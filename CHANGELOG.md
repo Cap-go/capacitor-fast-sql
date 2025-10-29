@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [7.2.2](https://github.com/Cap-go/capacitor-fast-sql/compare/7.2.1...7.2.2) (2025-10-29)
+
+
+### Bug Fixes
+
+* update plugin version to 7.2.1 in Android and iOS implementations ([0372d7d](https://github.com/Cap-go/capacitor-fast-sql/commit/0372d7d3108dff949404e53fd980e7fca4cc3e94))
+
 ## [7.2.1](https://github.com/Cap-go/capacitor-fast-sql/compare/7.2.0...7.2.1) (2025-10-29)
 
 
