@@ -35,7 +35,7 @@ class SQLDatabase {
         }
     }
 
-    func execute(statement: String, params: [JSValue]) throws -> [String: Any] {
+    func execute(statement: String, params: [Any]) throws -> [String: Any] {
         guard let db = db else {
             throw SQLError.notOpen
         }
@@ -128,7 +128,7 @@ class SQLDatabase {
         inTransaction = false
     }
 
-    private func bindParameter(stmt: OpaquePointer?, index: Int32, value: JSValue) throws -> Int32 {
+    private func bindParameter(stmt: OpaquePointer?, index: Int32, value: Any) throws -> Int32 {
         guard let stmt = stmt else {
             return SQLITE_ERROR
         }

@@ -8,8 +8,8 @@ import SQLite3
  * This plugin uses a custom HTTP server for efficient data transfer,
  * bypassing Capacitor's standard bridge for better performance.
  */
-@objc(CapgoCapacitorNativeSqlPlugin)
-public class CapgoCapacitorNativeSqlPlugin: CAPPlugin {
+@objc(CapgoCapacitorFastSqlPlugin)
+public class CapgoCapacitorFastSqlPlugin: CAPPlugin {
     private var databases: [String: SQLDatabase] = [:]
     private var server: SQLHTTPServer?
 

@@ -2,27 +2,29 @@
 import PackageDescription
 
 let package = Package(
-    name: "CapgoCapacitorNativeSql",
+    name: "CapgoCapacitorFastSql",
     platforms: [.iOS(.v14)],
     products: [
         .library(
-            name: "CapgoCapacitorNativeSql",
-            targets: ["CapgoCapacitorNativeSqlPlugin"])
+            name: "CapgoCapacitorFastSql",
+            targets: ["CapgoCapacitorFastSqlPlugin"])
     ],
     dependencies: [
-        .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", from: "7.0.0")
+        .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", from: "7.0.0"),
+        .package(url: "https://github.com/Building42/Telegraph.git", from: "0.30.0")
     ],
     targets: [
         .target(
-            name: "CapgoCapacitorNativeSqlPlugin",
+            name: "CapgoCapacitorFastSqlPlugin",
             dependencies: [
                 .product(name: "Capacitor", package: "capacitor-swift-pm"),
-                .product(name: "Cordova", package: "capacitor-swift-pm")
+                .product(name: "Cordova", package: "capacitor-swift-pm"),
+                .product(name: "Telegraph", package: "Telegraph")
             ],
-            path: "ios/Sources/CapgoCapacitorNativeSqlPlugin"),
+            path: "ios/Sources/CapgoCapacitorFastSqlPlugin"),
         .testTarget(
-            name: "CapgoCapacitorNativeSqlPluginTests",
-            dependencies: ["CapgoCapacitorNativeSqlPlugin"],
-            path: "ios/Tests/CapgoCapacitorNativeSqlPluginTests")
+            name: "CapgoCapacitorFastSqlPluginTests",
+            dependencies: ["CapgoCapacitorFastSqlPlugin"],
+            path: "ios/Tests/CapgoCapacitorFastSqlPluginTests")
     ]
 )

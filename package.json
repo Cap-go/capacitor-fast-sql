@@ -1,6 +1,6 @@
 {
-  "name": "@capgo/capacitor-native-sql",
-  "version": "7.0.0",
+  "name": "@capgo/capacitor-fast-sql",
+  "version": "7.0.1",
   "description": "High-performance native SQLite plugin with custom protocol for efficient sync operations and IndexedDB replacement",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -13,16 +13,16 @@
     "ios/Sources",
     "ios/Tests",
     "Package.swift",
-    "CapgoCapacitorNativeSql.podspec"
+    "CapgoCapacitorFastSql.podspec"
   ],
   "author": "Martin Donadieu <martin@capgo.app>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Cap-go/capacitor-native-sql.git"
+    "url": "git+https://github.com/Cap-go/capacitor-fast-sql.git"
   },
   "bugs": {
-    "url": "https://github.com/Cap-go/capacitor-native-sql/issues"
+    "url": "https://github.com/Cap-go/capacitor-fast-sql/issues"
   },
   "keywords": [
     "capacitor",
@@ -37,7 +37,7 @@
   ],
   "scripts": {
     "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",
-    "verify:ios": "xcodebuild -scheme CapgoCapacitorNativeSql -destination generic/platform=iOS",
+    "verify:ios": "xcodebuild -scheme CapgoCapacitorFastSql -destination generic/platform=iOS",
     "verify:android": "cd android && ./gradlew clean build test && cd ..",
     "verify:web": "npm run build",
     "lint": "npm run eslint && npm run prettier -- --check && npm run swiftlint -- lint",
@@ -45,7 +45,7 @@
     "eslint": "eslint .",
     "prettier": "prettier \"**/*.{css,html,ts,js,java}\" --plugin=prettier-plugin-java",
     "swiftlint": "node-swiftlint",
-    "docgen": "docgen --api CapgoCapacitorNativeSqlPlugin --output-readme README.md --output-json dist/docs.json",
+    "docgen": "docgen --api CapgoCapacitorFastSqlPlugin --output-readme README.md --output-json dist/docs.json",
     "build": "npm run clean && tsc && rollup -c rollup.config.mjs",
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",

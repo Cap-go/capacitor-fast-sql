@@ -1,4 +1,4 @@
-# @capgo/capacitor-native-sql
+# @capgo/capacitor-fast-sql
   <a href="https://capgo.app/"><img src='https://raw.githubusercontent.com/Cap-go/capgo/main/assets/capgo_banner.png' alt='Capgo - Instant updates for capacitor'/></a>
 
 <div align="center">
@@ -6,16 +6,16 @@
   <h2><a href="https://capgo.app/consulting/?ref=plugin"> Missing a feature? We'll build the plugin for you 💪</a></h2>
 </div>
 
-High-performance native SQLite plugin with custom protocol for efficient sync operations and IndexedDB replacement.
+High-performance native SQLite plugin with HTTP server for efficient sync operations and IndexedDB replacement.
 
 ## Documentation
 
-The most complete doc is available here: https://capgo.app/docs/plugins/native-sql/
+The most complete doc is available here: https://capgo.app/docs/plugins/fast-sql/
 
 ## Install
 
 ```bash
-npm install @capgo/capacitor-native-sql
+npm install @capgo/capacitor-fast-sql
 npx cap sync
 ```
 
@@ -59,7 +59,7 @@ Add to your `AndroidManifest.xml` if needed:
 ### Basic Example
 
 ```typescript
-import { NativeSQL } from '@capgo/capacitor-native-sql';
+import { NativeSQL } from '@capgo/capacitor-fast-sql';
 
 // Connect to database
 const db = await NativeSQL.connect({ database: 'myapp' });

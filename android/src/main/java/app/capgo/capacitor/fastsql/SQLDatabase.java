@@ -1,4 +1,4 @@
-package app.capgo.capacitor.nativesql;
+package app.capgo.capacitor.fastsql;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;

@@ -1,4 +1,4 @@
-package app.capgo.capacitor.nativesql;
+package app.capgo.capacitor.fastsql;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Map;
 
-import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.NanoHTTPD;  // Note: org.nanohttpd:nanohttpd:2.3.1 still uses fi.iki.elonen package
 
 /**
  * HTTP server for efficient SQL operations

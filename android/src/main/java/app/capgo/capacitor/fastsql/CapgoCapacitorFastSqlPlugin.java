@@ -1,4 +1,4 @@
-package app.capgo.capacitor.nativesql;
+package app.capgo.capacitor.fastsql;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -17,8 +17,8 @@ import java.util.Map;
  * This plugin uses a custom HTTP server for efficient data transfer,
  * bypassing Capacitor's standard bridge for better performance.
  */
-@CapacitorPlugin(name = "CapgoCapacitorNativeSql")
-public class CapgoCapacitorNativeSqlPlugin extends Plugin {
+@CapacitorPlugin(name = "CapgoCapacitorFastSql")
+public class CapgoCapacitorFastSqlPlugin extends Plugin {
 
     private Map<String, SQLDatabase> databases = new HashMap<>();
     private SQLHTTPServer server;
