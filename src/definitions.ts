@@ -81,14 +81,14 @@ export enum IsolationLevel {
 }
 
 /**
- * Native SQL Plugin for high-performance SQLite database access.
+ * Fast SQL Plugin for high-performance SQLite database access.
  *
  * This plugin uses a custom HTTP-based protocol for efficient data transfer,
  * bypassing Capacitor's standard bridge for better performance with sync operations.
  *
  * @since 0.0.1
  */
-export interface CapgoCapacitorNativeSqlPlugin {
+export interface CapgoCapacitorFastSqlPlugin {
   /**
    * Initialize the database connection and start the HTTP server.
    *
@@ -98,7 +98,7 @@ export interface CapgoCapacitorNativeSqlPlugin {
    * @since 0.0.1
    * @example
    * ```typescript
-   * const conn = await CapgoCapacitorNativeSql.connect({ database: 'myapp' });
+   * const conn = await CapgoCapacitorFastSql.connect({ database: 'myapp' });
    * console.log('Connected on port:', conn.port);
    * ```
    */
@@ -117,7 +117,7 @@ export interface CapgoCapacitorNativeSqlPlugin {
    * @since 0.0.1
    * @example
    * ```typescript
-   * await CapgoCapacitorNativeSql.disconnect({ database: 'myapp' });
+   * await CapgoCapacitorFastSql.disconnect({ database: 'myapp' });
    * ```
    */
   disconnect(options: { database: string }): Promise<void>;
@@ -131,7 +131,7 @@ export interface CapgoCapacitorNativeSqlPlugin {
    * @since 0.0.1
    * @example
    * ```typescript
-   * const info = await CapgoCapacitorNativeSql.getServerInfo({ database: 'myapp' });
+   * const info = await CapgoCapacitorFastSql.getServerInfo({ database: 'myapp' });
    * console.log('Server port:', info.port);
    * ```
    */
@@ -150,7 +150,7 @@ export interface CapgoCapacitorNativeSqlPlugin {
    * @since 0.0.1
    * @example
    * ```typescript
-   * const result = await CapgoCapacitorNativeSql.execute({
+   * const result = await CapgoCapacitorFastSql.execute({
    *   database: 'myapp',
    *   statement: 'SELECT * FROM users WHERE age > ?',
    *   params: [18]
@@ -173,9 +173,9 @@ export interface CapgoCapacitorNativeSqlPlugin {
    * @since 0.0.1
    * @example
    * ```typescript
-   * await CapgoCapacitorNativeSql.beginTransaction({ database: 'myapp' });
+   * await CapgoCapacitorFastSql.beginTransaction({ database: 'myapp' });
    * // Execute multiple operations
-   * await CapgoCapacitorNativeSql.commitTransaction({ database: 'myapp' });
+   * await CapgoCapacitorFastSql.commitTransaction({ database: 'myapp' });
    * ```
    */
   beginTransaction(options: {
@@ -192,7 +192,7 @@ export interface CapgoCapacitorNativeSqlPlugin {
    * @since 0.0.1
    * @example
    * ```typescript
-   * await CapgoCapacitorNativeSql.commitTransaction({ database: 'myapp' });
+   * await CapgoCapacitorFastSql.commitTransaction({ database: 'myapp' });
    * ```
    */
   commitTransaction(options: { database: string }): Promise<void>;
@@ -207,11 +207,11 @@ export interface CapgoCapacitorNativeSqlPlugin {
    * @example
    * ```typescript
    * try {
-   *   await CapgoCapacitorNativeSql.beginTransaction({ database: 'myapp' });
+   *   await CapgoCapacitorFastSql.beginTransaction({ database: 'myapp' });
    *   // Operations...
-   *   await CapgoCapacitorNativeSql.commitTransaction({ database: 'myapp' });
+   *   await CapgoCapacitorFastSql.commitTransaction({ database: 'myapp' });
    * } catch (error) {
-   *   await CapgoCapacitorNativeSql.rollbackTransaction({ database: 'myapp' });
+   *   await CapgoCapacitorFastSql.rollbackTransaction({ database: 'myapp' });
    * }
    * ```
    */
@@ -225,7 +225,7 @@ export interface CapgoCapacitorNativeSqlPlugin {
    * @since 0.0.1
    * @example
    * ```typescript
-   * const { version } = await CapgoCapacitorNativeSql.getPluginVersion();
+   * const { version } = await CapgoCapacitorFastSql.getPluginVersion();
    * console.log('Plugin version:', version);
    * ```
    */

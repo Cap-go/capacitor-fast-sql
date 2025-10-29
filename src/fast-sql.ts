@@ -1,14 +1,14 @@
 import type { SQLConnectionOptions } from './definitions';
-import { CapgoCapacitorNativeSql } from './plugin';
+import { CapgoCapacitorFastSql } from './plugin';
 import { SQLConnection } from './sql-connection';
 
 /**
- * NativeSQL - High-level API for managing SQL connections
+ * FastSQL - High-level API for managing SQL connections
  *
  * This class provides a convenient interface for opening/closing database connections
  * and managing multiple databases simultaneously.
  */
-export class NativeSQL {
+export class FastSQL {
   private static connections: Map<string, SQLConnection> = new Map();
 
   /**
@@ -26,7 +26,7 @@ export class NativeSQL {
     }
 
     // Connect via native plugin
-    const info = await CapgoCapacitorNativeSql.connect(options);
+    const info = await CapgoCapacitorFastSql.connect(options);
 
     // Create connection instance
     const connection = new SQLConnection(
@@ -53,7 +53,7 @@ export class NativeSQL {
     }
 
     // Disconnect via native plugin
-    await CapgoCapacitorNativeSql.disconnect({ database });
+    await CapgoCapacitorFastSql.disconnect({ database });
 
     // Remove connection
     this.connections.delete(database);

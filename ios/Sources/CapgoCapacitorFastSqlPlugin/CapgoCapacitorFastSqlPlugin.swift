@@ -9,7 +9,20 @@ import SQLite3
  * bypassing Capacitor's standard bridge for better performance.
  */
 @objc(CapgoCapacitorFastSqlPlugin)
-public class CapgoCapacitorFastSqlPlugin: CAPPlugin {
+public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "CapgoCapacitorFastSqlPlugin"
+    public let jsName = "CapgoCapacitorFastSql"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "connect", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "disconnect", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getServerInfo", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "execute", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "beginTransaction", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "commitTransaction", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "rollbackTransaction", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getPluginVersion", returnType: CAPPluginReturnPromise)
+    ]
+
     private var databases: [String: SQLDatabase] = [:]
     private var server: SQLHTTPServer?
 
@@ -188,10 +201,16 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin {
         }
     }
 
+    @objc func getPluginVersion(_ call: CAPPluginCall) {
+        call.resolve([
+            "version": "7.0.1"
+        ])
+    }
+
     private func getDatabasePath(_ database: String) throws -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
         guard let documentsDirectory = paths.first else {
-            throw NSError(domain: "CapgoCapacitorNativeSQL", code: 1, userInfo: [
+            throw NSError(domain: "CapgoCapacitorFastSQL", code: 1, userInfo: [
                 NSLocalizedDescriptionKey: "Could not find documents directory"
             ])
         }

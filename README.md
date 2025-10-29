@@ -59,10 +59,10 @@ Add to your `AndroidManifest.xml` if needed:
 ### Basic Example
 
 ```typescript
-import { NativeSQL } from '@capgo/capacitor-fast-sql';
+import { FastSQL } from '@capgo/capacitor-fast-sql';
 
 // Connect to database
-const db = await NativeSQL.connect({ database: 'myapp' });
+const db = await FastSQL.connect({ database: 'myapp' });
 
 // Create table
 await db.execute(`
@@ -85,13 +85,13 @@ const users = await db.query('SELECT * FROM users WHERE name LIKE ?', ['John%'])
 console.log('Users:', users);
 
 // Close connection
-await NativeSQL.disconnect('myapp');
+await FastSQL.disconnect('myapp');
 ```
 
 ### Transaction Example
 
 ```typescript
-const db = await NativeSQL.connect({ database: 'myapp' });
+const db = await FastSQL.connect({ database: 'myapp' });
 
 try {
   await db.transaction(async (tx) => {
@@ -109,7 +109,7 @@ try {
 ### Batch Operations
 
 ```typescript
-const db = await NativeSQL.connect({ database: 'myapp' });
+const db = await FastSQL.connect({ database: 'myapp' });
 
 const results = await db.executeBatch([
   { statement: 'INSERT INTO logs (message) VALUES (?)', params: ['Log 1'] },

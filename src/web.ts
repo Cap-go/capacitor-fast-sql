@@ -1,7 +1,7 @@
 import { WebPlugin } from '@capacitor/core';
 
 import type {
-  CapgoCapacitorNativeSqlPlugin,
+  CapgoCapacitorFastSqlPlugin,
   SQLConnectionOptions,
   SQLResult,
   SQLValue,
@@ -14,9 +14,9 @@ import type {
  * This provides a compatible API on the web platform, storing databases
  * in IndexedDB for persistence.
  */
-export class CapgoCapacitorNativeSqlWeb
+export class CapgoCapacitorFastSqlWeb
   extends WebPlugin
-  implements CapgoCapacitorNativeSqlPlugin
+  implements CapgoCapacitorFastSqlPlugin
 {
   private databases: Map<
     string,

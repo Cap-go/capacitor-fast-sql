@@ -213,6 +213,13 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
         }
     }
 
+    @PluginMethod
+    public void getPluginVersion(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("version", "7.0.1");
+        call.resolve(ret);
+    }
+
     private File getDatabasePath(String database) {
         File dataDir = getContext().getFilesDir();
         return new File(dataDir, database + ".db");
