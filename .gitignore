@@ -1,0 +1,37 @@
+# Node
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Build
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Android
+*.iml
+.gradle
+local.properties
+.externalNativeBuild
+.cxx
+
+# iOS
+Pods/
+*.xcworkspace
+!default.xcworkspace
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+DerivedData/
+
+# Capacitor
+.capacitor/

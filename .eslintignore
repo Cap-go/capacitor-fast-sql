@@ -1,0 +1,5 @@
+dist/
+android/
+ios/
+node_modules/
+example-app/
