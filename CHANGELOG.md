@@ -1,0 +1,15 @@
+# Changelog
+
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+## 7.1.0 (2025-10-29)
+
+
+### Features
+
+* implement FastSQL class and update plugin references ([b83cda4](https://github.com/Cap-go/capacitor-fast-sql/commit/b83cda4c9033b7b7b927f57543ed1965965b7872))
+
+
+### Bug Fixes
+
+* rename to fast-sql ([4df97e2](https://github.com/Cap-go/capacitor-fast-sql/commit/4df97e293750ae378219c7f09d99a59735768632))
