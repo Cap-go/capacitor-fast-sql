@@ -1,5 +1,5 @@
 {
-  "name": "capacitor-native-sql-example",
+  "name": "capacitor-fast-sql-example",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@capgo/capacitor-native-sql": "file:..",
+    "@capgo/capacitor-fast-sql": "file:..",
     "@capacitor/core": "^7.0.0"
   },
   "devDependencies": {

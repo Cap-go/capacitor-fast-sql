@@ -1,5 +1,5 @@
-import type { SQLConnection } from '@capgo/capacitor-native-sql';
-import { NativeSQL } from '@capgo/capacitor-native-sql';
+import type { SQLConnection } from '@capgo/capacitor-fast-sql';
+import { FastSQL } from '@capgo/capacitor-fast-sql';
 
 let db: SQLConnection | null = null;
 
@@ -49,7 +49,7 @@ function updateButtonStates(connected: boolean) {
 document.getElementById('connect')?.addEventListener('click', async () => {
   try {
     log('connection-output', 'Connecting to database...');
-    db = await NativeSQL.connect({ database: 'example-db' });
+    db = await FastSQL.connect({ database: 'example-db' });
 
     // Create users table
     await db.execute(`
@@ -78,7 +78,7 @@ document.getElementById('connect')?.addEventListener('click', async () => {
 document.getElementById('disconnect')?.addEventListener('click', async () => {
   try {
     if (!db) return;
-    await NativeSQL.disconnect(db.getDatabaseName());
+    await FastSQL.disconnect(db.getDatabaseName());
     db = null;
     log('connection-output', 'Disconnected successfully.');
     updateButtonStates(false);
