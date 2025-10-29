@@ -14,14 +14,8 @@ import type {
  * This provides a compatible API on the web platform, storing databases
  * in IndexedDB for persistence.
  */
-export class CapgoCapacitorFastSqlWeb
-  extends WebPlugin
-  implements CapgoCapacitorFastSqlPlugin
-{
-  private databases: Map<
-    string,
-    { db: any; token: string; port: number }
-  > = new Map();
+export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacitorFastSqlPlugin {
+  private databases: Map<string, { db: any; token: string; port: number }> = new Map();
   private sqlPromise: Promise<any> | null = null;
   private nextPort = 9000;
 
@@ -36,17 +30,15 @@ export class CapgoCapacitorFastSqlWeb
   private async loadSqlJs(): Promise<void> {
     if (this.sqlPromise) return;
 
-    this.sqlPromise = new Promise(async (resolve, reject) => {
+    this.sqlPromise = new Promise((resolve, reject) => {
       try {
         // Load sql.js from CDN
         const script = document.createElement('script');
-        script.src =
-          'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js';
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js';
         script.onload = async () => {
           const initSqlJs = (window as any).initSqlJs;
           const SQL = await initSqlJs({
-            locateFile: (file: string) =>
-              `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`,
+            locateFile: (file: string) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`,
           });
           resolve(SQL);
         };
@@ -58,9 +50,7 @@ export class CapgoCapacitorFastSqlWeb
     });
   }
 
-  async connect(
-    options: SQLConnectionOptions,
-  ): Promise<{ port: number; token: string; database: string }> {
+  async connect(options: SQLConnectionOptions): Promise<{ port: number; token: string; database: string }> {
     const SQL = await this.sqlPromise;
 
     // Check if database already exists in IndexedDB
@@ -99,9 +89,7 @@ export class CapgoCapacitorFastSqlWeb
     this.databases.delete(options.database);
   }
 
-  async getServerInfo(options: {
-    database: string;
-  }): Promise<{ port: number; token: string }> {
+  async getServerInfo(options: { database: string }): Promise<{ port: number; token: string }> {
     const dbInfo = this.databases.get(options.database);
     if (!dbInfo) {
       throw new Error(`Database '${options.database}' is not connected`);
@@ -113,11 +101,7 @@ export class CapgoCapacitorFastSqlWeb
     };
   }
 
-  async execute(options: {
-    database: string;
-    statement: string;
-    params?: SQLValue[];
-  }): Promise<SQLResult> {
+  async execute(options: { database: string; statement: string; params?: SQLValue[] }): Promise<SQLResult> {
     const dbInfo = this.databases.get(options.database);
     if (!dbInfo) {
       throw new Error(`Database '${options.database}' is not connected`);
@@ -150,10 +134,7 @@ export class CapgoCapacitorFastSqlWeb
     }
   }
 
-  async beginTransaction(options: {
-    database: string;
-    isolationLevel?: IsolationLevel;
-  }): Promise<void> {
+  async beginTransaction(options: { database: string; isolationLevel?: IsolationLevel }): Promise<void> {
     await this.execute({
       database: options.database,
       statement: 'BEGIN TRANSACTION',
@@ -201,10 +182,7 @@ export class CapgoCapacitorFastSqlWeb
   /**
    * Save database to IndexedDB
    */
-  private async saveToIndexedDB(
-    dbName: string,
-    data: Uint8Array,
-  ): Promise<void> {
+  private async saveToIndexedDB(dbName: string, data: Uint8Array): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open('CapacitorNativeSQL', 1);
 
@@ -239,9 +217,7 @@ export class CapgoCapacitorFastSqlWeb
   /**
    * Load database from IndexedDB
    */
-  private async loadFromIndexedDB(
-    dbName: string,
-  ): Promise<Uint8Array | null> {
+  private async loadFromIndexedDB(dbName: string): Promise<Uint8Array | null> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open('CapacitorNativeSQL', 1);
 
@@ -274,6 +250,6 @@ export class CapgoCapacitorFastSqlWeb
   }
 
   async getPluginVersion(): Promise<{ version: string }> {
-    return { version: "web" };
+    return { version: 'web' };
   }
 }

@@ -26,11 +26,17 @@ function appendLog(elementId: string, message: string) {
 // Enable/disable buttons based on connection state
 function updateButtonStates(connected: boolean) {
   const buttons = [
-    'disconnect', 'insert', 'query', 'clear',
-    'transaction', 'batch-insert',
-    'sync-init', 'sync-add', 'sync-view'
+    'disconnect',
+    'insert',
+    'query',
+    'clear',
+    'transaction',
+    'batch-insert',
+    'sync-init',
+    'sync-add',
+    'sync-view',
   ];
-  buttons.forEach(id => {
+  buttons.forEach((id) => {
     const btn = document.getElementById(id) as HTMLButtonElement;
     if (btn) btn.disabled = !connected;
   });
@@ -92,14 +98,9 @@ document.getElementById('insert')?.addEventListener('click', async () => {
   const email = emailInput.value.trim() || `user${Date.now()}@example.com`;
 
   try {
-    const result = await db.run(
-      'INSERT INTO users (name, email) VALUES (?, ?)',
-      [name, email]
-    );
+    const result = await db.run('INSERT INTO users (name, email) VALUES (?, ?)', [name, email]);
 
-    log('operations-output',
-      `✓ Inserted: ${name} (${email})\nInsert ID: ${result.insertId}`
-    );
+    log('operations-output', `✓ Inserted: ${name} (${email})\nInsert ID: ${result.insertId}`);
 
     nameInput.value = '';
     emailInput.value = '';
@@ -119,9 +120,7 @@ document.getElementById('query')?.addEventListener('click', async () => {
     if (users.length === 0) {
       log('operations-output', 'No users found.');
     } else {
-      const output = users.map((user, i) =>
-        `${i + 1}. ${user.name} (${user.email}) - ID: ${user.id}`
-      ).join('\n');
+      const output = users.map((user, i) => `${i + 1}. ${user.name} (${user.email}) - ID: ${user.id}`).join('\n');
       log('operations-output', `Found ${users.length} users:\n\n${output}`);
     }
   } catch (error: any) {
@@ -154,24 +153,19 @@ document.getElementById('transaction')?.addEventListener('click', async () => {
       const users = [
         ['Alice', 'alice@example.com'],
         ['Bob', 'bob@example.com'],
-        ['Charlie', 'charlie@example.com']
+        ['Charlie', 'charlie@example.com'],
       ];
 
       const insertIds: number[] = [];
       for (const [name, email] of users) {
-        const result = await tx.run(
-          'INSERT INTO users (name, email) VALUES (?, ?)',
-          [name, email]
-        );
+        const result = await tx.run('INSERT INTO users (name, email) VALUES (?, ?)', [name, email]);
         insertIds.push(result.insertId!);
       }
 
       return insertIds;
     });
 
-    log('transaction-output',
-      `✓ Transaction committed successfully!\nInserted IDs: ${result.join(', ')}`
-    );
+    log('transaction-output', `✓ Transaction committed successfully!\nInserted IDs: ${result.join(', ')}`);
     await updateRowCount();
   } catch (error: any) {
     log('transaction-output', `✗ Transaction rolled back: ${error.message}`, true);
@@ -195,7 +189,7 @@ document.getElementById('batch-insert')?.addEventListener('click', async () => {
     for (let i = 0; i < count; i++) {
       operations.push({
         statement: 'INSERT INTO users (name, email) VALUES (?, ?)',
-        params: [`Batch User ${i}`, `batch${i}_${Date.now()}@example.com`]
+        params: [`Batch User ${i}`, `batch${i}_${Date.now()}@example.com`],
       });
     }
 
@@ -205,8 +199,9 @@ document.getElementById('batch-insert')?.addEventListener('click', async () => {
     const endTime = performance.now();
     const duration = (endTime - startTime).toFixed(2);
 
-    log('batch-output',
-      `✓ Inserted ${count} rows in ${duration}ms\nThroughput: ${(count / (parseFloat(duration) / 1000)).toFixed(0)} rows/sec`
+    log(
+      'batch-output',
+      `✓ Inserted ${count} rows in ${duration}ms\nThroughput: ${(count / (parseFloat(duration) / 1000)).toFixed(0)} rows/sec`,
     );
 
     // Update stats
@@ -252,20 +247,19 @@ document.getElementById('sync-add')?.addEventListener('click', async () => {
       // Simulate a local change
       const user = {
         name: `Local User ${Date.now()}`,
-        email: `local${Date.now()}@example.com`
+        email: `local${Date.now()}@example.com`,
       };
 
       // Insert the user
-      const result = await tx.run(
-        'INSERT INTO users (name, email) VALUES (?, ?)',
-        [user.name, user.email]
-      );
+      const result = await tx.run('INSERT INTO users (name, email) VALUES (?, ?)', [user.name, user.email]);
 
       // Record the operation for sync
-      await tx.run(
-        'INSERT INTO sync_operations (timestamp, table_name, operation, data) VALUES (?, ?, ?, ?)',
-        [Date.now(), 'users', 'INSERT', JSON.stringify({ id: result.insertId, ...user })]
-      );
+      await tx.run('INSERT INTO sync_operations (timestamp, table_name, operation, data) VALUES (?, ?, ?, ?)', [
+        Date.now(),
+        'users',
+        'INSERT',
+        JSON.stringify({ id: result.insertId, ...user }),
+      ]);
     });
 
     log('sync-output', '✓ Local change recorded and queued for sync');
@@ -280,17 +274,17 @@ document.getElementById('sync-view')?.addEventListener('click', async () => {
   if (!db) return;
 
   try {
-    const pending = await db.query(
-      'SELECT * FROM sync_operations WHERE synced = 0 ORDER BY timestamp'
-    );
+    const pending = await db.query('SELECT * FROM sync_operations WHERE synced = 0 ORDER BY timestamp');
 
     if (pending.length === 0) {
       log('sync-output', 'No pending changes to sync.');
     } else {
-      const output = pending.map((op, i) => {
-        const date = new Date(op.timestamp as number).toLocaleString();
-        return `${i + 1}. [${date}] ${op.operation} on ${op.table_name}`;
-      }).join('\n');
+      const output = pending
+        .map((op, i) => {
+          const date = new Date(op.timestamp as number).toLocaleString();
+          return `${i + 1}. [${date}] ${op.operation} on ${op.table_name}`;
+        })
+        .join('\n');
 
       log('sync-output', `${pending.length} pending changes:\n\n${output}`);
     }

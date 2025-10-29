@@ -158,11 +158,7 @@ export interface CapgoCapacitorFastSqlPlugin {
    * console.log('Rows:', result.rows);
    * ```
    */
-  execute(options: {
-    database: string;
-    statement: string;
-    params?: SQLValue[];
-  }): Promise<SQLResult>;
+  execute(options: { database: string; statement: string; params?: SQLValue[] }): Promise<SQLResult>;
 
   /**
    * Begin a database transaction.
@@ -178,10 +174,7 @@ export interface CapgoCapacitorFastSqlPlugin {
    * await CapgoCapacitorFastSql.commitTransaction({ database: 'myapp' });
    * ```
    */
-  beginTransaction(options: {
-    database: string;
-    isolationLevel?: IsolationLevel;
-  }): Promise<void>;
+  beginTransaction(options: { database: string; isolationLevel?: IsolationLevel }): Promise<void>;
 
   /**
    * Commit the current transaction.

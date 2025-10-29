@@ -4,21 +4,19 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Base64;
-
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * SQLite database wrapper for Android
  */
 public class SQLDatabase {
+
     private SQLiteDatabase db;
     private boolean inTransaction = false;
 
@@ -41,9 +39,8 @@ public class SQLDatabase {
 
         // Check if this is a query (SELECT) or a modification (INSERT/UPDATE/DELETE)
         String trimmedStatement = statement.trim().toUpperCase();
-        boolean isQuery = trimmedStatement.startsWith("SELECT") ||
-                         trimmedStatement.startsWith("PRAGMA") ||
-                         trimmedStatement.startsWith("EXPLAIN");
+        boolean isQuery =
+            trimmedStatement.startsWith("SELECT") || trimmedStatement.startsWith("PRAGMA") || trimmedStatement.startsWith("EXPLAIN");
 
         if (isQuery) {
             return executeQuery(statement, params);

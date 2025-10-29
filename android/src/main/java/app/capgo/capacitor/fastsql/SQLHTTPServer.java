@@ -7,15 +7,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
+import fi.iki.elonen.NanoHTTPD; // Note: org.nanohttpd:nanohttpd:2.3.1 still uses fi.iki.elonen package
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Map;
-
-import fi.iki.elonen.NanoHTTPD;  // Note: org.nanohttpd:nanohttpd:2.3.1 still uses fi.iki.elonen package
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * HTTP server for efficient SQL operations
@@ -24,6 +21,7 @@ import fi.iki.elonen.NanoHTTPD;  // Note: org.nanohttpd:nanohttpd:2.3.1 still us
  * bridge for better performance with large datasets and sync operations.
  */
 public class SQLHTTPServer extends NanoHTTPD {
+
     private final String token;
     private final Map<String, SQLDatabase> databases;
     private final Gson gson = new Gson();
@@ -80,8 +78,7 @@ public class SQLHTTPServer extends NanoHTTPD {
                 return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Endpoint not found");
             }
         } catch (Exception e) {
-            return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain",
-                    "Error: " + e.getMessage());
+            return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "Error: " + e.getMessage());
         }
     }
 

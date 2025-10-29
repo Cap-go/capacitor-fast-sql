@@ -1,9 +1,4 @@
-import type {
-  SQLValue,
-  SQLRow,
-  SQLResult,
-  SQLBatchOperation,
-} from './definitions';
+import type { SQLValue, SQLRow, SQLResult, SQLBatchOperation } from './definitions';
 import { IsolationLevel } from './definitions';
 
 /**
@@ -40,10 +35,7 @@ export class SQLConnection {
    * @param params - Parameters to bind to the statement
    * @returns Query results
    */
-  async execute(
-    statement: string,
-    params?: SQLValue[],
-  ): Promise<SQLResult> {
+  async execute(statement: string, params?: SQLValue[]): Promise<SQLResult> {
     const response = await fetch(`${this.baseUrl}/execute`, {
       method: 'POST',
       headers: {
@@ -72,9 +64,7 @@ export class SQLConnection {
    * @param operations - Array of SQL operations to execute
    * @returns Array of results for each operation
    */
-  async executeBatch(
-    operations: SQLBatchOperation[],
-  ): Promise<SQLResult[]> {
+  async executeBatch(operations: SQLBatchOperation[]): Promise<SQLResult[]> {
     const response = await fetch(`${this.baseUrl}/batch`, {
       method: 'POST',
       headers: {
@@ -104,9 +94,7 @@ export class SQLConnection {
    *
    * @param isolationLevel - Optional isolation level
    */
-  async beginTransaction(
-    isolationLevel?: IsolationLevel,
-  ): Promise<void> {
+  async beginTransaction(isolationLevel?: IsolationLevel): Promise<void> {
     if (this.inTransaction) {
       throw new Error('Transaction already in progress');
     }
@@ -185,10 +173,7 @@ export class SQLConnection {
    * @param callback - Function containing operations to execute
    * @param isolationLevel - Optional isolation level
    */
-  async transaction<T>(
-    callback: (conn: SQLConnection) => Promise<T>,
-    isolationLevel?: IsolationLevel,
-  ): Promise<T> {
+  async transaction<T>(callback: (conn: SQLConnection) => Promise<T>, isolationLevel?: IsolationLevel): Promise<T> {
     await this.beginTransaction(isolationLevel);
     try {
       const result = await callback(this);
@@ -219,10 +204,7 @@ export class SQLConnection {
    * @param params - Statement parameters
    * @returns Number of affected rows and insert ID if applicable
    */
-  async run(
-    statement: string,
-    params?: SQLValue[],
-  ): Promise<{ rowsAffected: number; insertId?: number }> {
+  async run(statement: string, params?: SQLValue[]): Promise<{ rowsAffected: number; insertId?: number }> {
     const result = await this.execute(statement, params);
     return {
       rowsAffected: result.rowsAffected,
@@ -255,14 +237,8 @@ export class SQLConnection {
       rows: result.rows.map((row: any) => {
         const deserializedRow: SQLRow = {};
         for (const [key, value] of Object.entries(row)) {
-          if (
-            value &&
-            typeof value === 'object' &&
-            (value as any)._type === 'binary'
-          ) {
-            deserializedRow[key] = this.base64ToUint8Array(
-              (value as any)._data,
-            );
+          if (value && typeof value === 'object' && (value as any)._type === 'binary') {
+            deserializedRow[key] = this.base64ToUint8Array((value as any)._data);
           } else {
             deserializedRow[key] = value as SQLValue;
           }

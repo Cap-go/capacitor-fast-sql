@@ -17,9 +17,7 @@ export class FastSQL {
    * @param options - Connection options
    * @returns SQLConnection instance for executing queries
    */
-  static async connect(
-    options: SQLConnectionOptions,
-  ): Promise<SQLConnection> {
+  static async connect(options: SQLConnectionOptions): Promise<SQLConnection> {
     // Check if already connected
     if (this.connections.has(options.database)) {
       return this.connections.get(options.database)!;
@@ -29,11 +27,7 @@ export class FastSQL {
     const info = await CapgoCapacitorFastSql.connect(options);
 
     // Create connection instance
-    const connection = new SQLConnection(
-      info.database,
-      info.port,
-      info.token,
-    );
+    const connection = new SQLConnection(info.database, info.port, info.token);
 
     // Store connection
     this.connections.set(options.database, connection);
