@@ -131,6 +131,7 @@ const results = await db.executeBatch([
 * [`rollbackTransaction(...)`](#rollbacktransaction)
 * [`getPluginVersion()`](#getpluginversion)
 * [Interfaces](#interfaces)
+* [Type Aliases](#type-aliases)
 * [Enums](#enums)
 
 </docgen-index>
@@ -138,7 +139,7 @@ const results = await db.executeBatch([
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
 
-Native SQL Plugin for high-performance SQLite database access.
+Fast SQL Plugin for high-performance SQLite database access.
 
 This plugin uses a custom HTTP-based protocol for efficient data transfer,
 bypassing Capacitor's standard bridge for better performance with sync operations.
@@ -151,8 +152,8 @@ connect(options: SQLConnectionOptions) => Promise<{ port: number; token: string;
 
 Initialize the database connection and start the HTTP server.
 
-| Param         | Type                                                                  | Description         |
-| ------------- | --------------------------------------------------------------------- | ------------------- |
+| Param         | Type                                                                  | Description          |
+| ------------- | --------------------------------------------------------------------- | -------------------- |
 | **`options`** | <code><a href="#sqlconnectionoptions">SQLConnectionOptions</a></code> | - Connection options |
 
 **Returns:** <code>Promise&lt;{ port: number; token: string; database: string; }&gt;</code>
@@ -170,8 +171,8 @@ disconnect(options: { database: string; }) => Promise<void>
 
 Close database connection and stop the HTTP server.
 
-| Param         | Type                               | Description           |
-| ------------- | ---------------------------------- | --------------------- |
+| Param         | Type                               | Description              |
+| ------------- | ---------------------------------- | ------------------------ |
 | **`options`** | <code>{ database: string; }</code> | - Database name to close |
 
 **Since:** 0.0.1
@@ -207,9 +208,9 @@ execute(options: { database: string; statement: string; params?: SQLValue[]; }) 
 Execute a SQL query via Capacitor bridge (for simple queries).
 For better performance with large datasets, use the HTTP protocol directly via SQLConnection class.
 
-| Param         | Type                                                                                         | Description        |
-| ------------- | -------------------------------------------------------------------------------------------- | ------------------ |
-| **`options`** | <code>{ database: string; statement: string; params?: <a href="#sqlvalue">SQLValue</a>[]; }</code> | - Query parameters |
+| Param         | Type                                                                       | Description        |
+| ------------- | -------------------------------------------------------------------------- | ------------------ |
+| **`options`** | <code>{ database: string; statement: string; params?: SQLValue[]; }</code> | - Query parameters |
 
 **Returns:** <code>Promise&lt;<a href="#sqlresult">SQLResult</a>&gt;</code>
 
@@ -226,8 +227,8 @@ beginTransaction(options: { database: string; isolationLevel?: IsolationLevel; }
 
 Begin a database transaction.
 
-| Param         | Type                                                                                                   | Description             |
-| ------------- | ------------------------------------------------------------------------------------------------------ | ----------------------- |
+| Param         | Type                                                                                              | Description           |
+| ------------- | ------------------------------------------------------------------------------------------------- | --------------------- |
 | **`options`** | <code>{ database: string; isolationLevel?: <a href="#isolationlevel">IsolationLevel</a>; }</code> | - Transaction options |
 
 **Since:** 0.0.1
@@ -291,23 +292,23 @@ Get the native Capacitor plugin version.
 
 Database connection options
 
-| Prop                | Type                 | Description                                         |
-| ------------------- | -------------------- | --------------------------------------------------- |
+| Prop                | Type                 | Description                                                |
+| ------------------- | -------------------- | ---------------------------------------------------------- |
 | **`database`**      | <code>string</code>  | Database name (file will be created in app data directory) |
-| **`encrypted`**     | <code>boolean</code> | Enable encryption (iOS/Android only)                |
-| **`encryptionKey`** | <code>string</code>  | Encryption key (required if encrypted is true)      |
-| **`readOnly`**      | <code>boolean</code> | Read-only mode                                      |
+| **`encrypted`**     | <code>boolean</code> | Enable encryption (iOS/Android only)                       |
+| **`encryptionKey`** | <code>string</code>  | Encryption key (required if encrypted is true)             |
+| **`readOnly`**      | <code>boolean</code> | Read-only mode                                             |
 
 
 #### SQLResult
 
 Result of a SQL query execution
 
-| Prop                | Type                                          | Description                                                      |
-| ------------------- | --------------------------------------------- | ---------------------------------------------------------------- |
-| **`rows`**          | <code><a href="#sqlrow">SQLRow</a>[]</code>  | Rows returned by the query (for SELECT statements)               |
-| **`rowsAffected`**  | <code>number</code>                           | Number of rows affected by the query (for INSERT/UPDATE/DELETE) |
-| **`insertId`**      | <code>number</code>                           | ID of the last inserted row (for INSERT statements with auto-increment) |
+| Prop               | Type                  | Description                                                             |
+| ------------------ | --------------------- | ----------------------------------------------------------------------- |
+| **`rows`**         | <code>SQLRow[]</code> | Rows returned by the query (for SELECT statements)                      |
+| **`rowsAffected`** | <code>number</code>   | Number of rows affected by the query (for INSERT/UPDATE/DELETE)         |
+| **`insertId`**     | <code>number</code>   | ID of the last inserted row (for INSERT statements with auto-increment) |
 
 
 #### SQLRow
@@ -315,19 +316,79 @@ Result of a SQL query execution
 SQL row result - values indexed by column name
 
 
-### Enums
+#### Uint8Array
+
+A typed array of 8-bit unsigned integer values. The contents are initialized to 0. If the
+requested number of bytes could not be allocated an exception is raised.
+
+| Prop                    | Type                                                        | Description                                                                  |
+| ----------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **`BYTES_PER_ELEMENT`** | <code>number</code>                                         | The size in bytes of each element in the array.                              |
+| **`buffer`**            | <code><a href="#arraybufferlike">ArrayBufferLike</a></code> | The <a href="#arraybuffer">ArrayBuffer</a> instance referenced by the array. |
+| **`byteLength`**        | <code>number</code>                                         | The length in bytes of the array.                                            |
+| **`byteOffset`**        | <code>number</code>                                         | The offset in bytes of the array.                                            |
+| **`length`**            | <code>number</code>                                         | The length of the array.                                                     |
+
+| Method             | Signature                                                                                                                                                                      | Description                                                                                                                                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **copyWithin**     | (target: number, start: number, end?: number \| undefined) =&gt; this                                                                                                          | Returns the this object after copying a section of the array identified by start and end to the same array starting at position target                                                                                                      |
+| **every**          | (predicate: (value: number, index: number, array: <a href="#uint8array">Uint8Array</a>) =&gt; unknown, thisArg?: any) =&gt; boolean                                            | Determines whether all the members of an array satisfy the specified test.                                                                                                                                                                  |
+| **fill**           | (value: number, start?: number \| undefined, end?: number \| undefined) =&gt; this                                                                                             | Returns the this object after filling the section identified by start and end with value                                                                                                                                                    |
+| **filter**         | (predicate: (value: number, index: number, array: <a href="#uint8array">Uint8Array</a>) =&gt; any, thisArg?: any) =&gt; <a href="#uint8array">Uint8Array</a>                   | Returns the elements of an array that meet the condition specified in a callback function.                                                                                                                                                  |
+| **find**           | (predicate: (value: number, index: number, obj: <a href="#uint8array">Uint8Array</a>) =&gt; boolean, thisArg?: any) =&gt; number \| undefined                                  | Returns the value of the first element in the array where predicate is true, and undefined otherwise.                                                                                                                                       |
+| **findIndex**      | (predicate: (value: number, index: number, obj: <a href="#uint8array">Uint8Array</a>) =&gt; boolean, thisArg?: any) =&gt; number                                               | Returns the index of the first element in the array where predicate is true, and -1 otherwise.                                                                                                                                              |
+| **forEach**        | (callbackfn: (value: number, index: number, array: <a href="#uint8array">Uint8Array</a>) =&gt; void, thisArg?: any) =&gt; void                                                 | Performs the specified action for each element in an array.                                                                                                                                                                                 |
+| **indexOf**        | (searchElement: number, fromIndex?: number \| undefined) =&gt; number                                                                                                          | Returns the index of the first occurrence of a value in an array.                                                                                                                                                                           |
+| **join**           | (separator?: string \| undefined) =&gt; string                                                                                                                                 | Adds all the elements of an array separated by the specified separator string.                                                                                                                                                              |
+| **lastIndexOf**    | (searchElement: number, fromIndex?: number \| undefined) =&gt; number                                                                                                          | Returns the index of the last occurrence of a value in an array.                                                                                                                                                                            |
+| **map**            | (callbackfn: (value: number, index: number, array: <a href="#uint8array">Uint8Array</a>) =&gt; number, thisArg?: any) =&gt; <a href="#uint8array">Uint8Array</a>               | Calls a defined callback function on each element of an array, and returns an array that contains the results.                                                                                                                              |
+| **reduce**         | (callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: <a href="#uint8array">Uint8Array</a>) =&gt; number) =&gt; number                       | Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.                      |
+| **reduce**         | (callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: <a href="#uint8array">Uint8Array</a>) =&gt; number, initialValue: number) =&gt; number |                                                                                                                                                                                                                                             |
+| **reduce**         | &lt;U&gt;(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: <a href="#uint8array">Uint8Array</a>) =&gt; U, initialValue: U) =&gt; U            | Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.                      |
+| **reduceRight**    | (callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: <a href="#uint8array">Uint8Array</a>) =&gt; number) =&gt; number                       | Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function. |
+| **reduceRight**    | (callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: <a href="#uint8array">Uint8Array</a>) =&gt; number, initialValue: number) =&gt; number |                                                                                                                                                                                                                                             |
+| **reduceRight**    | &lt;U&gt;(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: <a href="#uint8array">Uint8Array</a>) =&gt; U, initialValue: U) =&gt; U            | Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function. |
+| **reverse**        | () =&gt; <a href="#uint8array">Uint8Array</a>                                                                                                                                  | Reverses the elements in an Array.                                                                                                                                                                                                          |
+| **set**            | (array: <a href="#arraylike">ArrayLike</a>&lt;number&gt;, offset?: number \| undefined) =&gt; void                                                                             | Sets a value or an array of values.                                                                                                                                                                                                         |
+| **slice**          | (start?: number \| undefined, end?: number \| undefined) =&gt; <a href="#uint8array">Uint8Array</a>                                                                            | Returns a section of an array.                                                                                                                                                                                                              |
+| **some**           | (predicate: (value: number, index: number, array: <a href="#uint8array">Uint8Array</a>) =&gt; unknown, thisArg?: any) =&gt; boolean                                            | Determines whether the specified callback function returns true for any element of an array.                                                                                                                                                |
+| **sort**           | (compareFn?: ((a: number, b: number) =&gt; number) \| undefined) =&gt; this                                                                                                    | Sorts an array.                                                                                                                                                                                                                             |
+| **subarray**       | (begin?: number \| undefined, end?: number \| undefined) =&gt; <a href="#uint8array">Uint8Array</a>                                                                            | Gets a new <a href="#uint8array">Uint8Array</a> view of the <a href="#arraybuffer">ArrayBuffer</a> store for this array, referencing the elements at begin, inclusive, up to end, exclusive.                                                |
+| **toLocaleString** | () =&gt; string                                                                                                                                                                | Converts a number to a string by using the current locale.                                                                                                                                                                                  |
+| **toString**       | () =&gt; string                                                                                                                                                                | Returns a string representation of an array.                                                                                                                                                                                                |
+| **valueOf**        | () =&gt; <a href="#uint8array">Uint8Array</a>                                                                                                                                  | Returns the primitive value of the specified object.                                                                                                                                                                                        |
 
 
-#### IsolationLevel
+#### ArrayLike
 
-Transaction isolation levels
+| Prop         | Type                |
+| ------------ | ------------------- |
+| **`length`** | <code>number</code> |
 
-| Members                | Value                          |
-| ---------------------- | ------------------------------ |
-| **`ReadUncommitted`**  | <code>'READ UNCOMMITTED'</code> |
-| **`ReadCommitted`**    | <code>'READ COMMITTED'</code>   |
-| **`RepeatableRead`**   | <code>'REPEATABLE READ'</code>  |
-| **`Serializable`**     | <code>'SERIALIZABLE'</code>     |
+
+#### ArrayBufferTypes
+
+Allowed <a href="#arraybuffer">ArrayBuffer</a> types for the buffer of an ArrayBufferView and related Typed Arrays.
+
+| Prop              | Type                                                |
+| ----------------- | --------------------------------------------------- |
+| **`ArrayBuffer`** | <code><a href="#arraybuffer">ArrayBuffer</a></code> |
+
+
+#### ArrayBuffer
+
+Represents a raw buffer of binary data, which is used to store data for the
+different typed arrays. ArrayBuffers cannot be read from or written to directly,
+but can be passed to a typed array or DataView Object to interpret the raw
+buffer as needed.
+
+| Prop             | Type                | Description                                                                     |
+| ---------------- | ------------------- | ------------------------------------------------------------------------------- |
+| **`byteLength`** | <code>number</code> | Read-only. The length of the <a href="#arraybuffer">ArrayBuffer</a> (in bytes). |
+
+| Method    | Signature                                                                               | Description                                                     |
+| --------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **slice** | (begin: number, end?: number \| undefined) =&gt; <a href="#arraybuffer">ArrayBuffer</a> | Returns a section of an <a href="#arraybuffer">ArrayBuffer</a>. |
 
 
 ### Type Aliases
@@ -335,6 +396,26 @@ Transaction isolation levels
 
 #### SQLValue
 
-<code>string | number | boolean | null | Uint8Array</code>
+SQL value types supported by the plugin
+
+<code>string | number | boolean | null | <a href="#uint8array">Uint8Array</a></code>
+
+
+#### ArrayBufferLike
+
+<code>ArrayBufferTypes[keyof ArrayBufferTypes]</code>
+
+
+### Enums
+
+
+#### IsolationLevel
+
+| Members               | Value                           |
+| --------------------- | ------------------------------- |
+| **`ReadUncommitted`** | <code>'READ UNCOMMITTED'</code> |
+| **`ReadCommitted`**   | <code>'READ COMMITTED'</code>   |
+| **`RepeatableRead`**  | <code>'REPEATABLE READ'</code>  |
+| **`Serializable`**    | <code>'SERIALIZABLE'</code>     |
 
 </docgen-api>
