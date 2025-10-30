@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [7.2.4](https://github.com/Cap-go/capacitor-fast-sql/compare/7.2.3...7.2.4) (2025-10-30)
+
+
+### Bug Fixes
+
+* update output plugin name to capacitorCapgoCapacitorFastSql ([26dad62](https://github.com/Cap-go/capacitor-fast-sql/commit/26dad6231ae566afff0f9d9ccb789dd0d974650e))
+
 ## [7.2.3](https://github.com/Cap-go/capacitor-fast-sql/compare/7.2.2...7.2.3) (2025-10-30)
 
 
