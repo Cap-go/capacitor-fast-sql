@@ -10,7 +10,7 @@ import SQLite3
  */
 @objc(CapgoCapacitorFastSqlPlugin)
 public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
-    private let pluginVersion: String = "7.2.6"
+    private let pluginVersion: String = "7.2.7"
     public let identifier = "CapgoCapacitorFastSqlPlugin"
     public let jsName = "CapgoCapacitorFastSql"
     public let pluginMethods: [CAPPluginMethod] = [
