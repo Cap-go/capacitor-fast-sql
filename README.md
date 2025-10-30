@@ -8,6 +8,16 @@
 
 High-performance native SQLite plugin with HTTP server for efficient sync operations and IndexedDB replacement.
 
+## Why Fast SQL?
+
+Traditional Capacitor plugins serialize data through the JavaScript bridge, which becomes inefficient with large datasets. Fast SQL solves this by establishing a local HTTP server for direct native communication, making it ideal for:
+
+- **Local-first sync systems** (CRDTs, operational transforms)
+- **IndexedDB replacement** on platforms with broken/limited implementations
+- **Large dataset operations** requiring high throughput
+- **Batch operations** with thousands of rows
+- **Binary data storage** (BLOBs, files)
+
 ## Documentation
 
 The most complete doc is available here: https://capgo.app/docs/plugins/fast-sql/
