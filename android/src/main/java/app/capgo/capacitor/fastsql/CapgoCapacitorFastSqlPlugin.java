@@ -19,7 +19,7 @@ import java.util.Map;
 @CapacitorPlugin(name = "CapgoCapacitorFastSql")
 public class CapgoCapacitorFastSqlPlugin extends Plugin {
 
-    private final String pluginVersion = "7.2.13";
+    private final String pluginVersion = "8.0.1";
 
     private Map<String, SQLDatabase> databases = new HashMap<>();
     private SQLHTTPServer server;
