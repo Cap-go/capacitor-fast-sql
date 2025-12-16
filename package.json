@@ -24,6 +24,7 @@
   "bugs": {
     "url": "https://github.com/Cap-go/capacitor-fast-sql/issues"
   },
+  "homepage": "https://capgo.app/docs/plugins/fast-sql/",
   "keywords": [
     "capacitor",
     "plugin",
