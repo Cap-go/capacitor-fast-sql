@@ -24,7 +24,7 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
             throw new Exception("Encryption key is required when encrypted is true");
         }
         byte[] keyBytes = encryptionKey.getBytes(StandardCharsets.UTF_8);
-        this.db = SQLiteDatabase.openOrCreateDatabase(path, keyBytes, null);
+        this.db = SQLiteDatabase.openOrCreateDatabase(path, keyBytes, null, null);
         // Enable foreign keys
         db.execSQL("PRAGMA foreign_keys = ON");
     }
