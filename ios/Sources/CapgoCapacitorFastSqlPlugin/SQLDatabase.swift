@@ -28,12 +28,26 @@ class SQLDatabase {
             throw SQLError.openFailed(message: String(cString: sqlite3_errmsg(db)))
         }
 
+        guard let db = db else {
+            throw SQLError.openFailed(message: "Failed to open database")
+        }
+
+        var needsClose = true
+        defer {
+            if needsClose {
+                sqlite3_close(db)
+                self.db = nil
+            }
+        }
+
         if encrypted {
             guard let key = encryptionKey, !key.isEmpty else {
                 throw SQLError.encryptionKeyMissing
             }
 #if canImport(SQLCipher)
-            let keyData = key.data(using: .utf8) ?? Data()
+            guard let keyData = key.data(using: .utf8) else {
+                throw SQLError.encryptionFailed(message: "Invalid encryption key encoding")
+            }
             let keyResult = keyData.withUnsafeBytes { bytes in
                 sqlite3_key(db, bytes.baseAddress, Int32(keyData.count))
             }
@@ -48,6 +62,7 @@ class SQLDatabase {
 
         // Enable foreign keys
         try execute(statement: "PRAGMA foreign_keys = ON", params: [])
+        needsClose = false
     }
 
     func close() {

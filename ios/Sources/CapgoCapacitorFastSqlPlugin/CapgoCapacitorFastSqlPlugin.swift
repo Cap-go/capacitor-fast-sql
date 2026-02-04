@@ -36,7 +36,7 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
         let encrypted = call.getBool("encrypted") ?? false
         let encryptionKey = call.getString("encryptionKey")
         if encrypted && (encryptionKey == nil || encryptionKey?.isEmpty == true) {
-            call.reject("Encryption key is required when encrypted is true")
+            call.reject("Encryption key is required when encryption is enabled")
             return
         }
 

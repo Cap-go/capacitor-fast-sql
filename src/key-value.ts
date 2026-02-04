@@ -29,6 +29,8 @@ export class KeyValueStore {
   private connection: SQLConnection;
   private store: string;
   private initialized = false;
+  private ownsConnection = false;
+  private closed = false;
 
   private constructor(connection: SQLConnection, store: string) {
     this.connection = connection;
@@ -42,17 +44,38 @@ export class KeyValueStore {
     const connection = await FastSQL.connect(options);
     const store = options.store ?? 'default';
     const kv = new KeyValueStore(connection, store);
+    kv.ownsConnection = true;
     await kv.ensureSchema();
     return kv;
   }
 
   /**
    * Create a key-value store from an existing SQLConnection.
+   * Note: The caller retains ownership and is responsible for closing the connection.
    */
   static async fromConnection(connection: SQLConnection, store = 'default'): Promise<KeyValueStore> {
     const kv = new KeyValueStore(connection, store);
     await kv.ensureSchema();
     return kv;
+  }
+
+  /**
+   * Close the key-value store and release resources.
+   * Only disconnects the database if this store owns the connection (created via open()).
+   */
+  async close(): Promise<void> {
+    if (this.closed) {
+      return;
+    }
+    this.closed = true;
+    if (this.ownsConnection) {
+      try {
+        await FastSQL.disconnect(this.connection.getDatabaseName());
+      } catch {
+        // Ignore disconnect errors during close.
+      }
+    }
+    this.initialized = false;
   }
 
   /**
