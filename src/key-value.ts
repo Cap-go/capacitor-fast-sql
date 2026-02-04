@@ -2,14 +2,7 @@ import type { SQLConnectionOptions, SQLRow, SQLValue } from './definitions';
 import { FastSQL } from './fast-sql';
 import type { SQLConnection } from './sql-connection';
 
-export type KeyValueValue =
-  | string
-  | number
-  | boolean
-  | null
-  | Uint8Array
-  | Record<string, unknown>
-  | unknown[];
+export type KeyValueValue = string | number | boolean | null | Uint8Array | Record<string, unknown> | unknown[];
 
 export interface KeyValueStoreOptions extends SQLConnectionOptions {
   store?: string;
@@ -84,10 +77,12 @@ export class KeyValueStore {
   async set(key: string, value: KeyValueValue): Promise<void> {
     await this.ensureSchema();
     const encoded = this.encodeValue(value);
-    await this.connection.run(
-      'INSERT OR REPLACE INTO __kv_store (s, k, t, v) VALUES (?, ?, ?, ?)',
-      [this.store, key, encoded.type, encoded.value],
-    );
+    await this.connection.run('INSERT OR REPLACE INTO __kv_store (s, k, t, v) VALUES (?, ?, ?, ?)', [
+      this.store,
+      key,
+      encoded.type,
+      encoded.value,
+    ]);
   }
 
   /**
@@ -95,10 +90,10 @@ export class KeyValueStore {
    */
   async get(key: string): Promise<KeyValueValue | null> {
     await this.ensureSchema();
-    const rows = await this.connection.query(
-      'SELECT t, v FROM __kv_store WHERE s = ? AND k = ? LIMIT 1',
-      [this.store, key],
-    );
+    const rows = await this.connection.query('SELECT t, v FROM __kv_store WHERE s = ? AND k = ? LIMIT 1', [
+      this.store,
+      key,
+    ]);
     if (!rows.length) {
       return null;
     }
@@ -113,10 +108,10 @@ export class KeyValueStore {
    */
   async has(key: string): Promise<boolean> {
     await this.ensureSchema();
-    const rows = await this.connection.query(
-      'SELECT 1 as existsFlag FROM __kv_store WHERE s = ? AND k = ? LIMIT 1',
-      [this.store, key],
-    );
+    const rows = await this.connection.query('SELECT 1 as existsFlag FROM __kv_store WHERE s = ? AND k = ? LIMIT 1', [
+      this.store,
+      key,
+    ]);
     return rows.length > 0;
   }
 
@@ -125,10 +120,7 @@ export class KeyValueStore {
    */
   async remove(key: string): Promise<void> {
     await this.ensureSchema();
-    await this.connection.run('DELETE FROM __kv_store WHERE s = ? AND k = ?', [
-      this.store,
-      key,
-    ]);
+    await this.connection.run('DELETE FROM __kv_store WHERE s = ? AND k = ?', [this.store, key]);
   }
 
   /**
@@ -144,9 +136,7 @@ export class KeyValueStore {
    */
   async keys(): Promise<string[]> {
     await this.ensureSchema();
-    const rows = await this.connection.query('SELECT k FROM __kv_store WHERE s = ? ORDER BY k', [
-      this.store,
-    ]);
+    const rows = await this.connection.query('SELECT k FROM __kv_store WHERE s = ? ORDER BY k', [this.store]);
     return rows.map((row) => String(row.k));
   }
 

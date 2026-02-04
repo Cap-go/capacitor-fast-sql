@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.util.Base64;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import net.zetetic.database.sqlcipher.SQLiteDatabase;
@@ -22,7 +23,8 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
         if (encryptionKey == null || encryptionKey.isEmpty()) {
             throw new Exception("Encryption key is required when encrypted is true");
         }
-        this.db = SQLiteDatabase.openOrCreateDatabase(path, encryptionKey, null);
+        byte[] keyBytes = encryptionKey.getBytes(StandardCharsets.UTF_8);
+        this.db = SQLiteDatabase.openOrCreateDatabase(path, keyBytes, null);
         // Enable foreign keys
         db.execSQL("PRAGMA foreign_keys = ON");
     }
