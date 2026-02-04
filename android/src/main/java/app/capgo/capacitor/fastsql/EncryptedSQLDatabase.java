@@ -1,14 +1,13 @@
 package app.capgo.capacitor.fastsql;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.util.Base64;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import java.util.ArrayList;
 import java.util.List;
-import net.sqlcipher.database.SQLiteDatabase;
-import net.sqlcipher.database.SQLiteStatement;
+import net.zetetic.database.sqlcipher.SQLiteDatabase;
+import net.zetetic.database.sqlcipher.SQLiteStatement;
 import org.json.JSONObject;
 
 /**
@@ -19,11 +18,10 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
     private SQLiteDatabase db;
     private boolean inTransaction = false;
 
-    public EncryptedSQLDatabase(String path, String encryptionKey, Context context) throws Exception {
+    public EncryptedSQLDatabase(String path, String encryptionKey) throws Exception {
         if (encryptionKey == null || encryptionKey.isEmpty()) {
             throw new Exception("Encryption key is required when encrypted is true");
         }
-        SQLiteDatabase.loadLibs(context);
         this.db = SQLiteDatabase.openOrCreateDatabase(path, encryptionKey, null);
         // Enable foreign keys
         db.execSQL("PRAGMA foreign_keys = ON");

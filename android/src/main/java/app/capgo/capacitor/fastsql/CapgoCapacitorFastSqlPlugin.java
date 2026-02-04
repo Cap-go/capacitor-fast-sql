@@ -57,7 +57,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
             // Open database
             DatabaseConnection db;
             if (encrypted) {
-                db = new EncryptedSQLDatabase(dbFile.getAbsolutePath(), encryptionKey, getContext());
+                db = new EncryptedSQLDatabase(dbFile.getAbsolutePath(), encryptionKey);
             } else {
                 db = new SQLDatabase(dbFile.getAbsolutePath());
             }
