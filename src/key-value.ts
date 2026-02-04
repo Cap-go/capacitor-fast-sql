@@ -1,6 +1,6 @@
 import type { SQLConnectionOptions, SQLRow, SQLValue } from './definitions';
 import { FastSQL } from './fast-sql';
-import { SQLConnection } from './sql-connection';
+import type { SQLConnection } from './sql-connection';
 
 export type KeyValueValue = string | number | boolean | null | Uint8Array | Record<string, unknown> | unknown[];
 
