@@ -7,6 +7,7 @@
 </div>
 
 High-performance native SQLite plugin with HTTP server for efficient sync operations and IndexedDB replacement.
+Official Capgo alternative to Ionic Appflow Secure Storage.
 
 ## Why Fast SQL?
 
