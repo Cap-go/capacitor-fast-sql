@@ -2,7 +2,14 @@ import type { SQLConnectionOptions, SQLRow, SQLValue } from './definitions';
 import { FastSQL } from './fast-sql';
 import type { SQLConnection } from './sql-connection';
 
-export type KeyValueValue = string | number | boolean | null | Uint8Array | Record<string, unknown> | unknown[];
+export type KeyValueValue =
+  | string
+  | number
+  | boolean
+  | null
+  | Uint8Array
+  | Record<string, unknown>
+  | unknown[];
 
 export interface KeyValueStoreOptions extends SQLConnectionOptions {
   store?: string;
@@ -56,7 +63,7 @@ export class KeyValueStore {
     const encoded = this.encodeValue(value);
     await this.connection.run(
       'INSERT OR REPLACE INTO __kv_store (s, k, t, v) VALUES (?, ?, ?, ?)',
-      [this.store, key, encoded.type, encoded.value]
+      [this.store, key, encoded.type, encoded.value],
     );
   }
 
@@ -67,7 +74,7 @@ export class KeyValueStore {
     await this.ensureSchema();
     const rows = await this.connection.query(
       'SELECT t, v FROM __kv_store WHERE s = ? AND k = ? LIMIT 1',
-      [this.store, key]
+      [this.store, key],
     );
     if (!rows.length) {
       return null;
@@ -85,7 +92,7 @@ export class KeyValueStore {
     await this.ensureSchema();
     const rows = await this.connection.query(
       'SELECT 1 as existsFlag FROM __kv_store WHERE s = ? AND k = ? LIMIT 1',
-      [this.store, key]
+      [this.store, key],
     );
     return rows.length > 0;
   }
@@ -95,7 +102,10 @@ export class KeyValueStore {
    */
   async remove(key: string): Promise<void> {
     await this.ensureSchema();
-    await this.connection.run('DELETE FROM __kv_store WHERE s = ? AND k = ?', [this.store, key]);
+    await this.connection.run('DELETE FROM __kv_store WHERE s = ? AND k = ?', [
+      this.store,
+      key,
+    ]);
   }
 
   /**
@@ -111,7 +121,9 @@ export class KeyValueStore {
    */
   async keys(): Promise<string[]> {
     await this.ensureSchema();
-    const rows = await this.connection.query('SELECT k FROM __kv_store WHERE s = ? ORDER BY k', [this.store]);
+    const rows = await this.connection.query('SELECT k FROM __kv_store WHERE s = ? ORDER BY k', [
+      this.store,
+    ]);
     return rows.map((row) => String(row.k));
   }
 
@@ -120,7 +132,7 @@ export class KeyValueStore {
       return;
     }
     await this.connection.run(
-      'CREATE TABLE IF NOT EXISTS __kv_store (s TEXT NOT NULL, k TEXT NOT NULL, t TEXT NOT NULL, v BLOB, PRIMARY KEY (s, k))'
+      'CREATE TABLE IF NOT EXISTS __kv_store (s TEXT NOT NULL, k TEXT NOT NULL, t TEXT NOT NULL, v BLOB, PRIMARY KEY (s, k))',
     );
     await this.connection.run('CREATE INDEX IF NOT EXISTS __kv_store_s_idx ON __kv_store (s)');
     this.initialized = true;
