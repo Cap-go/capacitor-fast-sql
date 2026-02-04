@@ -75,6 +75,10 @@ Add to your `AndroidManifest.xml` if needed:
 </application>
 ```
 
+## Encryption (iOS/Android)
+
+Set `encrypted: true` and provide an `encryptionKey` when connecting. This uses SQLCipher on mobile platforms (ensure SQLCipher is linked on iOS if you use SwiftPM).
+
 ## Usage
 
 ### Basic Example
@@ -138,6 +142,24 @@ const results = await db.executeBatch([
   { statement: 'INSERT INTO logs (message) VALUES (?)', params: ['Log 3'] },
 ]);
 ```
+
+### Key-Value Storage (Mobile-focused)
+
+```typescript
+import { KeyValueStore } from '@capgo/capacitor-fast-sql';
+
+const kv = await KeyValueStore.open({
+  database: 'myapp',
+  encrypted: true,
+  encryptionKey: 'super-secret-key',
+});
+
+await kv.set('session', { token: 'abc123', expiresAt: 1710000000 });
+const session = await kv.get('session');
+await kv.remove('session');
+```
+
+> Note: Web support is intended for minimal testing only. The primary focus is iOS/Android.
 
 ## API
 

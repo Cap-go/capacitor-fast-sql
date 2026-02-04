@@ -23,10 +23,10 @@ import org.json.JSONObject;
 public class SQLHTTPServer extends NanoHTTPD {
 
     private final String token;
-    private final Map<String, SQLDatabase> databases;
+    private final Map<String, DatabaseConnection> databases;
     private final Gson gson = new Gson();
 
-    public SQLHTTPServer(Map<String, SQLDatabase> databases) throws IOException {
+    public SQLHTTPServer(Map<String, DatabaseConnection> databases) throws IOException {
         super(findAvailablePort());
         this.databases = databases;
         this.token = generateToken();
@@ -55,7 +55,7 @@ public class SQLHTTPServer extends NanoHTTPD {
         }
 
         // Check if database exists
-        SQLDatabase db = databases.get(database);
+        DatabaseConnection db = databases.get(database);
         if (db == null) {
             return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Database not found");
         }
@@ -82,7 +82,7 @@ public class SQLHTTPServer extends NanoHTTPD {
         }
     }
 
-    private Response handleExecute(IHTTPSession session, SQLDatabase db) throws Exception {
+    private Response handleExecute(IHTTPSession session, DatabaseConnection db) throws Exception {
         // Read request body
         String body = readRequestBody(session);
         JsonObject request = JsonParser.parseString(body).getAsJsonObject();
@@ -125,7 +125,7 @@ public class SQLHTTPServer extends NanoHTTPD {
         return newFixedLengthResponse(Response.Status.OK, "application/json", resultJson);
     }
 
-    private Response handleBatch(IHTTPSession session, SQLDatabase db) throws Exception {
+    private Response handleBatch(IHTTPSession session, DatabaseConnection db) throws Exception {
         // Read request body
         String body = readRequestBody(session);
         JsonObject request = JsonParser.parseString(body).getAsJsonObject();
@@ -171,17 +171,17 @@ public class SQLHTTPServer extends NanoHTTPD {
         return newFixedLengthResponse(Response.Status.OK, "application/json", results.toString());
     }
 
-    private Response handleBeginTransaction(SQLDatabase db) throws Exception {
+    private Response handleBeginTransaction(DatabaseConnection db) throws Exception {
         db.beginTransaction();
         return newFixedLengthResponse(Response.Status.OK, "application/json", "{}");
     }
 
-    private Response handleCommitTransaction(SQLDatabase db) throws Exception {
+    private Response handleCommitTransaction(DatabaseConnection db) throws Exception {
         db.commitTransaction();
         return newFixedLengthResponse(Response.Status.OK, "application/json", "{}");
     }
 
-    private Response handleRollbackTransaction(SQLDatabase db) throws Exception {
+    private Response handleRollbackTransaction(DatabaseConnection db) throws Exception {
         db.rollbackTransaction();
         return newFixedLengthResponse(Response.Status.OK, "application/json", "{}");
     }
