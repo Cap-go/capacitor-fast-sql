@@ -1,6 +1,10 @@
 import Foundation
 import Capacitor
+#if canImport(SQLCipher)
+import SQLCipher
+#else
 import SQLite3
+#endif
 
 // SQLite constants that aren't imported to Swift
 private let SQLITE_STATIC = unsafeBitCast(0, to: sqlite3_destructor_type.self)
@@ -14,7 +18,7 @@ class SQLDatabase {
     private let path: String
     private var inTransaction = false
 
-    init(path: String) throws {
+    init(path: String, encrypted: Bool = false, encryptionKey: String? = nil) throws {
         self.path = path
 
         let flags = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX
@@ -22,6 +26,24 @@ class SQLDatabase {
 
         guard result == SQLITE_OK else {
             throw SQLError.openFailed(message: String(cString: sqlite3_errmsg(db)))
+        }
+
+        if encrypted {
+            guard let key = encryptionKey, !key.isEmpty else {
+                throw SQLError.encryptionKeyMissing
+            }
+#if canImport(SQLCipher)
+            let keyData = key.data(using: .utf8) ?? Data()
+            let keyResult = keyData.withUnsafeBytes { bytes in
+                sqlite3_key(db, bytes.baseAddress, Int32(keyData.count))
+            }
+            if keyResult != SQLITE_OK {
+                let error = String(cString: sqlite3_errmsg(db))
+                throw SQLError.encryptionFailed(message: error)
+            }
+#else
+            throw SQLError.encryptionUnavailable
+#endif
         }
 
         // Enable foreign keys
@@ -210,6 +232,36 @@ enum SQLError: Error {
     case prepareFailed(message: String)
     case bindFailed(message: String)
     case executeFailed(message: String)
+    case encryptionKeyMissing
+    case encryptionUnavailable
+    case encryptionFailed(message: String)
     case transactionAlreadyActive
     case noTransactionActive
+}
+
+extension SQLError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .notOpen:
+            return "Database is not open"
+        case .openFailed(let message):
+            return "Failed to open database: \(message)"
+        case .prepareFailed(let message):
+            return "Failed to prepare statement: \(message)"
+        case .bindFailed(let message):
+            return "Failed to bind parameter: \(message)"
+        case .executeFailed(let message):
+            return "Failed to execute statement: \(message)"
+        case .encryptionKeyMissing:
+            return "Encryption key is required when encryption is enabled"
+        case .encryptionUnavailable:
+            return "Encryption is not available in this build"
+        case .encryptionFailed(let message):
+            return "Failed to set encryption key: \(message)"
+        case .transactionAlreadyActive:
+            return "Transaction already active"
+        case .noTransactionActive:
+            return "No transaction active"
+        }
+    }
 }

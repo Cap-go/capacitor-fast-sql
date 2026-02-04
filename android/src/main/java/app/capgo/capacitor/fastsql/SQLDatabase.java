@@ -15,7 +15,7 @@ import org.json.JSONObject;
 /**
  * SQLite database wrapper for Android
  */
-public class SQLDatabase {
+public class SQLDatabase implements DatabaseConnection {
 
     private SQLiteDatabase db;
     private boolean inTransaction = false;
