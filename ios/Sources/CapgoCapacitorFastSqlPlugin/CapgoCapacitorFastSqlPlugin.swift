@@ -33,6 +33,13 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
             return
         }
 
+        let encrypted = call.getBool("encrypted") ?? false
+        let encryptionKey = call.getString("encryptionKey")
+        if encrypted && (encryptionKey == nil || encryptionKey?.isEmpty == true) {
+            call.reject("Encryption key is required when encryption is enabled")
+            return
+        }
+
         // Check if already connected
         if databases[database] != nil {
             if let server = server {
@@ -50,7 +57,7 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
             let dbPath = try getDatabasePath(database)
 
             // Open database
-            let db = try SQLDatabase(path: dbPath)
+            let db = try SQLDatabase(path: dbPath, encrypted: encrypted, encryptionKey: encryptionKey)
             databases[database] = db
 
             // Start HTTP server if not already running

@@ -14,5 +14,6 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '15.0'
   s.dependency 'Capacitor'
   s.dependency 'Telegraph', '~> 0.30'
+  s.dependency 'SQLCipher', '~> 4.10'
   s.swift_version = '5.1'
 end

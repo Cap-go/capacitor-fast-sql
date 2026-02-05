@@ -366,10 +366,10 @@ class OfflineQueue {
 
 1. **Streaming Large Results**: Use HTTP chunked transfer for very large result sets
 2. **WebSocket Support**: Real-time change notifications
-3. **Encryption**: Built-in database encryption (SQLCipher)
-4. **Compression**: Compress large responses
-5. **Query Cache**: Cache frequently-used queries
-6. **Connection Pool**: Multiple concurrent connections
+3. **Compression**: Compress large responses
+4. **Query Cache**: Cache frequently-used queries
+5. **Connection Pool**: Multiple concurrent connections
+6. **Key-Value Enhancements**: TTLs, batch set/get, and store-level metadata
 
 ## References
 

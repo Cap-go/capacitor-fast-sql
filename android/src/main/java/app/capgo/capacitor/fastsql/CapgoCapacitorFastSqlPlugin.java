@@ -21,7 +21,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
 
     private final String pluginVersion = "8.0.12";
 
-    private Map<String, SQLDatabase> databases = new HashMap<>();
+    private Map<String, DatabaseConnection> databases = new HashMap<>();
     private SQLHTTPServer server;
 
     @PluginMethod
@@ -29,6 +29,12 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
         String database = call.getString("database");
         if (database == null) {
             call.reject("Database name is required");
+            return;
+        }
+        boolean encrypted = call.getBoolean("encrypted", false);
+        String encryptionKey = call.getString("encryptionKey");
+        if (encrypted && (encryptionKey == null || encryptionKey.isEmpty())) {
+            call.reject("Encryption key is required when encrypted is true");
             return;
         }
 
@@ -49,7 +55,12 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
             File dbFile = getDatabasePath(database);
 
             // Open database
-            SQLDatabase db = new SQLDatabase(dbFile.getAbsolutePath());
+            DatabaseConnection db;
+            if (encrypted) {
+                db = new EncryptedSQLDatabase(dbFile.getAbsolutePath(), encryptionKey);
+            } else {
+                db = new SQLDatabase(dbFile.getAbsolutePath());
+            }
             databases.put(database, db);
 
             // Start HTTP server if not already running
@@ -76,7 +87,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
             return;
         }
 
-        SQLDatabase db = databases.get(database);
+        DatabaseConnection db = databases.get(database);
         if (db == null) {
             call.reject("Database '" + database + "' is not connected");
             return;
@@ -132,7 +143,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
             return;
         }
 
-        SQLDatabase db = databases.get(database);
+        DatabaseConnection db = databases.get(database);
         if (db == null) {
             call.reject("Database '" + database + "' is not connected");
             return;
@@ -156,7 +167,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
             return;
         }
 
-        SQLDatabase db = databases.get(database);
+        DatabaseConnection db = databases.get(database);
         if (db == null) {
             call.reject("Database '" + database + "' is not connected");
             return;
@@ -178,7 +189,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
             return;
         }
 
-        SQLDatabase db = databases.get(database);
+        DatabaseConnection db = databases.get(database);
         if (db == null) {
             call.reject("Database '" + database + "' is not connected");
             return;
@@ -200,7 +211,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
             return;
         }
 
-        SQLDatabase db = databases.get(database);
+        DatabaseConnection db = databases.get(database);
         if (db == null) {
             call.reject("Database '" + database + "' is not connected");
             return;

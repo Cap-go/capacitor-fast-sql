@@ -19,8 +19,9 @@ export class FastSQL {
    */
   static async connect(options: SQLConnectionOptions): Promise<SQLConnection> {
     // Check if already connected
-    if (this.connections.has(options.database)) {
-      return this.connections.get(options.database)!;
+    const existing = this.connections.get(options.database);
+    if (existing) {
+      return existing;
     }
 
     // Connect via native plugin
