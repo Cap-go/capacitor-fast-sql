@@ -44,7 +44,7 @@ class SQLDatabase {
             guard let key = encryptionKey, !key.isEmpty else {
                 throw SQLError.encryptionKeyMissing
             }
-#if canImport(SQLCipher)
+            #if canImport(SQLCipher)
             guard let keyData = key.data(using: .utf8) else {
                 throw SQLError.encryptionFailed(message: "Invalid encryption key encoding")
             }
@@ -55,9 +55,9 @@ class SQLDatabase {
                 let error = String(cString: sqlite3_errmsg(db))
                 throw SQLError.encryptionFailed(message: error)
             }
-#else
+            #else
             throw SQLError.encryptionUnavailable
-#endif
+            #endif
         }
 
         // Enable foreign keys
