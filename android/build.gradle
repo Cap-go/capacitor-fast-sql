@@ -51,7 +51,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':capacitor-android')
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
-    implementation 'androidx.sqlite:sqlite:2.4.0'
+    implementation 'androidx.sqlite:sqlite:2.6.2'
     implementation 'com.google.code.gson:gson:2.13.2'
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
     implementation 'net.zetetic:sqlcipher-android:4.13.0'
