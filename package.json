@@ -1,6 +1,6 @@
 {
   "name": "@capgo/capacitor-fast-sql",
-  "version": "8.0.16",
+  "version": "8.0.17",
   "description": "High-performance native SQLite plugin with custom protocol for efficient sync operations and IndexedDB replacement",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
