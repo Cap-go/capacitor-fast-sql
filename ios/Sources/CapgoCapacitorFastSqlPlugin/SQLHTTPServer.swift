@@ -45,17 +45,48 @@ class SQLHTTPServer {
         isRunning = false
     }
 
+    // MARK: - CORS Headers
+
+    private let corsHeaders: HTTPHeaders = [
+        .accessControlAllowOrigin: "*",
+        .accessControlAllowMethods: "GET, POST, OPTIONS",
+        .accessControlAllowHeaders: "Content-Type, Authorization, X-Database",
+        .accessControlMaxAge: "86400"
+    ]
+
+    private func corsPreflightResponse() -> HTTPResponse {
+        return HTTPResponse(.ok, headers: corsHeaders)
+    }
+
+    private func addCorsHeaders(_ response: HTTPResponse) -> HTTPResponse {
+        for (key, value) in corsHeaders {
+            response.headers[key] = value
+        }
+        return response
+    }
+
     // MARK: - Route Setup
 
     private func setupRoutes() {
         guard let server = server else { return }
+
+        // CORS preflight for all endpoints
+        let preflightPaths = ["/execute", "/batch", "/transaction/begin", "/transaction/commit", "/transaction/rollback"]
+        for path in preflightPaths {
+            server.route(.OPTIONS, path) { [weak self] _ in
+                guard let self = self else {
+                    return HTTPResponse(.internalServerError)
+                }
+                return self.corsPreflightResponse()
+            }
+        }
 
         // Execute endpoint
         server.route(.POST, "/execute") { [weak self] request in
             guard let self = self else {
                 return HTTPResponse(.internalServerError)
             }
-            return self.handleExecuteRequest(request: request)
+            return self.addCorsHeaders(self.handleExecuteRequest(request: request))
         }
 
         // Batch endpoint
@@ -63,7 +94,7 @@ class SQLHTTPServer {
             guard let self = self else {
                 return HTTPResponse(.internalServerError)
             }
-            return self.handleBatchRequest(request: request)
+            return self.addCorsHeaders(self.handleBatchRequest(request: request))
         }
 
         // Transaction endpoints
@@ -71,21 +102,21 @@ class SQLHTTPServer {
             guard let self = self else {
                 return HTTPResponse(.internalServerError)
             }
-            return self.handleBeginTransactionRequest(request: request)
+            return self.addCorsHeaders(self.handleBeginTransactionRequest(request: request))
         }
 
         server.route(.POST, "/transaction/commit") { [weak self] request in
             guard let self = self else {
                 return HTTPResponse(.internalServerError)
             }
-            return self.handleCommitTransactionRequest(request: request)
+            return self.addCorsHeaders(self.handleCommitTransactionRequest(request: request))
         }
 
         server.route(.POST, "/transaction/rollback") { [weak self] request in
             guard let self = self else {
                 return HTTPResponse(.internalServerError)
             }
-            return self.handleRollbackTransactionRequest(request: request)
+            return self.addCorsHeaders(self.handleRollbackTransactionRequest(request: request))
         }
     }
 
@@ -167,7 +198,7 @@ class SQLHTTPServer {
         do {
             let result = try db.execute(statement: statement, params: params)
             let resultData = try JSONSerialization.data(withJSONObject: result)
-            return HTTPResponse(.ok, headers: ["Content-Type": "application/json"], body: resultData)
+            return HTTPResponse(.ok, headers: [.contentType: "application/json"], body: resultData)
         } catch {
             let errorData = "Error: \(error.localizedDescription)".data(using: .utf8)!
             return HTTPResponse(.internalServerError, body: errorData)
@@ -215,7 +246,7 @@ class SQLHTTPServer {
             }
 
             let resultData = try JSONSerialization.data(withJSONObject: results)
-            return HTTPResponse(.ok, headers: ["Content-Type": "application/json"], body: resultData)
+            return HTTPResponse(.ok, headers: [.contentType: "application/json"], body: resultData)
         } catch {
             let errorData = "Error: \(error.localizedDescription)".data(using: .utf8)!
             return HTTPResponse(.internalServerError, body: errorData)
@@ -244,7 +275,7 @@ class SQLHTTPServer {
         do {
             try db.beginTransaction()
             let resultData = "{}".data(using: .utf8)!
-            return HTTPResponse(.ok, headers: ["Content-Type": "application/json"], body: resultData)
+            return HTTPResponse(.ok, headers: [.contentType: "application/json"], body: resultData)
         } catch {
             let errorData = "Error: \(error.localizedDescription)".data(using: .utf8)!
             return HTTPResponse(.internalServerError, body: errorData)
@@ -273,7 +304,7 @@ class SQLHTTPServer {
         do {
             try db.commitTransaction()
             let resultData = "{}".data(using: .utf8)!
-            return HTTPResponse(.ok, headers: ["Content-Type": "application/json"], body: resultData)
+            return HTTPResponse(.ok, headers: [.contentType: "application/json"], body: resultData)
         } catch {
             let errorData = "Error: \(error.localizedDescription)".data(using: .utf8)!
             return HTTPResponse(.internalServerError, body: errorData)
@@ -302,7 +333,7 @@ class SQLHTTPServer {
         do {
             try db.rollbackTransaction()
             let resultData = "{}".data(using: .utf8)!
-            return HTTPResponse(.ok, headers: ["Content-Type": "application/json"], body: resultData)
+            return HTTPResponse(.ok, headers: [.contentType: "application/json"], body: resultData)
         } catch {
             let errorData = "Error: \(error.localizedDescription)".data(using: .utf8)!
             return HTTPResponse(.internalServerError, body: errorData)
