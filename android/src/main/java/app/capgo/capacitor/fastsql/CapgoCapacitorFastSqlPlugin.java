@@ -57,6 +57,16 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
             // Open database
             DatabaseConnection db;
             if (encrypted) {
+                try {
+                    Class.forName("net.zetetic.database.sqlcipher.SQLiteDatabase");
+                } catch (ClassNotFoundException e) {
+                    call.reject(
+                        "Encryption is not available. " +
+                            "Add 'implementation \"net.zetetic:sqlcipher-android:4.13.0\"' " +
+                            "to your app's build.gradle to enable encryption."
+                    );
+                    return;
+                }
                 db = new EncryptedSQLDatabase(dbFile.getAbsolutePath(), encryptionKey);
             } else {
                 db = new SQLDatabase(dbFile.getAbsolutePath());

@@ -23,6 +23,16 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
         if (encryptionKey == null || encryptionKey.isEmpty()) {
             throw new Exception("Encryption key is required when encrypted is true");
         }
+        try {
+            System.loadLibrary("sqlcipher");
+        } catch (UnsatisfiedLinkError e) {
+            throw new Exception(
+                "SQLCipher native library not found. " +
+                    "Add 'implementation \"net.zetetic:sqlcipher-android:4.13.0\"' " +
+                    "to your app's build.gradle to enable encryption.",
+                e
+            );
+        }
         byte[] keyBytes = encryptionKey.getBytes(StandardCharsets.UTF_8);
         this.db = SQLiteDatabase.openOrCreateDatabase(path, keyBytes, null, null);
         // Enable foreign keys

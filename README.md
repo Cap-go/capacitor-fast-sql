@@ -76,9 +76,27 @@ Add to your `AndroidManifest.xml` if needed:
 </application>
 ```
 
-## Encryption (iOS/Android)
+## Encryption (Android)
 
-Set `encrypted: true` and provide an `encryptionKey` when connecting. This uses SQLCipher on mobile platforms (ensure SQLCipher is linked on iOS if you use SwiftPM).
+Encryption uses [SQLCipher](https://www.zetetic.net/sqlcipher/) and is opt-in. Add the SQLCipher dependency to your **app-level** `build.gradle`:
+
+```gradle
+dependencies {
+    implementation 'net.zetetic:sqlcipher-android:4.13.0'
+}
+```
+
+Then connect with encryption enabled:
+
+```typescript
+const db = await FastSQL.connect({
+  database: 'secure',
+  encrypted: true,
+  encryptionKey: 'my-secret-key',
+});
+```
+
+If SQLCipher is not installed and `encrypted: true` is passed, the plugin returns a clear error message instead of crashing.
 
 ## Usage
 
