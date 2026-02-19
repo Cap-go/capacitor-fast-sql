@@ -49,7 +49,7 @@ class SQLHTTPServer {
 
     private let corsHeaders: HTTPHeaders = [
         .accessControlAllowOrigin: "*",
-        .accessControlAllowMethods: "GET, POST, OPTIONS",
+        .accessControlAllowMethods: "POST, OPTIONS",
         .accessControlAllowHeaders: "Content-Type, Authorization, X-Database",
         .accessControlMaxAge: "86400"
     ]
