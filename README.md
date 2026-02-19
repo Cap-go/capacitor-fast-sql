@@ -55,7 +55,7 @@ This plugin provides direct native SQLite database access with a custom communic
 
 ## iOS Configuration
 
-Add to your `Info.plist` if you encounter any issues:
+This plugin runs a local HTTP server on `localhost`. iOS App Transport Security (ATS) blocks cleartext HTTP by default, so you **must** allow local networking in your `Info.plist`:
 
 ```xml
 <key>NSAppTransportSecurity</key>
@@ -64,6 +64,8 @@ Add to your `Info.plist` if you encounter any issues:
     <true/>
 </dict>
 ```
+
+This only permits cleartext to loopback addresses (`localhost` / `127.0.0.1`) — it does not weaken ATS for external connections.
 
 ## Android Configuration
 

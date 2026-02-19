@@ -95,7 +95,7 @@ npx cap sync
 
 ### iOS Configuration
 
-1. Add to `Info.plist`:
+1. **Required:** Allow local networking in `Info.plist`. This plugin runs a local HTTP server that iOS ATS blocks by default:
 
 ```xml
 <key>NSAppTransportSecurity</key>
@@ -104,6 +104,8 @@ npx cap sync
     <true/>
 </dict>
 ```
+
+   This only permits cleartext to loopback addresses (`localhost` / `127.0.0.1`) — it does not weaken ATS for external connections.
 
 2. If using CocoaPods, the plugin will be automatically linked
 
