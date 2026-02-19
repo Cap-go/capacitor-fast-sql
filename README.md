@@ -55,7 +55,7 @@ This plugin provides direct native SQLite database access with a custom communic
 
 ## iOS Configuration
 
-Add to your `Info.plist` if you encounter any issues:
+This plugin runs a local HTTP server on `localhost`. iOS App Transport Security (ATS) blocks cleartext HTTP by default, so you **must** allow local networking in your `Info.plist`:
 
 ```xml
 <key>NSAppTransportSecurity</key>
@@ -65,9 +65,36 @@ Add to your `Info.plist` if you encounter any issues:
 </dict>
 ```
 
+This only permits cleartext to loopback addresses (`localhost` / `127.0.0.1`) — it does not weaken ATS for external connections.
+
 ## Android Configuration
 
-Add to your `AndroidManifest.xml` if needed:
+This plugin runs a local HTTP server on `localhost` to bypass Capacitor's bridge for performance. Android 9+ blocks cleartext (non-HTTPS) traffic by default, so you **must** allow it for `localhost`.
+
+**Option A — Scoped to localhost only (recommended):**
+
+Create `android/app/src/main/res/xml/network_security_config.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>
+```
+
+Then reference it in your `AndroidManifest.xml`:
+
+```xml
+<application
+    android:networkSecurityConfig="@xml/network_security_config">
+    ...
+</application>
+```
+
+**Option B — Allow all cleartext (simpler but less secure):**
 
 ```xml
 <application

@@ -40,24 +40,33 @@ public class SQLHTTPServer extends NanoHTTPD {
         return getListeningPort();
     }
 
+    private Response addCorsHeaders(Response response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Database");
+        response.addHeader("Access-Control-Max-Age", "86400");
+        return response;
+    }
+
     @Override
     public Response serve(IHTTPSession session) {
-        // Check authentication
+        if (Method.OPTIONS.equals(session.getMethod())) {
+            return addCorsHeaders(newFixedLengthResponse(Response.Status.OK, "text/plain", ""));
+        }
+
         String authHeader = session.getHeaders().get("authorization");
         if (authHeader == null || !authHeader.equals("Bearer " + token)) {
-            return newFixedLengthResponse(Response.Status.UNAUTHORIZED, "text/plain", "Unauthorized");
+            return addCorsHeaders(newFixedLengthResponse(Response.Status.UNAUTHORIZED, "text/plain", "Unauthorized"));
         }
 
-        // Get database name
         String database = session.getHeaders().get("x-database");
         if (database == null) {
-            return newFixedLengthResponse(Response.Status.BAD_REQUEST, "text/plain", "Database header required");
+            return addCorsHeaders(newFixedLengthResponse(Response.Status.BAD_REQUEST, "text/plain", "Database header required"));
         }
 
-        // Check if database exists
         DatabaseConnection db = databases.get(database);
         if (db == null) {
-            return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Database not found");
+            return addCorsHeaders(newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Database not found"));
         }
 
         String uri = session.getUri();
@@ -65,20 +74,20 @@ public class SQLHTTPServer extends NanoHTTPD {
 
         try {
             if (method == Method.POST && uri.equals("/execute")) {
-                return handleExecute(session, db);
+                return addCorsHeaders(handleExecute(session, db));
             } else if (method == Method.POST && uri.equals("/batch")) {
-                return handleBatch(session, db);
+                return addCorsHeaders(handleBatch(session, db));
             } else if (method == Method.POST && uri.equals("/transaction/begin")) {
-                return handleBeginTransaction(db);
+                return addCorsHeaders(handleBeginTransaction(db));
             } else if (method == Method.POST && uri.equals("/transaction/commit")) {
-                return handleCommitTransaction(db);
+                return addCorsHeaders(handleCommitTransaction(db));
             } else if (method == Method.POST && uri.equals("/transaction/rollback")) {
-                return handleRollbackTransaction(db);
+                return addCorsHeaders(handleRollbackTransaction(db));
             } else {
-                return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Endpoint not found");
+                return addCorsHeaders(newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Endpoint not found"));
             }
         } catch (Exception e) {
-            return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "Error: " + e.getMessage());
+            return addCorsHeaders(newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "Error: " + e.getMessage()));
         }
     }
 
