@@ -113,14 +113,39 @@ npx cap sync
 
 1. The plugin is automatically linked via Gradle
 
-2. If you need cleartext traffic, add to `AndroidManifest.xml`:
+2. **Required:** Allow cleartext traffic to `localhost`. This plugin runs a local HTTP server that Android 9+ blocks by default.
 
-```xml
-<application
-    android:usesCleartextTraffic="true">
-    ...
-</application>
-```
+   **Option A — Scoped to localhost only (recommended):**
+
+   Create `android/app/src/main/res/xml/network_security_config.xml`:
+
+   ```xml
+   <?xml version="1.0" encoding="utf-8"?>
+   <network-security-config>
+       <domain-config cleartextTrafficPermitted="true">
+           <domain includeSubdomains="false">localhost</domain>
+           <domain includeSubdomains="false">127.0.0.1</domain>
+       </domain-config>
+   </network-security-config>
+   ```
+
+   Then reference it in your `AndroidManifest.xml`:
+
+   ```xml
+   <application
+       android:networkSecurityConfig="@xml/network_security_config">
+       ...
+   </application>
+   ```
+
+   **Option B — Allow all cleartext (simpler but less secure):**
+
+   ```xml
+   <application
+       android:usesCleartextTraffic="true">
+       ...
+   </application>
+   ```
 
 ## Architecture Details
 
