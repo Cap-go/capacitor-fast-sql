@@ -42,7 +42,7 @@ public class SQLHTTPServer extends NanoHTTPD {
 
     private Response addCorsHeaders(Response response) {
         response.addHeader("Access-Control-Allow-Origin", "*");
-        response.addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Database");
         response.addHeader("Access-Control-Max-Age", "86400");
         return response;
