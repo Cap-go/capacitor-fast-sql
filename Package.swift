@@ -11,7 +11,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", from: "8.0.0"),
-        .package(url: "https://github.com/Building42/Telegraph.git", from: "0.30.0")
+        .package(url: "https://github.com/Building42/Telegraph.git", from: "0.40.0")
     ],
     targets: [
         .target(
