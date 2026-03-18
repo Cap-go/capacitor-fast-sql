@@ -236,6 +236,12 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void configureWeb(PluginCall call) {
+        // No-op on Android — web configuration is only relevant on the web platform.
+        call.resolve();
+    }
+
+    @PluginMethod
     public void getPluginVersion(PluginCall call) {
         JSObject ret = new JSObject();
         ret.put("version", pluginVersion);

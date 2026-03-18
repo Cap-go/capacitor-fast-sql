@@ -125,6 +125,34 @@ const db = await FastSQL.connect({
 
 If SQLCipher is not installed and `encrypted: true` is passed, the plugin returns a clear error message instead of crashing.
 
+## Web Platform
+
+On the web, this plugin uses [sql.js](https://sql.js.org/) (SQLite compiled to WebAssembly) with IndexedDB for persistence.
+
+By default, the plugin loads `sql-wasm.js` and `sql-wasm.wasm` from the cdnjs CDN. If you want to bundle these files with your web application (to avoid a CDN dependency), call `configureWeb()` once at startup **before** the first `connect()`:
+
+```typescript
+import { CapgoCapacitorFastSql, FastSQL } from '@capgo/capacitor-fast-sql';
+
+// Point to your locally bundled sql.js files
+await CapgoCapacitorFastSql.configureWeb({
+  sqlJsUrl: '/assets/sql-wasm.js',
+  wasmUrl: '/assets/sql-wasm.wasm',
+});
+
+const db = await FastSQL.connect({ database: 'myapp' });
+```
+
+To bundle the files locally, copy them from the `sql.js` npm package into your project's public assets directory:
+
+```bash
+# npm / bun
+cp node_modules/sql.js/dist/sql-wasm.js public/assets/
+cp node_modules/sql.js/dist/sql-wasm.wasm public/assets/
+```
+
+`configureWeb()` is a no-op on iOS and Android — it is safe to call unconditionally.
+
 ## Usage
 
 ### Basic Example
@@ -219,6 +247,7 @@ await kv.remove('session');
 * [`commitTransaction(...)`](#committransaction)
 * [`rollbackTransaction(...)`](#rollbacktransaction)
 * [`getPluginVersion()`](#getpluginversion)
+* [`configureWeb(...)`](#configureweb)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
 * [Enums](#enums)
@@ -374,6 +403,27 @@ Get the native Capacitor plugin version.
 --------------------
 
 
+### configureWeb(...)
+
+```typescript
+configureWeb(config: WebConfig) => Promise<void>
+```
+
+Configure web-specific options for the sql.js WASM module.
+
+Call this **before** the first `connect()` call to load sql.js from a
+locally bundled path instead of the default CDN. This method is a no-op
+on iOS and Android.
+
+| Param        | Type                                            | Description                 |
+| ------------ | ----------------------------------------------- | --------------------------- |
+| **`config`** | <code><a href="#webconfig">WebConfig</a></code> | - Web configuration options |
+
+**Since:** 0.0.1
+
+--------------------
+
+
 ### Interfaces
 
 
@@ -478,6 +528,18 @@ buffer as needed.
 | Method    | Signature                                                                               | Description                                                     |
 | --------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | **slice** | (begin: number, end?: number \| undefined) =&gt; <a href="#arraybuffer">ArrayBuffer</a> | Returns a section of an <a href="#arraybuffer">ArrayBuffer</a>. |
+
+
+#### WebConfig
+
+Web platform configuration for the sql.js WASM module.
+Use with `configureWeb()` to load sql.js
+from a locally bundled path instead of the default CDN.
+
+| Prop           | Type                | Description                                                                                                |
+| -------------- | ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **`sqlJsUrl`** | <code>string</code> | URL to the sql.js JavaScript file (`sql-wasm.js`). When omitted, the plugin loads from the cdnjs CDN.      |
+| **`wasmUrl`**  | <code>string</code> | URL to the sql.js WebAssembly binary (`sql-wasm.wasm`). When omitted, the plugin loads from the cdnjs CDN. |
 
 
 ### Type Aliases

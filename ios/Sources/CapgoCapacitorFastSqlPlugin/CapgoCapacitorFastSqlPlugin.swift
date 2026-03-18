@@ -21,7 +21,8 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "beginTransaction", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "commitTransaction", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "rollbackTransaction", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "getPluginVersion", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "getPluginVersion", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "configureWeb", returnType: CAPPluginReturnPromise)
     ]
 
     private var databases: [String: SQLDatabase] = [:]
@@ -213,6 +214,11 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
         call.resolve([
             "version": pluginVersion
         ])
+    }
+
+    @objc func configureWeb(_ call: CAPPluginCall) {
+        // No-op on iOS — web configuration is only relevant on the web platform.
+        call.resolve()
     }
 
     private func getDatabasePath(_ database: String) throws -> String {
