@@ -71,6 +71,27 @@ export interface SQLConnectionOptions {
 }
 
 /**
+ * Web platform configuration for the sql.js WASM module.
+ * Use with {@link CapgoCapacitorFastSqlPlugin.configureWeb} to load sql.js
+ * from a locally bundled path instead of the default CDN.
+ */
+export interface WebConfig {
+  /**
+   * URL to the sql.js JavaScript file (`sql-wasm.js`).
+   * When omitted, the plugin loads from the cdnjs CDN.
+   * @example '/assets/sql-wasm.js'
+   */
+  sqlJsUrl?: string;
+
+  /**
+   * URL to the sql.js WebAssembly binary (`sql-wasm.wasm`).
+   * When omitted, the plugin loads from the cdnjs CDN.
+   * @example '/assets/sql-wasm.wasm'
+   */
+  wasmUrl?: string;
+}
+
+/**
  * Transaction isolation levels
  */
 export enum IsolationLevel {
@@ -223,4 +244,26 @@ export interface CapgoCapacitorFastSqlPlugin {
    * ```
    */
   getPluginVersion(): Promise<{ version: string }>;
+
+  /**
+   * Configure web-specific options for the sql.js WASM module.
+   *
+   * Call this **before** the first `connect()` call to load sql.js from a
+   * locally bundled path instead of the default CDN. This method is a no-op
+   * on iOS and Android.
+   *
+   * @param config - Web configuration options
+   * @returns Promise that resolves when the configuration is applied
+   * @since 0.0.1
+   * @example
+   * ```typescript
+   * // Configure once at app startup (web only)
+   * await CapgoCapacitorFastSql.configureWeb({
+   *   sqlJsUrl: '/assets/sql-wasm.js',
+   *   wasmUrl: '/assets/sql-wasm.wasm',
+   * });
+   * const db = await FastSQL.connect({ database: 'myapp' });
+   * ```
+   */
+  configureWeb(config: WebConfig): Promise<void>;
 }
