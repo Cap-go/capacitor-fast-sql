@@ -72,7 +72,7 @@ export interface SQLConnectionOptions {
 
 /**
  * Web platform configuration for the sql.js WASM module.
- * Use with {@link CapgoCapacitorFastSqlPlugin.configureWeb} to load sql.js
+ * Use with `configureWeb()` to load sql.js
  * from a locally bundled path instead of the default CDN.
  */
 export interface WebConfig {
