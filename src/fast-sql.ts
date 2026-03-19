@@ -1,9 +1,9 @@
 import { Capacitor } from '@capacitor/core';
 
 import type { SQLConnectionOptions } from './definitions';
+import { NativeSQLConnection } from './native-sql-connection';
 import { CapgoCapacitorFastSql } from './plugin';
 import type { SQLConnection } from './sql-connection';
-import { NativeSQLConnection } from './sql-connection';
 import { WebSQLConnection } from './web-sql-connection';
 
 /**
@@ -33,10 +33,11 @@ export class FastSQL {
 
     // Create connection instance appropriate for the current platform
     let connection: SQLConnection;
-    if (Capacitor.getPlatform() === 'web') {
-      connection = new WebSQLConnection(info.database, CapgoCapacitorFastSql);
-    } else {
+    const platform = Capacitor.getPlatform();
+    if (platform === 'android' || platform === 'ios') {
       connection = new NativeSQLConnection(info.database, info.port, info.token);
+    } else {
+      connection = new WebSQLConnection(info.database, CapgoCapacitorFastSql);
     }
 
     // Store connection
