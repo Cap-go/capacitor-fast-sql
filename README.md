@@ -143,14 +143,6 @@ await CapgoCapacitorFastSql.configureWeb({
 const db = await FastSQL.connect({ database: 'myapp' });
 ```
 
-To bundle the files locally, copy them from the `sql.js` npm package into your project's public assets directory:
-
-```bash
-# npm / bun
-cp node_modules/sql.js/dist/sql-wasm.js public/assets/
-cp node_modules/sql.js/dist/sql-wasm.wasm public/assets/
-```
-
 `configureWeb()` is a no-op on iOS and Android — it is safe to call unconditionally.
 
 ## Usage
