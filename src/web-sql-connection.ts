@@ -117,7 +117,6 @@ export class WebSQLConnection implements SQLConnection {
       throw error;
     }
   }
-  }
 
   /**
    * Query helper for SELECT statements
