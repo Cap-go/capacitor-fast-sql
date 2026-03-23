@@ -105,9 +105,18 @@ export class WebSQLConnection implements SQLConnection {
       await this.commit();
       return result;
     } catch (error) {
-      await this.rollback();
+      if (this.inTransaction) {
+        try {
+          await this.rollback();
+        } catch (rollbackError) {
+          throw new Error(
+            `Transaction failed and rollback failed: ${String(rollbackError)}; original error: ${String(error)}`,
+          );
+        }
+      }
       throw error;
     }
+  }
   }
 
   /**
