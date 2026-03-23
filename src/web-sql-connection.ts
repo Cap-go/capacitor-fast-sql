@@ -1,4 +1,11 @@
-import type { CapgoCapacitorFastSqlPlugin, SQLValue, SQLRow, SQLResult, SQLBatchOperation, IsolationLevel } from './definitions';
+import type {
+  CapgoCapacitorFastSqlPlugin,
+  SQLValue,
+  SQLRow,
+  SQLResult,
+  SQLBatchOperation,
+  IsolationLevel,
+} from './definitions';
 import type { SQLConnection } from './sql-connection';
 
 /**
