@@ -6,7 +6,11 @@ import type {
   SQLResult,
   SQLValue,
   IsolationLevel,
+  WebConfig,
 } from './definitions';
+
+const DEFAULT_SQLJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js';
+const DEFAULT_WASM_URL = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.wasm';
 
 /**
  * Web implementation using sql.js (SQLite compiled to WebAssembly)
@@ -18,40 +22,56 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
   private databases: Map<string, { db: any; token: string; port: number }> = new Map();
   private sqlPromise: Promise<any> | null = null;
   private nextPort = 9000;
+  private webConfig: WebConfig = {};
 
   constructor() {
     super();
-    this.loadSqlJs();
   }
 
   /**
-   * Load sql.js library
+   * Configure web-specific options (no-op on native platforms).
+   * Must be called before connect() when using locally bundled sql.js files.
    */
-  private async loadSqlJs(): Promise<void> {
-    if (this.sqlPromise) return;
+  async configureWeb(config: WebConfig): Promise<void> {
+    this.webConfig = config;
+    // Reset any in-progress load so the next connect() uses the new config
+    this.sqlPromise = null;
+  }
 
-    this.sqlPromise = new Promise((resolve, reject) => {
-      try {
-        // Load sql.js from CDN
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js';
-        script.onload = async () => {
-          const initSqlJs = (window as any).initSqlJs;
-          const SQL = await initSqlJs({
-            locateFile: (file: string) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`,
-          });
-          resolve(SQL);
-        };
-        script.onerror = reject;
-        document.head.appendChild(script);
-      } catch (error) {
-        reject(error);
-      }
-    });
+  /**
+   * Load sql.js library (lazy – called on first connect()).
+   * Returns the cached promise so callers can await it directly.
+   */
+  private loadSqlJs(): Promise<any> {
+    if (!this.sqlPromise) {
+      const jsUrl = this.webConfig.sqlJsUrl ?? DEFAULT_SQLJS_URL;
+      const wasmUrl = this.webConfig.wasmUrl ?? DEFAULT_WASM_URL;
+
+      this.sqlPromise = new Promise((resolve, reject) => {
+        try {
+          // Load sql.js from the configured URL (CDN or local bundle)
+          const script = document.createElement('script');
+          script.src = jsUrl;
+          script.onload = async () => {
+            const initSqlJs = (window as any).initSqlJs;
+            const SQL = await initSqlJs({
+              locateFile: (file: string) => (file.endsWith('.wasm') ? wasmUrl : file),
+            });
+            resolve(SQL);
+          };
+          script.onerror = reject;
+          document.head.appendChild(script);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    }
+
+    return this.sqlPromise;
   }
 
   async connect(options: SQLConnectionOptions): Promise<{ port: number; token: string; database: string }> {
-    const SQL = await this.sqlPromise;
+    const SQL = await this.loadSqlJs();
 
     // Check if database already exists in IndexedDB
     const savedData = await this.loadFromIndexedDB(options.database);

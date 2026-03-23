@@ -1,6 +1,10 @@
+import { Capacitor } from '@capacitor/core';
+
 import type { SQLConnectionOptions } from './definitions';
+import { NativeSQLConnection } from './native-sql-connection';
 import { CapgoCapacitorFastSql } from './plugin';
-import { SQLConnection } from './sql-connection';
+import type { SQLConnection } from './sql-connection';
+import { WebSQLConnection } from './web-sql-connection';
 
 /**
  * FastSQL - High-level API for managing SQL connections
@@ -27,8 +31,14 @@ export class FastSQL {
     // Connect via native plugin
     const info = await CapgoCapacitorFastSql.connect(options);
 
-    // Create connection instance
-    const connection = new SQLConnection(info.database, info.port, info.token);
+    // Create connection instance appropriate for the current platform
+    let connection: SQLConnection;
+    const platform = Capacitor.getPlatform();
+    if (platform === 'android' || platform === 'ios') {
+      connection = new NativeSQLConnection(info.database, info.port, info.token);
+    } else {
+      connection = new WebSQLConnection(info.database, CapgoCapacitorFastSql);
+    }
 
     // Store connection
     this.connections.set(options.database, connection);
