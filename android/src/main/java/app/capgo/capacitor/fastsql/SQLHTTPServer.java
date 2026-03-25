@@ -55,34 +55,34 @@ public class SQLHTTPServer extends NanoHTTPD {
             return addCorsHeaders(newFixedLengthResponse(Response.Status.OK, "text/plain", ""));
         }
 
-        String authHeader = session.getHeaders().get("authorization");
-        if (authHeader == null || !authHeader.equals("Bearer " + token)) {
-            return addCorsHeaders(newFixedLengthResponse(Response.Status.UNAUTHORIZED, "text/plain", "Unauthorized"));
-        }
-
-        String database = session.getHeaders().get("x-database");
-        if (database == null) {
-            return addCorsHeaders(newFixedLengthResponse(Response.Status.BAD_REQUEST, "text/plain", "Database header required"));
-        }
-
-        DatabaseConnection db = databases.get(database);
-        if (db == null) {
-            return addCorsHeaders(newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Database not found"));
-        }
-
         String uri = session.getUri();
         Method method = session.getMethod();
 
         try {
-            // Always consume the request body for POST requests.
-            // NanoHTTPD reuses connections (keep-alive). If the body is not consumed,
-            // leftover bytes corrupt the next request's HTTP line parsing, causing
-            // NanoHTTPD to return a 400 before serve() is called (no CORS headers).
+            // Always consume the request body for POST requests BEFORE any early-return
+            // checks (auth, missing header, unknown DB). NanoHTTPD reuses connections
+            // (keep-alive): leaving unread bytes corrupts the next request's HTTP line
+            // parsing, causing NanoHTTPD to return a 400 before serve() is even called.
             String body = null;
             if (Method.POST.equals(method)) {
                 Map<String, String> files = new HashMap<>();
                 session.parseBody(files);
                 body = files.get("postData");
+            }
+
+            String authHeader = session.getHeaders().get("authorization");
+            if (authHeader == null || !authHeader.equals("Bearer " + token)) {
+                return addCorsHeaders(newFixedLengthResponse(Response.Status.UNAUTHORIZED, "text/plain", "Unauthorized"));
+            }
+
+            String database = session.getHeaders().get("x-database");
+            if (database == null) {
+                return addCorsHeaders(newFixedLengthResponse(Response.Status.BAD_REQUEST, "text/plain", "Database header required"));
+            }
+
+            DatabaseConnection db = databases.get(database);
+            if (db == null) {
+                return addCorsHeaders(newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Database not found"));
             }
 
             if (method == Method.POST && uri.equals("/execute")) {

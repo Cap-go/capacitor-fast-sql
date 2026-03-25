@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,6 +52,14 @@ public class SQLDatabase implements DatabaseConnection {
 
     public void close() {
         dbExecutor.shutdown();
+        try {
+            if (!dbExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
+                dbExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            dbExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
         if (db != null && db.isOpen()) {
             db.close();
         }
