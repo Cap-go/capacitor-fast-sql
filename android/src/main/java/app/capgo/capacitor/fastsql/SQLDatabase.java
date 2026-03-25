@@ -18,7 +18,7 @@ import org.json.JSONObject;
 public class SQLDatabase implements DatabaseConnection {
 
     private SQLiteDatabase db;
-    private boolean inTransaction = false;
+    private volatile boolean inTransaction = false;
 
     public SQLDatabase(String path) {
         this.db = SQLiteDatabase.openOrCreateDatabase(path, null);
@@ -113,28 +113,27 @@ public class SQLDatabase implements DatabaseConnection {
         }
     }
 
-    public void beginTransaction() throws Exception {
+    public synchronized void beginTransaction() throws Exception {
         if (inTransaction) {
             throw new Exception("Transaction already active");
         }
-        db.beginTransaction();
+        db.execSQL("BEGIN TRANSACTION");
         inTransaction = true;
     }
 
-    public void commitTransaction() throws Exception {
+    public synchronized void commitTransaction() throws Exception {
         if (!inTransaction) {
             throw new Exception("No transaction active");
         }
-        db.setTransactionSuccessful();
-        db.endTransaction();
+        db.execSQL("COMMIT");
         inTransaction = false;
     }
 
-    public void rollbackTransaction() throws Exception {
+    public synchronized void rollbackTransaction() throws Exception {
         if (!inTransaction) {
             throw new Exception("No transaction active");
         }
-        db.endTransaction();
+        db.execSQL("ROLLBACK");
         inTransaction = false;
     }
 

@@ -17,7 +17,7 @@ import org.json.JSONObject;
 public class EncryptedSQLDatabase implements DatabaseConnection {
 
     private SQLiteDatabase db;
-    private boolean inTransaction = false;
+    private volatile boolean inTransaction = false;
 
     public EncryptedSQLDatabase(String path, String encryptionKey) throws Exception {
         if (encryptionKey == null || encryptionKey.isEmpty()) {
@@ -119,28 +119,27 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
         }
     }
 
-    public void beginTransaction() throws Exception {
+    public synchronized void beginTransaction() throws Exception {
         if (inTransaction) {
             throw new Exception("Transaction already active");
         }
-        db.beginTransaction();
+        db.execSQL("BEGIN TRANSACTION");
         inTransaction = true;
     }
 
-    public void commitTransaction() throws Exception {
+    public synchronized void commitTransaction() throws Exception {
         if (!inTransaction) {
             throw new Exception("No transaction active");
         }
-        db.setTransactionSuccessful();
-        db.endTransaction();
+        db.execSQL("COMMIT");
         inTransaction = false;
     }
 
-    public void rollbackTransaction() throws Exception {
+    public synchronized void rollbackTransaction() throws Exception {
         if (!inTransaction) {
             throw new Exception("No transaction active");
         }
-        db.endTransaction();
+        db.execSQL("ROLLBACK");
         inTransaction = false;
     }
 
