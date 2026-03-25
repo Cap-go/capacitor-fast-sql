@@ -131,9 +131,11 @@ export class NativeSQLConnection implements SQLConnection {
     const response = await fetch(`${this.baseUrl}/transaction/commit`, {
       method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${this.token}`,
         'X-Database': this.database,
       },
+      body: '{}',
     });
 
     if (!response.ok) {
@@ -155,9 +157,11 @@ export class NativeSQLConnection implements SQLConnection {
     const response = await fetch(`${this.baseUrl}/transaction/rollback`, {
       method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${this.token}`,
         'X-Database': this.database,
       },
+      body: '{}',
     });
 
     if (!response.ok) {

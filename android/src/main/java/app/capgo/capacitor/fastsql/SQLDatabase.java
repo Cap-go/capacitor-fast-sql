@@ -8,6 +8,10 @@ import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +23,7 @@ public class SQLDatabase implements DatabaseConnection {
 
     private SQLiteDatabase db;
     private boolean inTransaction = false;
+    private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
 
     public SQLDatabase(String path) {
         this.db = SQLiteDatabase.openOrCreateDatabase(path, null);
@@ -26,27 +31,48 @@ public class SQLDatabase implements DatabaseConnection {
         db.execSQL("PRAGMA foreign_keys = ON");
     }
 
+    /**
+     * Run a callable on the dedicated DB thread and wait for the result.
+     * This ensures all operations (including transactions) share the same thread,
+     * which is required by Android's SQLiteDatabase connection pool.
+     */
+    private <T> T runOnDbThread(Callable<T> task) throws Exception {
+        Future<T> future = dbExecutor.submit(task);
+        try {
+            return future.get();
+        } catch (java.util.concurrent.ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof Exception) {
+                throw (Exception) cause;
+            }
+            throw new Exception(cause);
+        }
+    }
+
     public void close() {
+        dbExecutor.shutdown();
         if (db != null && db.isOpen()) {
             db.close();
         }
     }
 
     public JSObject execute(String statement, JSArray params) throws Exception {
-        if (db == null || !db.isOpen()) {
-            throw new Exception("Database is not open");
-        }
+        return runOnDbThread(() -> {
+            if (db == null || !db.isOpen()) {
+                throw new Exception("Database is not open");
+            }
 
-        // Check if this is a query (SELECT) or a modification (INSERT/UPDATE/DELETE)
-        String trimmedStatement = statement.trim().toUpperCase();
-        boolean isQuery =
-            trimmedStatement.startsWith("SELECT") || trimmedStatement.startsWith("PRAGMA") || trimmedStatement.startsWith("EXPLAIN");
+            // Check if this is a query (SELECT) or a modification (INSERT/UPDATE/DELETE)
+            String trimmedStatement = statement.trim().toUpperCase();
+            boolean isQuery =
+                trimmedStatement.startsWith("SELECT") || trimmedStatement.startsWith("PRAGMA") || trimmedStatement.startsWith("EXPLAIN");
 
-        if (isQuery) {
-            return executeQuery(statement, params);
-        } else {
-            return executeUpdate(statement, params);
-        }
+            if (isQuery) {
+                return executeQuery(statement, params);
+            } else {
+                return executeUpdate(statement, params);
+            }
+        });
     }
 
     private JSObject executeQuery(String statement, JSArray params) throws Exception {
@@ -114,28 +140,37 @@ public class SQLDatabase implements DatabaseConnection {
     }
 
     public void beginTransaction() throws Exception {
-        if (inTransaction) {
-            throw new Exception("Transaction already active");
-        }
-        db.beginTransaction();
-        inTransaction = true;
+        runOnDbThread(() -> {
+            if (inTransaction) {
+                throw new Exception("Transaction already active");
+            }
+            db.beginTransaction();
+            inTransaction = true;
+            return null;
+        });
     }
 
     public void commitTransaction() throws Exception {
-        if (!inTransaction) {
-            throw new Exception("No transaction active");
-        }
-        db.setTransactionSuccessful();
-        db.endTransaction();
-        inTransaction = false;
+        runOnDbThread(() -> {
+            if (!inTransaction) {
+                throw new Exception("No transaction active");
+            }
+            db.setTransactionSuccessful();
+            db.endTransaction();
+            inTransaction = false;
+            return null;
+        });
     }
 
     public void rollbackTransaction() throws Exception {
-        if (!inTransaction) {
-            throw new Exception("No transaction active");
-        }
-        db.endTransaction();
-        inTransaction = false;
+        runOnDbThread(() -> {
+            if (!inTransaction) {
+                throw new Exception("No transaction active");
+            }
+            db.endTransaction();
+            inTransaction = false;
+            return null;
+        });
     }
 
     private String[] convertParamsToStringArray(JSArray params) throws JSONException {

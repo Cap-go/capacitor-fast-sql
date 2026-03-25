@@ -10,6 +10,7 @@ import com.google.gson.JsonParser;
 import fi.iki.elonen.NanoHTTPD; // Note: org.nanohttpd:nanohttpd:2.3.1 still uses fi.iki.elonen package
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -73,10 +74,21 @@ public class SQLHTTPServer extends NanoHTTPD {
         Method method = session.getMethod();
 
         try {
+            // Always consume the request body for POST requests.
+            // NanoHTTPD reuses connections (keep-alive). If the body is not consumed,
+            // leftover bytes corrupt the next request's HTTP line parsing, causing
+            // NanoHTTPD to return a 400 before serve() is called (no CORS headers).
+            String body = null;
+            if (Method.POST.equals(method)) {
+                Map<String, String> files = new HashMap<>();
+                session.parseBody(files);
+                body = files.get("postData");
+            }
+
             if (method == Method.POST && uri.equals("/execute")) {
-                return addCorsHeaders(handleExecute(session, db));
+                return addCorsHeaders(handleExecute(body, db));
             } else if (method == Method.POST && uri.equals("/batch")) {
-                return addCorsHeaders(handleBatch(session, db));
+                return addCorsHeaders(handleBatch(body, db));
             } else if (method == Method.POST && uri.equals("/transaction/begin")) {
                 return addCorsHeaders(handleBeginTransaction(db));
             } else if (method == Method.POST && uri.equals("/transaction/commit")) {
@@ -91,9 +103,7 @@ public class SQLHTTPServer extends NanoHTTPD {
         }
     }
 
-    private Response handleExecute(IHTTPSession session, DatabaseConnection db) throws Exception {
-        // Read request body
-        String body = readRequestBody(session);
+    private Response handleExecute(String body, DatabaseConnection db) throws Exception {
         JsonObject request = JsonParser.parseString(body).getAsJsonObject();
 
         String statement = request.get("statement").getAsString();
@@ -134,9 +144,7 @@ public class SQLHTTPServer extends NanoHTTPD {
         return newFixedLengthResponse(Response.Status.OK, "application/json", resultJson);
     }
 
-    private Response handleBatch(IHTTPSession session, DatabaseConnection db) throws Exception {
-        // Read request body
-        String body = readRequestBody(session);
+    private Response handleBatch(String body, DatabaseConnection db) throws Exception {
         JsonObject request = JsonParser.parseString(body).getAsJsonObject();
         JsonArray operations = request.getAsJsonArray("operations");
 
@@ -193,13 +201,6 @@ public class SQLHTTPServer extends NanoHTTPD {
     private Response handleRollbackTransaction(DatabaseConnection db) throws Exception {
         db.rollbackTransaction();
         return newFixedLengthResponse(Response.Status.OK, "application/json", "{}");
-    }
-
-    private String readRequestBody(IHTTPSession session) throws IOException {
-        int contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
-        byte[] buffer = new byte[contentLength];
-        session.getInputStream().read(buffer, 0, contentLength);
-        return new String(buffer);
     }
 
     private static String generateToken() {
