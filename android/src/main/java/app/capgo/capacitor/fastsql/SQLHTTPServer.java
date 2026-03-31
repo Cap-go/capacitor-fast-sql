@@ -2,7 +2,6 @@ package app.capgo.capacitor.fastsql;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
