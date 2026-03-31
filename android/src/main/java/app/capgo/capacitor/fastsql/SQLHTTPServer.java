@@ -2,6 +2,7 @@ package app.capgo.capacitor.fastsql;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -225,7 +226,7 @@ public class SQLHTTPServer extends NanoHTTPD {
     }
 
     private String readRequestBody(IHTTPSession session) throws IOException {
-		int contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
+        int contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
         byte[] buffer = new byte[contentLength];
         new DataInputStream(session.getInputStream()).readFully(buffer);
         return new String(buffer, StandardCharsets.UTF_8);
