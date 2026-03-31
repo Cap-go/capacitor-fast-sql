@@ -8,7 +8,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fi.iki.elonen.NanoHTTPD; // Note: org.nanohttpd:nanohttpd:2.3.1 still uses fi.iki.elonen package
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -105,11 +107,11 @@ public class SQLHTTPServer extends NanoHTTPD {
         } else if (method == Method.POST && uri.equals("/batch")) {
             return addCorsHeaders(handleBatch(session, db));
         } else if (method == Method.POST && uri.equals("/transaction/begin")) {
-            return addCorsHeaders(handleBeginTransaction(db));
+            return addCorsHeaders(handleBeginTransaction(session, db));
         } else if (method == Method.POST && uri.equals("/transaction/commit")) {
-            return addCorsHeaders(handleCommitTransaction(db));
+            return addCorsHeaders(handleCommitTransaction(session, db));
         } else if (method == Method.POST && uri.equals("/transaction/rollback")) {
-            return addCorsHeaders(handleRollbackTransaction(db));
+            return addCorsHeaders(handleRollbackTransaction(session, db));
         } else {
             return addCorsHeaders(newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Endpoint not found"));
         }
@@ -204,26 +206,29 @@ public class SQLHTTPServer extends NanoHTTPD {
         return newFixedLengthResponse(Response.Status.OK, "application/json", results.toString());
     }
 
-    private Response handleBeginTransaction(DatabaseConnection db) throws Exception {
+    private Response handleBeginTransaction(IHTTPSession session, DatabaseConnection db) throws Exception {
+        readRequestBody(session); // drain any body to keep the connection clean for keep-alive
         db.beginTransaction();
         return newFixedLengthResponse(Response.Status.OK, "application/json", "{}");
     }
 
-    private Response handleCommitTransaction(DatabaseConnection db) throws Exception {
+    private Response handleCommitTransaction(IHTTPSession session, DatabaseConnection db) throws Exception {
+        readRequestBody(session); // drain any body to keep the connection clean for keep-alive
         db.commitTransaction();
         return newFixedLengthResponse(Response.Status.OK, "application/json", "{}");
     }
 
-    private Response handleRollbackTransaction(DatabaseConnection db) throws Exception {
+    private Response handleRollbackTransaction(IHTTPSession session, DatabaseConnection db) throws Exception {
+        readRequestBody(session); // drain any body to keep the connection clean for keep-alive
         db.rollbackTransaction();
         return newFixedLengthResponse(Response.Status.OK, "application/json", "{}");
     }
 
     private String readRequestBody(IHTTPSession session) throws IOException {
-        int contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
+		int contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
         byte[] buffer = new byte[contentLength];
-        session.getInputStream().read(buffer, 0, contentLength);
-        return new String(buffer);
+        new DataInputStream(session.getInputStream()).readFully(buffer);
+        return new String(buffer, StandardCharsets.UTF_8);
     }
 
     private static String generateToken() {
