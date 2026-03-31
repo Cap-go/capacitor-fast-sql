@@ -11,6 +11,9 @@ import fi.iki.elonen.NanoHTTPD; // Note: org.nanohttpd:nanohttpd:2.3.1 still use
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -25,6 +28,12 @@ public class SQLHTTPServer extends NanoHTTPD {
     private final String token;
     private final Map<String, DatabaseConnection> databases;
     private final Gson gson = new Gson();
+    private final ExecutorService requestExecutor = Executors.newSingleThreadExecutor((runnable) -> {
+        Thread thread = new Thread(runnable);
+        thread.setName("FastSQL-DB");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     public SQLHTTPServer(Map<String, DatabaseConnection> databases) throws IOException {
         super(findAvailablePort());
@@ -49,6 +58,12 @@ public class SQLHTTPServer extends NanoHTTPD {
     }
 
     @Override
+    public void stop() {
+        super.stop();
+        requestExecutor.shutdownNow();
+    }
+
+    @Override
     public Response serve(IHTTPSession session) {
         if (Method.OPTIONS.equals(session.getMethod())) {
             return addCorsHeaders(newFixedLengthResponse(Response.Status.OK, "text/plain", ""));
@@ -69,25 +84,34 @@ public class SQLHTTPServer extends NanoHTTPD {
             return addCorsHeaders(newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Database not found"));
         }
 
+        try {
+            return requestExecutor.submit(() -> routeRequest(session, db)).get();
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            String message = cause != null ? cause.getMessage() : e.getMessage();
+            return addCorsHeaders(newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "Error: " + message));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return addCorsHeaders(newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "Request interrupted"));
+        }
+    }
+
+    private Response routeRequest(IHTTPSession session, DatabaseConnection db) throws Exception {
         String uri = session.getUri();
         Method method = session.getMethod();
 
-        try {
-            if (method == Method.POST && uri.equals("/execute")) {
-                return addCorsHeaders(handleExecute(session, db));
-            } else if (method == Method.POST && uri.equals("/batch")) {
-                return addCorsHeaders(handleBatch(session, db));
-            } else if (method == Method.POST && uri.equals("/transaction/begin")) {
-                return addCorsHeaders(handleBeginTransaction(db));
-            } else if (method == Method.POST && uri.equals("/transaction/commit")) {
-                return addCorsHeaders(handleCommitTransaction(db));
-            } else if (method == Method.POST && uri.equals("/transaction/rollback")) {
-                return addCorsHeaders(handleRollbackTransaction(db));
-            } else {
-                return addCorsHeaders(newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Endpoint not found"));
-            }
-        } catch (Exception e) {
-            return addCorsHeaders(newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "Error: " + e.getMessage()));
+        if (method == Method.POST && uri.equals("/execute")) {
+            return addCorsHeaders(handleExecute(session, db));
+        } else if (method == Method.POST && uri.equals("/batch")) {
+            return addCorsHeaders(handleBatch(session, db));
+        } else if (method == Method.POST && uri.equals("/transaction/begin")) {
+            return addCorsHeaders(handleBeginTransaction(db));
+        } else if (method == Method.POST && uri.equals("/transaction/commit")) {
+            return addCorsHeaders(handleCommitTransaction(db));
+        } else if (method == Method.POST && uri.equals("/transaction/rollback")) {
+            return addCorsHeaders(handleRollbackTransaction(db));
+        } else {
+            return addCorsHeaders(newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Endpoint not found"));
         }
     }
 
