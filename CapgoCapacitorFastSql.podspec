@@ -10,10 +10,19 @@ Pod::Spec.new do |s|
   s.homepage = package['repository']['url']
   s.author = package['author']
   s.source = { :git => package['repository']['url'], :tag => s.version.to_s }
-  s.source_files = 'ios/Sources/**/*.{swift,h,m,c,cc,mm,cpp}'
   s.ios.deployment_target = '15.0'
-  s.dependency 'Capacitor'
-  s.dependency 'Telegraph', '~> 0.30'
-  s.dependency 'SQLCipher', '~> 4.10'
   s.swift_version = '5.1'
+  s.default_subspecs = 'Core'
+
+  s.subspec 'Core' do |ss|
+    ss.source_files = 'ios/Sources/**/*.{swift,h,m,c,cc,mm,cpp}'
+    ss.dependency 'Capacitor'
+    ss.dependency 'Telegraph', '~> 0.30'
+  end
+
+  # Optional encryption support. Include this subspec to enable SQLCipher.
+  s.subspec 'SQLCipher' do |ss|
+    ss.dependency 'CapgoCapacitorFastSql/Core'
+    ss.dependency 'SQLCipher', '~> 4.10'
+  end
 end

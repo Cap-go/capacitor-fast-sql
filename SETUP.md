@@ -285,11 +285,11 @@ class OTSyncEngine {
 }
 ```
 
-## Encryption (Android)
+## Encryption
 
-Encryption is optional and uses [SQLCipher](https://www.zetetic.net/sqlcipher/). The plugin ships with SQLCipher as a compile-time dependency only — it is **not** bundled by default.
+Encryption is optional and uses [SQLCipher](https://www.zetetic.net/sqlcipher/). The plugin does **not** bundle SQLCipher — add it to your app only when you need encryption.
 
-### Enabling Encryption
+### Android
 
 Add the SQLCipher runtime dependency to your **app-level** `android/app/build.gradle`:
 
@@ -309,13 +309,23 @@ const db = await FastSQL.connect({
 });
 ```
 
+### iOS
+
+SQLCipher is optional on iOS. To enable it with CocoaPods, update your `ios/App/Podfile` to use the SQLCipher subspec:
+
+```ruby
+pod 'CapgoCapacitorFastSql/SQLCipher', :path => '../../node_modules/@capgo/capacitor-fast-sql'
+```
+
+Then run `pod install` from `ios/App`. If you skip this subspec, keep `encrypted: false` — encryption calls will return a descriptive error.
+
 ### What Happens Without SQLCipher
 
 If you pass `encrypted: true` without the SQLCipher dependency, the plugin returns a descriptive error:
 
-> Encryption is not available. Add `implementation "net.zetetic:sqlcipher-android:4.13.0"` to your app's build.gradle to enable encryption.
+> Encryption is not available. Add SQLCipher to your build to enable encryption.
 
-The app will **not** crash — the error is caught gracefully at two levels:
+The app will **not** crash — Android additionally catches failures at two levels:
 
 1. **Class check**: Before attempting to load `EncryptedSQLDatabase`, the plugin verifies the SQLCipher class is on the classpath via `Class.forName`.
 2. **Native library check**: `EncryptedSQLDatabase` catches `UnsatisfiedLinkError` from `System.loadLibrary("sqlcipher")` and converts it to a descriptive exception.

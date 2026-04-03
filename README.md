@@ -103,7 +103,9 @@ Then reference it in your `AndroidManifest.xml`:
 </application>
 ```
 
-## Encryption (Android)
+## Encryption
+
+### Android
 
 Encryption uses [SQLCipher](https://www.zetetic.net/sqlcipher/) and is opt-in. Add the SQLCipher dependency to your **app-level** `build.gradle`:
 
@@ -124,6 +126,18 @@ const db = await FastSQL.connect({
 ```
 
 If SQLCipher is not installed and `encrypted: true` is passed, the plugin returns a clear error message instead of crashing.
+
+### iOS
+
+SQLCipher is optional on iOS. The plugin builds without it; encryption calls will return `Encryption is not available in this build` unless SQLCipher is installed.
+
+To enable encryption via CocoaPods, update your `ios/App/Podfile` after `capacitor install`/`cap sync` to use the SQLCipher subspec:
+
+```ruby
+pod 'CapgoCapacitorFastSql/SQLCipher', :path => '../../node_modules/@capgo/capacitor-fast-sql'
+```
+
+Then run `pod install` in the `ios/App` directory. If you skip this subspec, keep `encrypted: false`.
 
 ## Web Platform
 
