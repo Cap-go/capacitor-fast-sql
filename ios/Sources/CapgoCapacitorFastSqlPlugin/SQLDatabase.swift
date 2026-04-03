@@ -270,7 +270,7 @@ extension SQLError: LocalizedError {
         case .encryptionKeyMissing:
             return "Encryption key is required when encryption is enabled"
         case .encryptionUnavailable:
-            return "Encryption is not available in this build"
+            return "Encryption is not available in this build. Add SQLCipher to enable encryption."
         case .encryptionFailed(let message):
             return "Failed to set encryption key: \(message)"
         case .transactionAlreadyActive:
