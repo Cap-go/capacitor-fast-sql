@@ -8,3 +8,17 @@ export { NativeSQLConnection } from './native-sql-connection';
 export { WebSQLConnection } from './web-sql-connection';
 export { KeyValueStore } from './key-value';
 export type { KeyValueStoreOptions, KeyValueValue } from './key-value';
+export { FastSQLVectorStore } from './vector-store';
+export type {
+  VectorEmbeddings,
+  VectorMetadata,
+  VectorStore,
+  VectorStoreAddOptions,
+  VectorStoreConnectionOptions,
+  VectorStoreDeleteOptions,
+  VectorStoreGetResult,
+  VectorStoreOptions,
+  VectorStoreQueryOptions,
+  VectorStoreQueryResult,
+  VectorStoreUpdateOptions,
+} from './vector-store';

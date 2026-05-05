@@ -52,6 +52,7 @@ This plugin provides direct native SQLite database access with a custom communic
 - **Sync-Friendly**: Designed for local sync systems (CRDTs, operational transforms, etc.)
 - **IndexedDB Replacement**: Provides reliable alternative to broken/limited IndexedDB implementations
 - **Cross-Platform**: iOS, Android, and Web (using sql.js + IndexedDB for persistence)
+- **Optional RAG VectorStore**: Persist many named vector stores for retrieval-augmented generation without adding a native dependency
 
 ## iOS Configuration
 
@@ -237,6 +238,62 @@ const kv = await KeyValueStore.open({
 await kv.set('session', { token: 'abc123', expiresAt: 1710000000 });
 const session = await kv.get('session');
 await kv.remove('session');
+```
+
+### RAG Vector Stores (Optional)
+
+`FastSQLVectorStore` provides a dependency-free VectorStore-compatible helper inspired by `@react-native-rag/op-sqlite`. It stores embeddings in SQLite as binary Float32 vectors and computes cosine similarity in TypeScript, so it works anywhere this plugin works.
+
+Each store is namespaced by the `store` option, so one database can hold as many independent vector stores as you need:
+
+```typescript
+import { FastSQLVectorStore } from '@capgo/capacitor-fast-sql';
+
+const docs = await FastSQLVectorStore.open({
+  database: 'rag',
+  store: 'docs',
+  embeddings,
+});
+
+const tickets = await FastSQLVectorStore.open({
+  database: 'rag',
+  store: 'tickets',
+  embeddings,
+});
+
+await docs.add({
+  document: 'Capgo ships instant updates for Capacitor apps.',
+  metadata: { source: 'docs' },
+});
+
+const results = await docs.query({
+  queryText: 'How do instant updates work?',
+  nResults: 3,
+});
+
+await docs.close();
+await tickets.close();
+```
+
+You can also use precomputed embeddings without an embeddings provider:
+
+```typescript
+const store = await FastSQLVectorStore.open({
+  database: 'rag',
+  store: 'offline-embeddings',
+  embeddingDimension: 384,
+});
+
+await store.add({
+  id: 'intro',
+  document: 'Local RAG entry',
+  embedding: [0.12, 0.08, 0.31 /* ...384 values */],
+});
+
+const matches = await store.query({
+  queryEmbedding: [0.11, 0.09, 0.29 /* ...384 values */],
+  nResults: 5,
+});
 ```
 
 > Note: Web support is intended for minimal testing only. The primary focus is iOS/Android.
