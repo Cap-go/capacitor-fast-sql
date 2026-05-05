@@ -14,6 +14,7 @@ import { WebSQLConnection } from './web-sql-connection';
  */
 export class FastSQL {
   private static connections: Map<string, SQLConnection> = new Map();
+  private static connectionRefs: Map<string, number> = new Map();
 
   /**
    * Open a database connection
@@ -25,6 +26,7 @@ export class FastSQL {
     // Check if already connected
     const existing = this.connections.get(options.database);
     if (existing) {
+      this.connectionRefs.set(options.database, (this.connectionRefs.get(options.database) ?? 0) + 1);
       return existing;
     }
 
@@ -42,6 +44,7 @@ export class FastSQL {
 
     // Store connection
     this.connections.set(options.database, connection);
+    this.connectionRefs.set(options.database, 1);
 
     return connection;
   }
@@ -57,11 +60,18 @@ export class FastSQL {
       throw new Error(`Database '${database}' is not connected`);
     }
 
+    const refs = (this.connectionRefs.get(database) ?? 1) - 1;
+    if (refs > 0) {
+      this.connectionRefs.set(database, refs);
+      return;
+    }
+
     // Disconnect via native plugin
     await CapgoCapacitorFastSql.disconnect({ database });
 
     // Remove connection
     this.connections.delete(database);
+    this.connectionRefs.delete(database);
   }
 
   /**
@@ -79,7 +89,12 @@ export class FastSQL {
    */
   static async disconnectAll(): Promise<void> {
     const databases = Array.from(this.connections.keys());
-    await Promise.all(databases.map((db) => this.disconnect(db)));
+    await Promise.all(
+      databases.map((db) => {
+        this.connectionRefs.set(db, 1);
+        return this.disconnect(db);
+      }),
+    );
   }
 
   /**

@@ -89,8 +89,6 @@ export interface VectorStore {
  * share one database by choosing different `store` names.
  */
 export class FastSQLVectorStore implements VectorStore {
-  private static readonly connectionRefs = new Map<string, number>();
-
   private readonly connection: SQLConnection;
   private readonly store: string;
   private readonly embeddings?: VectorEmbeddings;
@@ -108,21 +106,6 @@ export class FastSQLVectorStore implements VectorStore {
     this.embeddingDim = options.embeddingDimension;
   }
 
-  private static retainConnection(database: string): void {
-    this.connectionRefs.set(database, (this.connectionRefs.get(database) ?? 0) + 1);
-  }
-
-  private static async releaseConnection(database: string): Promise<void> {
-    const refs = this.connectionRefs.get(database) ?? 0;
-    if (refs > 1) {
-      this.connectionRefs.set(database, refs - 1);
-      return;
-    }
-
-    this.connectionRefs.delete(database);
-    await FastSQL.disconnect(database);
-  }
-
   /**
    * Open a vector store from database connection options.
    */
@@ -130,8 +113,6 @@ export class FastSQLVectorStore implements VectorStore {
     const connection = await FastSQL.connect(options);
     const vectorStore = new FastSQLVectorStore(connection, options);
     vectorStore.ownsConnection = true;
-    FastSQLVectorStore.retainConnection(connection.getDatabaseName());
-
     try {
       await vectorStore.load();
       return vectorStore;
@@ -182,7 +163,7 @@ export class FastSQLVectorStore implements VectorStore {
 
     await this.embeddings?.unload?.();
     if (this.ownsConnection) {
-      await FastSQLVectorStore.releaseConnection(this.connection.getDatabaseName());
+      await FastSQL.disconnect(this.connection.getDatabaseName());
     }
     this.initialized = false;
     this.closed = true;
