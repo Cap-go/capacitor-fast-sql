@@ -14,6 +14,9 @@ import { WebSQLConnection } from './web-sql-connection';
  */
 export class FastSQL {
   private static connections: Map<string, SQLConnection> = new Map();
+  private static sharedConnections: Set<string> = new Set();
+  private static connectionRetainers: Map<string, number> = new Map();
+  private static pendingDisconnects: Set<string> = new Set();
 
   /**
    * Open a database connection
@@ -25,6 +28,7 @@ export class FastSQL {
     // Check if already connected
     const existing = this.connections.get(options.database);
     if (existing) {
+      this.sharedConnections.add(options.database);
       return existing;
     }
 
@@ -57,11 +61,19 @@ export class FastSQL {
       throw new Error(`Database '${database}' is not connected`);
     }
 
+    if ((this.connectionRetainers.get(database) ?? 0) > 0) {
+      this.pendingDisconnects.add(database);
+      return;
+    }
+
     // Disconnect via native plugin
     await CapgoCapacitorFastSql.disconnect({ database });
 
     // Remove connection
     this.connections.delete(database);
+    this.sharedConnections.delete(database);
+    this.connectionRetainers.delete(database);
+    this.pendingDisconnects.delete(database);
   }
 
   /**
@@ -75,11 +87,53 @@ export class FastSQL {
   }
 
   /**
+   * Check whether a connection has been handed out more than once.
+   */
+  static isConnectionShared(database: string): boolean {
+    return this.sharedConnections.has(database);
+  }
+
+  /**
+   * Temporarily retain a connection for helpers that share cached connections.
+   */
+  static retainConnection(database: string): void {
+    if (!this.connections.has(database)) {
+      throw new Error(`Database '${database}' is not connected`);
+    }
+    this.connectionRetainers.set(database, (this.connectionRetainers.get(database) ?? 0) + 1);
+  }
+
+  /**
+   * Release a retained connection. Returns true when a pending disconnect closed it.
+   */
+  static async releaseConnection(database: string): Promise<boolean> {
+    const retainers = this.connectionRetainers.get(database) ?? 0;
+    if (retainers > 1) {
+      this.connectionRetainers.set(database, retainers - 1);
+      return false;
+    }
+
+    this.connectionRetainers.delete(database);
+    if (this.pendingDisconnects.has(database)) {
+      this.pendingDisconnects.delete(database);
+      await this.disconnect(database);
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Close all open connections
    */
   static async disconnectAll(): Promise<void> {
     const databases = Array.from(this.connections.keys());
-    await Promise.all(databases.map((db) => this.disconnect(db)));
+    await Promise.all(
+      databases.map((db) => {
+        this.connectionRetainers.delete(db);
+        this.pendingDisconnects.delete(db);
+        return this.disconnect(db);
+      }),
+    );
   }
 
   /**

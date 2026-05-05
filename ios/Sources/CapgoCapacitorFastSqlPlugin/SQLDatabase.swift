@@ -6,9 +6,8 @@ import SQLCipher
 import SQLite3
 #endif
 
-// SQLite constants that aren't imported to Swift
-private let SQLITE_STATIC = unsafeBitCast(0, to: sqlite3_destructor_type.self)
-private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+// SQLite destructor constant that is not imported to Swift
+private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
 /**
  * SQLite database wrapper for iOS
@@ -109,17 +108,17 @@ class SQLDatabase {
             if stepResult == SQLITE_ROW {
                 if columnNames.isEmpty {
                     columnCount = sqlite3_column_count(stmt)
-                    for i in 0..<columnCount {
-                        if let name = sqlite3_column_name(stmt, i) {
+                    for columnIndex in 0..<columnCount {
+                        if let name = sqlite3_column_name(stmt, columnIndex) {
                             columnNames.append(String(cString: name))
                         }
                     }
                 }
 
                 var row: [String: Any] = [:]
-                for i in 0..<columnCount {
-                    let columnName = columnNames[Int(i)]
-                    let value = getColumnValue(stmt: stmt, index: i)
+                for columnIndex in 0..<columnCount {
+                    let columnName = columnNames[Int(columnIndex)]
+                    let value = getColumnValue(stmt: stmt, index: columnIndex)
                     row[columnName] = value
                 }
                 rows.append(row)
@@ -177,7 +176,7 @@ class SQLDatabase {
 
         // Handle different types
         if let str = value as? String {
-            return sqlite3_bind_text(stmt, index, str, -1, SQLITE_TRANSIENT)
+            return sqlite3_bind_text(stmt, index, str, -1, sqliteTransient)
         } else if let num = value as? NSNumber {
             // Check if it's a boolean
             if CFGetTypeID(num as CFTypeRef) == CFBooleanGetTypeID() {
@@ -196,7 +195,7 @@ class SQLDatabase {
                   let data = Data(base64Encoded: base64) {
             // Handle binary data
             return data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
-                sqlite3_bind_blob(stmt, index, bytes.baseAddress, Int32(data.count), SQLITE_TRANSIENT)
+                sqlite3_bind_blob(stmt, index, bytes.baseAddress, Int32(data.count), sqliteTransient)
             }
         }
 
