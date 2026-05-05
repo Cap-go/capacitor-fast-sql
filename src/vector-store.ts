@@ -89,6 +89,9 @@ export interface VectorStore {
  * share one database by choosing different `store` names.
  */
 export class FastSQLVectorStore implements VectorStore {
+  private static readonly connectionRefs = new Map<string, number>();
+  private static readonly ownedConnections = new Set<string>();
+
   private readonly connection: SQLConnection;
   private readonly store: string;
   private readonly embeddings?: VectorEmbeddings;
@@ -96,6 +99,7 @@ export class FastSQLVectorStore implements VectorStore {
   private embeddingDim?: number;
   private initialized = false;
   private ownsConnection = false;
+  private shouldDisconnectConnection = false;
   private closed = false;
 
   private constructor(connection: SQLConnection, options: VectorStoreConnectionOptions = {}) {
@@ -106,13 +110,38 @@ export class FastSQLVectorStore implements VectorStore {
     this.embeddingDim = options.embeddingDimension;
   }
 
+  private static retainConnection(database: string): void {
+    this.connectionRefs.set(database, (this.connectionRefs.get(database) ?? 0) + 1);
+  }
+
+  private static releaseConnection(database: string): boolean {
+    const refs = this.connectionRefs.get(database) ?? 0;
+    if (refs > 1) {
+      this.connectionRefs.set(database, refs - 1);
+      return false;
+    }
+
+    this.connectionRefs.delete(database);
+    this.ownedConnections.delete(database);
+    return true;
+  }
+
   /**
    * Open a vector store from database connection options.
    */
   static async open(options: VectorStoreOptions): Promise<FastSQLVectorStore> {
-    const connection = await FastSQL.connect(options);
+    const existing = FastSQL.getConnection(options.database);
+    const ownsExistingVectorConnection = existing && FastSQLVectorStore.connectionRefs.has(options.database);
+    const connection = ownsExistingVectorConnection ? existing : await FastSQL.connect(options);
     const vectorStore = new FastSQLVectorStore(connection, options);
     vectorStore.ownsConnection = true;
+    vectorStore.shouldDisconnectConnection = !existing || FastSQLVectorStore.ownedConnections.has(options.database);
+    FastSQLVectorStore.retainConnection(connection.getDatabaseName());
+    FastSQL.retainConnection(connection.getDatabaseName());
+    if (vectorStore.shouldDisconnectConnection) {
+      FastSQLVectorStore.ownedConnections.add(connection.getDatabaseName());
+    }
+
     try {
       await vectorStore.load();
       return vectorStore;
@@ -163,7 +192,17 @@ export class FastSQLVectorStore implements VectorStore {
 
     await this.embeddings?.unload?.();
     if (this.ownsConnection) {
-      await FastSQL.disconnect(this.connection.getDatabaseName());
+      const database = this.connection.getDatabaseName();
+      const releasedLastVectorStore = FastSQLVectorStore.releaseConnection(database);
+      const closedFromPendingDisconnect = await FastSQL.releaseConnection(database);
+      if (
+        releasedLastVectorStore &&
+        this.shouldDisconnectConnection &&
+        !FastSQL.isConnectionShared(database) &&
+        !closedFromPendingDisconnect
+      ) {
+        await FastSQL.disconnect(database);
+      }
     }
     this.initialized = false;
     this.closed = true;
