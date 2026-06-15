@@ -7,12 +7,14 @@ const config: CapacitorConfig = {
   appName: 'FastSQL Example',
   webDir: 'dist',
   plugins: {
+    SplashScreen: {
+      launchAutoHide: false,
+    },
     CapacitorUpdater: {
       appId: 'com.capgo.fastsql.example',
       autoUpdate: true,
       autoSplashscreen: true,
       directUpdate: 'always',
-      defaultChannel: 'production',
       version: pkg.version,
     },
   },
