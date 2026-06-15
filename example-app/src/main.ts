@@ -1,3 +1,5 @@
+import { CapacitorUpdater } from '@capgo/capacitor-updater';
+import { Capacitor } from '@capacitor/core';
 import type { SQLConnection } from '@capgo/capacitor-fast-sql';
 import { FastSQL } from '@capgo/capacitor-fast-sql';
 
@@ -310,3 +312,9 @@ async function updateRowCount() {
 
 // Initial state
 updateButtonStates(false);
+
+if (Capacitor.isNativePlatform()) {
+  CapacitorUpdater.notifyAppReady().catch((error) => {
+    console.error('Capgo notifyAppReady failed', error);
+  });
+}
