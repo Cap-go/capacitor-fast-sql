@@ -24,6 +24,14 @@ class SQLHTTPServer {
         self.server = Server()
     }
 
+    func addDatabase(_ db: SQLDatabase, forKey key: String) {
+        databases[key] = db
+    }
+
+    func removeDatabase(forKey key: String) {
+        databases.removeValue(forKey: key)
+    }
+
     func start() throws {
         guard !isRunning else { return }
         guard let server = server else {
