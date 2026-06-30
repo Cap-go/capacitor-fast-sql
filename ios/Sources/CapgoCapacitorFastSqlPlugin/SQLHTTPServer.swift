@@ -12,6 +12,7 @@ class SQLHTTPServer {
     let port: Int
     let token: String
     private var databases: [String: SQLDatabase]
+    private let databasesLock = NSLock()
     private var server: Server?
     private var isRunning = false
 
@@ -24,12 +25,32 @@ class SQLHTTPServer {
         self.server = Server()
     }
 
+    /// Registers a newly-connected database with the HTTP server.
+    ///
+    /// Must be called after every `connect()` that finds the server already running,
+    /// because `SQLHTTPServer` holds a **value-type copy** of the databases dictionary
+    /// and cannot observe subsequent mutations made to the plugin's own copy.
     func addDatabase(_ db: SQLDatabase, forKey key: String) {
+        databasesLock.lock()
+        defer { databasesLock.unlock() }
         databases[key] = db
     }
 
+    /// Removes a disconnected database from the HTTP server's registry.
+    ///
+    /// Call whenever a database is disconnected so in-flight HTTP requests for it
+    /// receive a timely "not found" response rather than accessing a closed handle.
     func removeDatabase(forKey key: String) {
+        databasesLock.lock()
+        defer { databasesLock.unlock() }
         databases.removeValue(forKey: key)
+    }
+
+    /// Returns the open database for `key`, or `nil` if not registered.
+    private func database(forKey key: String) -> SQLDatabase? {
+        databasesLock.lock()
+        defer { databasesLock.unlock() }
+        return databases[key]
     }
 
     func start() throws {
@@ -188,7 +209,7 @@ class SQLHTTPServer {
         }
 
         // Check if database exists
-        guard let db = databases[database] else {
+        guard let db = database(forKey: database) else {
             let bodyData = "Database not found".data(using: .utf8)!
             return HTTPResponse(.notFound, body: bodyData)
         }
@@ -227,7 +248,7 @@ class SQLHTTPServer {
         }
 
         // Check if database exists
-        guard let db = databases[database] else {
+        guard let db = database(forKey: database) else {
             let bodyData = "Database not found".data(using: .utf8)!
             return HTTPResponse(.notFound, body: bodyData)
         }
@@ -275,7 +296,7 @@ class SQLHTTPServer {
         }
 
         // Check if database exists
-        guard let db = databases[database] else {
+        guard let db = database(forKey: database) else {
             let bodyData = "Database not found".data(using: .utf8)!
             return HTTPResponse(.notFound, body: bodyData)
         }
@@ -304,7 +325,7 @@ class SQLHTTPServer {
         }
 
         // Check if database exists
-        guard let db = databases[database] else {
+        guard let db = database(forKey: database) else {
             let bodyData = "Database not found".data(using: .utf8)!
             return HTTPResponse(.notFound, body: bodyData)
         }
@@ -333,7 +354,7 @@ class SQLHTTPServer {
         }
 
         // Check if database exists
-        guard let db = databases[database] else {
+        guard let db = database(forKey: database) else {
             let bodyData = "Database not found".data(using: .utf8)!
             return HTTPResponse(.notFound, body: bodyData)
         }
