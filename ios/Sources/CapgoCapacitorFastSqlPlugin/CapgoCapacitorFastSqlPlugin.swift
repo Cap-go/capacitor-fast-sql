@@ -59,12 +59,26 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
 
             // Open database
             let db = try SQLDatabase(path: dbPath, encrypted: encrypted, encryptionKey: encryptionKey)
-            databases[database] = db
 
-            // Start HTTP server if not already running
-            if server == nil {
-                server = try SQLHTTPServer(databases: databases)
-                try server?.start()
+            // Start HTTP server if not already running, otherwise register the
+            // new database with it. SQLHTTPServer stores a VALUE COPY of the
+            // databases dict (Swift Dict is a value type), so every connect()
+            // after server creation must push the new entry in explicitly.
+            if let server {
+                databases[database] = db
+                server.addDatabase(db, forKey: database)
+            } else {
+                var initialDatabases = databases
+                initialDatabases[database] = db
+                do {
+                    let newServer = try SQLHTTPServer(databases: initialDatabases)
+                    try newServer.start()
+                    databases[database] = db
+                    self.server = newServer
+                } catch {
+                    db.close()
+                    throw error
+                }
             }
 
             guard let server = server else {
@@ -93,8 +107,9 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
             return
         }
 
-        db.close()
+        server?.removeDatabase(forKey: database)
         databases.removeValue(forKey: database)
+        db.close()
 
         // Stop server if no more databases
         if databases.isEmpty {
