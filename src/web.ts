@@ -8,6 +8,7 @@ import type {
   IsolationLevel,
   WebConfig,
 } from './definitions';
+import { applyPerformanceConfig } from './performance-config';
 
 const DEFAULT_SQLJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js';
 const DEFAULT_WASM_URL = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.wasm';
@@ -75,13 +76,14 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
 
     // Check if database already exists in IndexedDB
     const savedData = await this.loadFromIndexedDB(options.database);
-
     let db;
     if (savedData) {
       db = new SQL.Database(savedData);
     } else {
       db = new SQL.Database();
     }
+
+    applyPerformanceConfig(db, options);
 
     const token = this.generateToken();
     const port = this.nextPort++;

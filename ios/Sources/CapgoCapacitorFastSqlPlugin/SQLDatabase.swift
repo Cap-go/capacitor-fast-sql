@@ -17,7 +17,13 @@ class SQLDatabase {
     private let path: String
     private var inTransaction = false
 
-    init(path: String, encrypted: Bool = false, encryptionKey: String? = nil) throws {
+    init(
+        path: String,
+        encrypted: Bool = false,
+        encryptionKey: String? = nil,
+        walMode: Bool = false,
+        performancePresets: Bool = false
+    ) throws {
         self.path = path
 
         let flags = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX
@@ -59,9 +65,22 @@ class SQLDatabase {
             #endif
         }
 
-        // Enable foreign keys
-        try execute(statement: "PRAGMA foreign_keys = ON", params: [])
+        try applyPerformanceOptions(walMode: walMode, performancePresets: performancePresets)
         needsClose = false
+    }
+
+    private func applyPerformanceOptions(walMode: Bool, performancePresets: Bool) throws {
+        try execute(statement: "PRAGMA foreign_keys = ON", params: [])
+
+        if walMode {
+            try execute(statement: "PRAGMA journal_mode = WAL", params: [])
+        }
+
+        if performancePresets {
+            try execute(statement: "PRAGMA synchronous = NORMAL", params: [])
+            try execute(statement: "PRAGMA busy_timeout = 5000", params: [])
+            try execute(statement: "PRAGMA cache_size = -2000", params: [])
+        }
     }
 
     func close() {

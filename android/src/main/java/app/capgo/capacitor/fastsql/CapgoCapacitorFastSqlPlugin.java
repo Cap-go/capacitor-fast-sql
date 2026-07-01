@@ -33,6 +33,8 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
         }
         boolean encrypted = call.getBoolean("encrypted", false);
         String encryptionKey = call.getString("encryptionKey");
+        boolean walMode = call.getBoolean("walMode", false);
+        boolean performancePresets = call.getBoolean("performancePresets", false);
         if (encrypted && (encryptionKey == null || encryptionKey.isEmpty())) {
             call.reject("Encryption key is required when encrypted is true");
             return;
@@ -67,9 +69,9 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
                     );
                     return;
                 }
-                db = new EncryptedSQLDatabase(dbFile.getAbsolutePath(), encryptionKey);
+                db = new EncryptedSQLDatabase(dbFile.getAbsolutePath(), encryptionKey, walMode, performancePresets);
             } else {
-                db = new SQLDatabase(dbFile.getAbsolutePath());
+                db = new SQLDatabase(dbFile.getAbsolutePath(), walMode, performancePresets);
             }
             databases.put(database, db);
 

@@ -508,12 +508,14 @@ on iOS and Android.
 
 Database connection options
 
-| Prop                | Type                 | Description                                                |
-| ------------------- | -------------------- | ---------------------------------------------------------- |
-| **`database`**      | <code>string</code>  | Database name (file will be created in app data directory) |
-| **`encrypted`**     | <code>boolean</code> | Enable encryption (iOS/Android only)                       |
-| **`encryptionKey`** | <code>string</code>  | Encryption key (required if encrypted is true)             |
-| **`readOnly`**      | <code>boolean</code> | Read-only mode                                             |
+| Prop                     | Type                 | Description                                                                                                                                                            | Since  |
+| ------------------------ | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| **`database`**           | <code>string</code>  | Database name (file will be created in app data directory)                                                                                                             |        |
+| **`encrypted`**          | <code>boolean</code> | Enable encryption (iOS/Android only)                                                                                                                                   |        |
+| **`encryptionKey`**      | <code>string</code>  | Encryption key (required if encrypted is true)                                                                                                                         |        |
+| **`readOnly`**           | <code>boolean</code> | Read-only mode                                                                                                                                                         |        |
+| **`walMode`**            | <code>boolean</code> | Enable WAL (Write-Ahead Logging) journal mode for better concurrency and performance. Executes `PRAGMA journal_mode = WAL` immediately after opening the database.     | 8.0.49 |
+| **`performancePresets`** | <code>boolean</code> | Apply recommended SQLite performance PRAGMAs after opening the database: `synchronous = NORMAL`, `busy_timeout = 5000`, `cache_size = -2000`, and `foreign_keys = ON`. | 8.0.49 |
 
 
 #### SQLResult

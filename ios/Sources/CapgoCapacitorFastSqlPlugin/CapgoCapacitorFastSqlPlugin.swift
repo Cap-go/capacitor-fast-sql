@@ -36,6 +36,8 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
 
         let encrypted = call.getBool("encrypted") ?? false
         let encryptionKey = call.getString("encryptionKey")
+        let walMode = call.getBool("walMode") ?? false
+        let performancePresets = call.getBool("performancePresets") ?? false
         if encrypted && (encryptionKey == nil || encryptionKey?.isEmpty == true) {
             call.reject("Encryption key is required when encryption is enabled")
             return
@@ -58,7 +60,13 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
             let dbPath = try getDatabasePath(database)
 
             // Open database
-            let db = try SQLDatabase(path: dbPath, encrypted: encrypted, encryptionKey: encryptionKey)
+            let db = try SQLDatabase(
+                path: dbPath,
+                encrypted: encrypted,
+                encryptionKey: encryptionKey,
+                walMode: walMode,
+                performancePresets: performancePresets
+            )
 
             // Start HTTP server if not already running, otherwise register the
             // new database with it. SQLHTTPServer stores a VALUE COPY of the
