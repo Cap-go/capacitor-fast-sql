@@ -68,6 +68,22 @@ export interface SQLConnectionOptions {
    * Read-only mode
    */
   readOnly?: boolean;
+
+  /**
+   * Enable WAL (Write-Ahead Logging) journal mode for better concurrency and performance.
+   * Executes `PRAGMA journal_mode = WAL` immediately after opening the database.
+   *
+   * @since 8.0.49
+   */
+  walMode?: boolean;
+
+  /**
+   * Apply recommended SQLite performance PRAGMAs after opening the database:
+   * `synchronous = NORMAL`, `busy_timeout = 5000`, `cache_size = -2000`, and `foreign_keys = ON`.
+   *
+   * @since 8.0.49
+   */
+  performancePresets?: boolean;
 }
 
 /**

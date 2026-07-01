@@ -19,7 +19,7 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
     private SQLiteDatabase db;
     private volatile boolean inTransaction = false;
 
-    public EncryptedSQLDatabase(String path, String encryptionKey) throws Exception {
+    public EncryptedSQLDatabase(String path, String encryptionKey, boolean walMode, boolean performancePresets) throws Exception {
         if (encryptionKey == null || encryptionKey.isEmpty()) {
             throw new Exception("Encryption key is required when encrypted is true");
         }
@@ -35,8 +35,7 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
         }
         byte[] keyBytes = encryptionKey.getBytes(StandardCharsets.UTF_8);
         this.db = SQLiteDatabase.openOrCreateDatabase(path, keyBytes, null, null);
-        // Enable foreign keys
-        db.execSQL("PRAGMA foreign_keys = ON");
+        SQLPerformanceConfig.apply(db::execSQL, walMode, performancePresets);
     }
 
     public void close() {

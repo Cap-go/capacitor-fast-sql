@@ -20,10 +20,9 @@ public class SQLDatabase implements DatabaseConnection {
     private SQLiteDatabase db;
     private volatile boolean inTransaction = false;
 
-    public SQLDatabase(String path) {
+    public SQLDatabase(String path, boolean walMode, boolean performancePresets) throws Exception {
         this.db = SQLiteDatabase.openOrCreateDatabase(path, null);
-        // Enable foreign keys
-        db.execSQL("PRAGMA foreign_keys = ON");
+        SQLPerformanceConfig.apply(db::execSQL, walMode, performancePresets);
     }
 
     public void close() {
