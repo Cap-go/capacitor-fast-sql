@@ -4,7 +4,7 @@ import pkg from './package.json';
 
 const config: CapacitorConfig = {
   appId: 'com.capgo.fastsql.example',
-  appName: 'FastSQL Example',
+  appName: '@capgo/capacitor-fast-sql',
   webDir: 'dist',
   plugins: {
     SplashScreen: {
