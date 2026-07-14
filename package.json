@@ -56,6 +56,9 @@
     "example:build": "bun run build && cd example-app && bun install --frozen-lockfile && bun run build",
     "changelog:ai": "node scripts/generate-ai-changelog.mjs"
   },
+  "dependencies": {
+    "@sqlite.org/sqlite-wasm": "3.53.0-build1"
+  },
   "devDependencies": {
     "@capacitor/android": "^8.0.0",
     "@capacitor/cli": "^8.0.0",

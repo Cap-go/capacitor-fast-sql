@@ -65,7 +65,7 @@ npm run verify:android
 
 ### Web Development
 
-The web implementation uses sql.js (SQLite compiled to WebAssembly) loaded from CDN.
+The web implementation uses `@sqlite.org/sqlite-wasm` with OPFS persistence (requires COOP/COEP headers).
 
 ## Example App Setup
 
@@ -344,11 +344,11 @@ The app will **not** crash — Android additionally catches failures at two leve
 - Check that NanoHTTPD dependency is properly included
 - Check logcat for server startup errors
 
-### Web: sql.js Not Loading
+### Web: SQLite Wasm / OPFS Not Working
 
-- Check browser console for CDN load errors
-- Verify network connectivity
-- Consider hosting sql.js locally for offline use
+- Ensure the page is served with `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`
+- Check the browser console for OPFS / SharedArrayBuffer warnings
+- Confirm `@sqlite.org/sqlite-wasm` is installed and not broken by dependency optimization (exclude it in Vite)
 
 ### All Platforms: Slow Performance
 

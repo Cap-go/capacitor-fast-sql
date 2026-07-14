@@ -165,9 +165,9 @@ JavaScript                    Native
 #### Web
 ```
 ┌─────────────────────────────────────┐
-│  CapgoCapacitorNativeSqlWeb         │
-│  - sql.js (SQLite in WebAssembly)  │
-│  - IndexedDB for persistence        │
+│  CapgoCapacitorFastSqlWeb           │
+│  - @sqlite.org/sqlite-wasm          │
+│  - OPFS for persistence             │
 │  - Compatible API                   │
 └─────────────────────────────────────┘
 ```
@@ -377,4 +377,4 @@ class OfflineQueue {
 - [SQLite Documentation](https://www.sqlite.org/docs.html)
 - [Capacitor Documentation](https://capacitorjs.com/docs)
 - [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd)
-- [sql.js](https://github.com/sql-js/sql.js)
+- [@sqlite.org/sqlite-wasm](https://github.com/sqlite/sqlite-wasm)

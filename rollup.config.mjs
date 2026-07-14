@@ -7,6 +7,7 @@ export default {
       name: 'capacitorCapgoCapacitorFastSql',
       globals: {
         '@capacitor/core': 'capacitorExports',
+        '@sqlite.org/sqlite-wasm': 'sqlite3Wasm',
       },
       sourcemap: true,
       inlineDynamicImports: true,
@@ -18,5 +19,5 @@ export default {
       inlineDynamicImports: true,
     },
   ],
-  external: ['@capacitor/core'],
+  external: ['@capacitor/core', '@sqlite.org/sqlite-wasm'],
 };

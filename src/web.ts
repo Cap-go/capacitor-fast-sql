@@ -1,4 +1,6 @@
 import { WebPlugin } from '@capacitor/core';
+import { sqlite3Worker1Promiser } from '@sqlite.org/sqlite-wasm';
+import type { Worker1Promiser } from '@sqlite.org/sqlite-wasm';
 
 import type {
   CapgoCapacitorFastSqlPlugin,
@@ -8,87 +10,91 @@ import type {
   IsolationLevel,
   WebConfig,
 } from './definitions';
-import { applyPerformanceConfig } from './performance-config';
 
-const DEFAULT_SQLJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js';
-const DEFAULT_WASM_URL = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.wasm';
+type DbInfo = {
+  dbId: string;
+  token: string;
+  port: number;
+  persistent: boolean;
+};
 
 /**
- * Web implementation using sql.js (SQLite compiled to WebAssembly)
+ * Web implementation using the official SQLite Wasm build with OPFS persistence.
  *
- * This provides a compatible API on the web platform, storing databases
- * in IndexedDB for persistence.
+ * Databases are stored in the Origin Private File System when available (requires
+ * Cross-Origin Isolation: COOP/COEP). No full-database copy is kept in RAM or
+ * IndexedDB — SQLite reads/writes the OPFS file directly from a worker.
  */
 export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacitorFastSqlPlugin {
-  private databases: Map<string, { db: any; token: string; port: number }> = new Map();
-  private sqlPromise: Promise<any> | null = null;
+  private databases: Map<string, DbInfo> = new Map();
+  private promiserPromise: Promise<Worker1Promiser> | null = null;
   private nextPort = 9000;
   private webConfig: WebConfig = {};
 
-  constructor() {
-    super();
-  }
-
   /**
    * Configure web-specific options (no-op on native platforms).
-   * Must be called before connect() when using locally bundled sql.js files.
+   * Must be called before connect() when overriding the default worker.
    */
   async configureWeb(config: WebConfig): Promise<void> {
     this.webConfig = config;
-    // Reset any in-progress load so the next connect() uses the new config
-    this.sqlPromise = null;
+    this.promiserPromise = null;
   }
 
-  /**
-   * Load sql.js library (lazy – called on first connect()).
-   * Returns the cached promise so callers can await it directly.
-   */
-  private loadSqlJs(): Promise<any> {
-    if (!this.sqlPromise) {
-      const jsUrl = this.webConfig.sqlJsUrl ?? DEFAULT_SQLJS_URL;
-      const wasmUrl = this.webConfig.wasmUrl ?? DEFAULT_WASM_URL;
-
-      this.sqlPromise = new Promise((resolve, reject) => {
-        try {
-          // Load sql.js from the configured URL (CDN or local bundle)
-          const script = document.createElement('script');
-          script.src = jsUrl;
-          script.onload = async () => {
-            const initSqlJs = (window as any).initSqlJs;
-            const SQL = await initSqlJs({
-              locateFile: (file: string) => (file.endsWith('.wasm') ? wasmUrl : file),
-            });
-            resolve(SQL);
-          };
-          script.onerror = reject;
-          document.head.appendChild(script);
-        } catch (error) {
-          reject(error);
-        }
-      });
+  private getPromiser(): Promise<Worker1Promiser> {
+    if (!this.promiserPromise) {
+      const config = this.webConfig.worker !== undefined ? { worker: this.webConfig.worker } : undefined;
+      this.promiserPromise = sqlite3Worker1Promiser.v2(config);
     }
+    return this.promiserPromise;
+  }
 
-    return this.sqlPromise;
+  private dbPath(database: string): string {
+    return `/capgo-fast-sql/${database}.sqlite3`;
   }
 
   async connect(options: SQLConnectionOptions): Promise<{ port: number; token: string; database: string }> {
-    const SQL = await this.loadSqlJs();
-
-    // Check if database already exists in IndexedDB
-    const savedData = await this.loadFromIndexedDB(options.database);
-    let db;
-    if (savedData) {
-      db = new SQL.Database(savedData);
-    } else {
-      db = new SQL.Database();
+    if (this.databases.has(options.database)) {
+      const existing = this.databases.get(options.database)!;
+      return {
+        port: existing.port,
+        token: existing.token,
+        database: options.database,
+      };
     }
 
-    applyPerformanceConfig(db, options);
+    const promiser = await this.getPromiser();
+    const path = this.dbPath(options.database);
+    const useOpfs = this.webConfig.useOpfs !== false;
+
+    let openResult;
+    if (useOpfs) {
+      try {
+        openResult = await promiser('open', {
+          filename: `file:${path}?vfs=opfs`,
+        });
+      } catch (opfsError) {
+        console.warn(
+          '[CapgoCapacitorFastSql] OPFS unavailable; web database will not persist across reloads. ' +
+            'Serve with Cross-Origin-Opener-Policy: same-origin and Cross-Origin-Embedder-Policy: require-corp.',
+          opfsError,
+        );
+        openResult = await promiser('open', { filename: path });
+      }
+    } else {
+      openResult = await promiser('open', { filename: path });
+    }
+
+    const dbId = openResult.result.dbId;
+    const persistent = Boolean(openResult.result.persistent);
+    if (!dbId) {
+      throw new Error('Failed to open SQLite Wasm database: missing dbId');
+    }
+
+    await this.applyPerformanceConfig(promiser, dbId, options);
 
     const token = this.generateToken();
     const port = this.nextPort++;
-
-    this.databases.set(options.database, { db, token, port });
+    this.databases.set(options.database, { dbId, token, port, persistent });
 
     return {
       port,
@@ -103,11 +109,9 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
       throw new Error(`Database '${options.database}' is not connected`);
     }
 
-    // Save to IndexedDB before closing
-    const data = dbInfo.db.export();
-    await this.saveToIndexedDB(options.database, data);
-
-    dbInfo.db.close();
+    const promiser = await this.getPromiser();
+    // OPFS-backed DBs persist automatically; no export/IndexedDB write needed.
+    await promiser({ type: 'close', dbId: dbInfo.dbId, args: {} });
     this.databases.delete(options.database);
   }
 
@@ -130,29 +134,35 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
     }
 
     try {
-      const stmt = dbInfo.db.prepare(options.statement);
-      if (options.params) {
-        stmt.bind(options.params);
-      }
+      const promiser = await this.getPromiser();
+      const rows: Record<string, SQLValue>[] = [];
 
-      const rows: any[] = [];
-      while (stmt.step()) {
-        const row = stmt.getAsObject();
-        rows.push(row);
-      }
-      stmt.free();
+      const result = await promiser({
+        type: 'exec',
+        dbId: dbInfo.dbId,
+        args: {
+          sql: options.statement,
+          bind: options.params,
+          rowMode: 'object',
+          callback: (msg) => {
+            if (msg.rowNumber != null && msg.row && typeof msg.row === 'object' && !Array.isArray(msg.row)) {
+              rows.push(msg.row as Record<string, SQLValue>);
+            }
+          },
+        },
+      });
 
-      // Get changes and last insert ID
-      const changes = dbInfo.db.getRowsModified();
-      const insertId = this.getLastInsertId(dbInfo.db);
+      const rowsAffected = Number(result.result.changeCount ?? 0);
+      const rawInsertId = result.result.lastInsertRowId;
+      const insertId = rawInsertId !== undefined && rawInsertId !== null ? Number(rawInsertId) : undefined;
 
       return {
         rows,
-        rowsAffected: changes,
-        insertId: insertId > 0 ? insertId : undefined,
+        rowsAffected,
+        insertId: insertId !== undefined && insertId > 0 ? insertId : undefined,
       };
     } catch (error: any) {
-      throw new Error(`SQL execution failed: ${error.message}`);
+      throw new Error(`SQL execution failed: ${error.message ?? String(error)}`);
     }
   }
 
@@ -177,98 +187,28 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
     });
   }
 
-  /**
-   * Generate a random authentication token
-   */
+  private async applyPerformanceConfig(
+    promiser: Worker1Promiser,
+    dbId: string,
+    options: SQLConnectionOptions,
+  ): Promise<void> {
+    await promiser({ type: 'exec', dbId, args: { sql: 'PRAGMA foreign_keys = ON' } });
+
+    if (options.walMode) {
+      await promiser({ type: 'exec', dbId, args: { sql: 'PRAGMA journal_mode = WAL' } });
+    }
+
+    if (options.performancePresets) {
+      await promiser({ type: 'exec', dbId, args: { sql: 'PRAGMA synchronous = NORMAL' } });
+      await promiser({ type: 'exec', dbId, args: { sql: 'PRAGMA busy_timeout = 5000' } });
+      await promiser({ type: 'exec', dbId, args: { sql: 'PRAGMA cache_size = -2000' } });
+    }
+  }
+
   private generateToken(): string {
     return Array.from(crypto.getRandomValues(new Uint8Array(32)))
       .map((b) => b.toString(16).padStart(2, '0'))
       .join('');
-  }
-
-  /**
-   * Get last insert row ID
-   */
-  private getLastInsertId(db: any): number {
-    try {
-      const result = db.exec('SELECT last_insert_rowid()');
-      if (result.length > 0 && result[0].values.length > 0) {
-        return result[0].values[0][0];
-      }
-    } catch {
-      // Ignore error
-    }
-    return -1;
-  }
-
-  /**
-   * Save database to IndexedDB
-   */
-  private async saveToIndexedDB(dbName: string, data: Uint8Array): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open('CapacitorNativeSQL', 1);
-
-      request.onerror = () => reject(request.error);
-
-      request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result;
-        if (!db.objectStoreNames.contains('databases')) {
-          db.createObjectStore('databases');
-        }
-      };
-
-      request.onsuccess = () => {
-        const db = request.result;
-        const transaction = db.transaction(['databases'], 'readwrite');
-        const store = transaction.objectStore('databases');
-        const putRequest = store.put(data, dbName);
-
-        putRequest.onsuccess = () => {
-          db.close();
-          resolve();
-        };
-
-        putRequest.onerror = () => {
-          db.close();
-          reject(putRequest.error);
-        };
-      };
-    });
-  }
-
-  /**
-   * Load database from IndexedDB
-   */
-  private async loadFromIndexedDB(dbName: string): Promise<Uint8Array | null> {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open('CapacitorNativeSQL', 1);
-
-      request.onerror = () => reject(request.error);
-
-      request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result;
-        if (!db.objectStoreNames.contains('databases')) {
-          db.createObjectStore('databases');
-        }
-      };
-
-      request.onsuccess = () => {
-        const db = request.result;
-        const transaction = db.transaction(['databases'], 'readonly');
-        const store = transaction.objectStore('databases');
-        const getRequest = store.get(dbName);
-
-        getRequest.onsuccess = () => {
-          db.close();
-          resolve(getRequest.result || null);
-        };
-
-        getRequest.onerror = () => {
-          db.close();
-          reject(getRequest.error);
-        };
-      };
-    });
   }
 
   async getPluginVersion(): Promise<{ version: string }> {
