@@ -86,7 +86,6 @@ export interface SQLConnectionOptions {
   performancePresets?: boolean;
 }
 
-
 /**
  * Browser Worker instance or a factory that returns one.
  * Used to override the default SQLite Wasm worker.
