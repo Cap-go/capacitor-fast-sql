@@ -86,6 +86,12 @@ export interface SQLConnectionOptions {
   performancePresets?: boolean;
 }
 
+
+/**
+ * Browser Worker instance or a factory that returns one.
+ * Used to override the default SQLite Wasm worker.
+ */
+export type SqliteWebWorker = Worker | (() => Worker);
 /**
  * Web platform configuration for the official SQLite Wasm module.
  * Use with `configureWeb()` before the first `connect()`.
@@ -107,7 +113,7 @@ export interface WebConfig {
    * Custom Worker instance or factory for SQLite Wasm.
    * Advanced: override the default worker from `@sqlite.org/sqlite-wasm`.
    */
-  worker?: Worker | (() => Worker);
+  worker?: SqliteWebWorker;
 }
 
 /**

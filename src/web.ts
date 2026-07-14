@@ -18,6 +18,11 @@ type DbInfo = {
   persistent: boolean;
 };
 
+type ExecMetaResult = {
+  changeCount?: number | bigint;
+  lastInsertRowId?: number | bigint;
+};
+
 /**
  * Web implementation using the official SQLite Wasm build with OPFS persistence.
  *
@@ -137,6 +142,8 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
       const promiser = await this.getPromiser();
       const rows: Record<string, SQLValue>[] = [];
 
+      // countChanges / lastInsertRowId are supported by Worker1 at runtime but
+      // omitted from the published Worker1ExecArgs typings.
       const result = await promiser({
         type: 'exec',
         dbId: dbInfo.dbId,
@@ -144,16 +151,19 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
           sql: options.statement,
           bind: options.params,
           rowMode: 'object',
-          callback: (msg) => {
+          countChanges: true,
+          lastInsertRowId: true,
+          callback: (msg: { rowNumber: number | null; row?: unknown }) => {
             if (msg.rowNumber != null && msg.row && typeof msg.row === 'object' && !Array.isArray(msg.row)) {
               rows.push(msg.row as Record<string, SQLValue>);
             }
           },
-        },
+        } as never,
       });
 
-      const rowsAffected = Number(result.result.changeCount ?? 0);
-      const rawInsertId = result.result.lastInsertRowId;
+      const execResult = result.result as ExecMetaResult;
+      const rowsAffected = Number(execResult.changeCount ?? 0);
+      const rawInsertId = execResult.lastInsertRowId;
       const insertId = rawInsertId !== undefined && rawInsertId !== null ? Number(rawInsertId) : undefined;
 
       return {
@@ -162,7 +172,8 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
         insertId: insertId !== undefined && insertId > 0 ? insertId : undefined,
       };
     } catch (error: any) {
-      throw new Error(`SQL execution failed: ${error.message ?? String(error)}`);
+      const message = error?.result?.message ?? error?.message ?? String(error);
+      throw new Error(`SQL execution failed: ${message}`);
     }
   }
 

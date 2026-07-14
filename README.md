@@ -160,7 +160,7 @@ On the web, this plugin uses the official [@sqlite.org/sqlite-wasm](https://gith
 
 For OPFS to work, your web server must send Cross-Origin Isolation headers:
 
-```
+```http
 Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: require-corp
 ```
@@ -642,10 +642,10 @@ OPFS persistence requires Cross-Origin Isolation headers on your web server:
 `Cross-Origin-Opener-Policy: same-origin` and
 `Cross-Origin-Embedder-Policy: require-corp`.
 
-| Prop          | Type                 | Description                                                                                                                                                  | Default           |
-| ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| **`useOpfs`** | <code>boolean</code> | Prefer OPFS persistence via a Web Worker (default: `true`). When OPFS is unavailable, the plugin falls back to a non-persistent database and logs a warning. | <code>true</code> |
-| **`worker`**  | <code>any</code>     | Custom Worker instance or factory for SQLite Wasm. Advanced: override the default worker from `@sqlite.org/sqlite-wasm`.                                     |                   |
+| Prop          | Type                                                        | Description                                                                                                                                                  | Default           |
+| ------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
+| **`useOpfs`** | <code>boolean</code>                                        | Prefer OPFS persistence via a Web Worker (default: `true`). When OPFS is unavailable, the plugin falls back to a non-persistent database and logs a warning. | <code>true</code> |
+| **`worker`**  | <code><a href="#sqlitewebworker">SqliteWebWorker</a></code> | Custom Worker instance or factory for SQLite Wasm. Advanced: override the default worker from `@sqlite.org/sqlite-wasm`.                                     |                   |
 
 
 ### Type Aliases
@@ -661,6 +661,14 @@ SQL value types supported by the plugin
 #### ArrayBufferLike
 
 <code>ArrayBufferTypes[keyof ArrayBufferTypes]</code>
+
+
+#### SqliteWebWorker
+
+Browser Worker instance or a factory that returns one.
+Used to override the default SQLite Wasm worker.
+
+<code>Worker | (() =&gt; Worker)</code>
 
 
 ### Enums
