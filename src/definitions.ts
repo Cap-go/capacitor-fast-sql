@@ -87,24 +87,32 @@ export interface SQLConnectionOptions {
 }
 
 /**
- * Web platform configuration for the sql.js WASM module.
- * Use with `configureWeb()` to load sql.js
- * from a locally bundled path instead of the default CDN.
+ * Browser Worker instance or a factory that returns one.
+ * Used to override the default SQLite Wasm worker.
+ */
+export type SqliteWebWorker = Worker | (() => Worker);
+/**
+ * Web platform configuration for the official SQLite Wasm module.
+ * Use with `configureWeb()` before the first `connect()`.
+ *
+ * OPFS persistence requires Cross-Origin Isolation headers on your web server:
+ * `Cross-Origin-Opener-Policy: same-origin` and
+ * `Cross-Origin-Embedder-Policy: require-corp`.
  */
 export interface WebConfig {
   /**
-   * URL to the sql.js JavaScript file (`sql-wasm.js`).
-   * When omitted, the plugin loads from the cdnjs CDN.
-   * @example '/assets/sql-wasm.js'
+   * Prefer OPFS persistence via a Web Worker (default: `true`).
+   * When OPFS is unavailable, the plugin falls back to a non-persistent database
+   * and logs a warning.
+   * @default true
    */
-  sqlJsUrl?: string;
+  useOpfs?: boolean;
 
   /**
-   * URL to the sql.js WebAssembly binary (`sql-wasm.wasm`).
-   * When omitted, the plugin loads from the cdnjs CDN.
-   * @example '/assets/sql-wasm.wasm'
+   * Custom Worker instance or factory for SQLite Wasm.
+   * Advanced: override the default worker from `@sqlite.org/sqlite-wasm`.
    */
-  wasmUrl?: string;
+  worker?: SqliteWebWorker;
 }
 
 /**
@@ -262,11 +270,10 @@ export interface CapgoCapacitorFastSqlPlugin {
   getPluginVersion(): Promise<{ version: string }>;
 
   /**
-   * Configure web-specific options for the sql.js WASM module.
+   * Configure web-specific options for the official SQLite Wasm module.
    *
-   * Call this **before** the first `connect()` call to load sql.js from a
-   * locally bundled path instead of the default CDN. This method is a no-op
-   * on iOS and Android.
+   * Call this **before** the first `connect()` call if you need to disable OPFS
+   * or supply a custom Worker. This method is a no-op on iOS and Android.
    *
    * @param config - Web configuration options
    * @returns Promise that resolves when the configuration is applied
@@ -275,8 +282,7 @@ export interface CapgoCapacitorFastSqlPlugin {
    * ```typescript
    * // Configure once at app startup (web only)
    * await CapgoCapacitorFastSql.configureWeb({
-   *   sqlJsUrl: '/assets/sql-wasm.js',
-   *   wasmUrl: '/assets/sql-wasm.wasm',
+   *   useOpfs: true,
    * });
    * const db = await FastSQL.connect({ database: 'myapp' });
    * ```

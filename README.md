@@ -65,7 +65,7 @@ This plugin provides direct native SQLite database access with a custom communic
 - **Direct Native SQLite**: Full SQL support with transactions, batch operations, and binary data
 - **Sync-Friendly**: Designed for local sync systems (CRDTs, operational transforms, etc.)
 - **IndexedDB Replacement**: Provides reliable alternative to broken/limited IndexedDB implementations
-- **Cross-Platform**: iOS, Android, and Web (using sql.js + IndexedDB for persistence)
+- **Cross-Platform**: iOS, Android, and Web (using [@sqlite.org/sqlite-wasm](https://github.com/sqlite/sqlite-wasm) with OPFS persistence)
 - **Optional RAG VectorStore**: Persist many named vector stores for retrieval-augmented generation without adding a native dependency
 
 ## iOS Configuration
@@ -156,23 +156,48 @@ Then run `pod install` in the `ios/App` directory. If you skip this subspec, kee
 
 ## Web Platform
 
-On the web, this plugin uses [sql.js](https://sql.js.org/) (SQLite compiled to WebAssembly) with IndexedDB for persistence.
+On the web, this plugin uses the official [@sqlite.org/sqlite-wasm](https://github.com/sqlite/sqlite-wasm) build with [OPFS](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system) for persistence. SQLite reads and writes the database file directly — it is not loaded entirely into RAM or mirrored through IndexedDB.
 
-By default, the plugin loads `sql-wasm.js` and `sql-wasm.wasm` from the cdnjs CDN. If you want to bundle these files with your web application (to avoid a CDN dependency), call `configureWeb()` once at startup **before** the first `connect()`:
+For OPFS to work, your web server must send Cross-Origin Isolation headers:
+
+```http
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+With Vite:
+
+```typescript
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  server: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
+  },
+  optimizeDeps: {
+    exclude: ['@sqlite.org/sqlite-wasm'],
+  },
+});
+```
+
+Optional web configuration (call before the first `connect()`):
 
 ```typescript
 import { CapgoCapacitorFastSql, FastSQL } from '@capgo/capacitor-fast-sql';
 
-// Point to your locally bundled sql.js files
 await CapgoCapacitorFastSql.configureWeb({
-  sqlJsUrl: '/assets/sql-wasm.js',
-  wasmUrl: '/assets/sql-wasm.wasm',
+  useOpfs: true,
 });
 
 const db = await FastSQL.connect({ database: 'myapp' });
 ```
 
 `configureWeb()` is a no-op on iOS and Android — it is safe to call unconditionally.
+
+> **Note:** Existing databases previously stored in IndexedDB by sql.js are not migrated automatically. Re-seed or import data after upgrading if needed.
 
 ## Usage
 
@@ -486,11 +511,10 @@ Get the native Capacitor plugin version.
 configureWeb(config: WebConfig) => Promise<void>
 ```
 
-Configure web-specific options for the sql.js WASM module.
+Configure web-specific options for the official SQLite Wasm module.
 
-Call this **before** the first `connect()` call to load sql.js from a
-locally bundled path instead of the default CDN. This method is a no-op
-on iOS and Android.
+Call this **before** the first `connect()` call if you need to disable OPFS
+or supply a custom Worker. This method is a no-op on iOS and Android.
 
 | Param        | Type                                            | Description                 |
 | ------------ | ----------------------------------------------- | --------------------------- |
@@ -611,14 +635,17 @@ buffer as needed.
 
 #### WebConfig
 
-Web platform configuration for the sql.js WASM module.
-Use with `configureWeb()` to load sql.js
-from a locally bundled path instead of the default CDN.
+Web platform configuration for the official SQLite Wasm module.
+Use with `configureWeb()` before the first `connect()`.
 
-| Prop           | Type                | Description                                                                                                |
-| -------------- | ------------------- | ---------------------------------------------------------------------------------------------------------- |
-| **`sqlJsUrl`** | <code>string</code> | URL to the sql.js JavaScript file (`sql-wasm.js`). When omitted, the plugin loads from the cdnjs CDN.      |
-| **`wasmUrl`**  | <code>string</code> | URL to the sql.js WebAssembly binary (`sql-wasm.wasm`). When omitted, the plugin loads from the cdnjs CDN. |
+OPFS persistence requires Cross-Origin Isolation headers on your web server:
+`Cross-Origin-Opener-Policy: same-origin` and
+`Cross-Origin-Embedder-Policy: require-corp`.
+
+| Prop          | Type                                                        | Description                                                                                                                                                  | Default           |
+| ------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
+| **`useOpfs`** | <code>boolean</code>                                        | Prefer OPFS persistence via a Web Worker (default: `true`). When OPFS is unavailable, the plugin falls back to a non-persistent database and logs a warning. | <code>true</code> |
+| **`worker`**  | <code><a href="#sqlitewebworker">SqliteWebWorker</a></code> | Custom Worker instance or factory for SQLite Wasm. Advanced: override the default worker from `@sqlite.org/sqlite-wasm`.                                     |                   |
 
 
 ### Type Aliases
@@ -634,6 +661,14 @@ SQL value types supported by the plugin
 #### ArrayBufferLike
 
 <code>ArrayBufferTypes[keyof ArrayBufferTypes]</code>
+
+
+#### SqliteWebWorker
+
+Browser Worker instance or a factory that returns one.
+Used to override the default SQLite Wasm worker.
+
+<code>Worker | (() =&gt; Worker)</code>
 
 
 ### Enums
