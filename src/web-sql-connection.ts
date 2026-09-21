@@ -111,6 +111,7 @@ export class WebSQLConnection implements SQLConnection {
         } catch (rollbackError) {
           throw new Error(
             `Transaction failed and rollback failed: ${String(rollbackError)}; original error: ${String(error)}`,
+            { cause: rollbackError },
           );
         }
       }
