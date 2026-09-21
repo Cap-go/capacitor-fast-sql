@@ -109,10 +109,11 @@ export class WebSQLConnection implements SQLConnection {
         try {
           await this.rollback();
         } catch (rollbackError) {
-          throw new Error(
+          const wrappedError = new Error(
             `Transaction failed and rollback failed: ${String(rollbackError)}; original error: ${String(error)}`,
-            { cause: rollbackError },
           );
+          (wrappedError as any).cause = rollbackError;
+          throw wrappedError;
         }
       }
       throw error;
