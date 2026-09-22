@@ -173,7 +173,9 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
       };
     } catch (error: any) {
       const message = error?.result?.message ?? error?.message ?? String(error);
-      throw new Error(`SQL execution failed: ${message}`);
+      const wrappedError = new Error(`SQL execution failed: ${message}`);
+      (wrappedError as any).cause = error;
+      throw wrappedError;
     }
   }
 
