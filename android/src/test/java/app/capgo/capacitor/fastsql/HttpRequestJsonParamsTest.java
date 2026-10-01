@@ -5,7 +5,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.junit.Test;
 
 public class HttpRequestJsonParamsTest {
@@ -26,10 +28,7 @@ public class HttpRequestJsonParamsTest {
 
     @Test
     public void convertRequestParam_jsonObjectValuesUseGetAsStringSemantics() throws Exception {
-        JSONObject obj = new JSONObject();
-        obj.put("s", "hello");
-        obj.put("n", 7);
-        obj.put("b", false);
+        JSONObject obj = new JSONObject("{\"s\":\"hello\",\"n\":7,\"b\":false}");
 
         JSONObject out = (JSONObject) HttpRequestJsonParams.convertRequestParam(obj);
         assertEquals("hello", out.getString("s"));
@@ -56,19 +55,23 @@ public class HttpRequestJsonParamsTest {
     @Test
     public void malformedRequestJson_throws() {
         try {
-            new JSONObject("");
+            new JSONTokener("{").nextValue();
             assertTrue("expected JSONException", false);
-        } catch (org.json.JSONException expected) {
+        } catch (JSONException expected) {
             // Same error path as invalid Gson bodies surfacing as request failures
         }
     }
 
     @Test
     public void convertRequestParam_skipsUnsupportedArrayElements() throws Exception {
-        assertNull(HttpRequestJsonParams.convertRequestParam(new JSONArray().put(1)));
+        JSONArray nested = new JSONArray();
+        nested.put(1);
+        assertNull(HttpRequestJsonParams.convertRequestParam(nested));
 
         JSONArray input = new JSONArray();
-        input.put(new JSONArray().put(1));
+        JSONArray nestedInInput = new JSONArray();
+        nestedInInput.put(1);
+        input.put(nestedInInput);
         input.put("kept");
 
         int converted = 0;
