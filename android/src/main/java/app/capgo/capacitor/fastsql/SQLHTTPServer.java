@@ -7,6 +7,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -120,7 +121,8 @@ public class SQLHTTPServer extends NanoHTTPD {
         JSONArray paramsJson = request.has("params") ? request.getJSONArray("params") : new JSONArray();
 
         JSArray params = new JSArray();
-        HttpRequestJsonParams.populateJsArrayFromParamsJson(paramsJson, params);
+        String rawParamsArray = request.has("params") ? HttpRequestJsonParams.extractJsonArrayAfterKey(body, "params") : null;
+        HttpRequestJsonParams.populateJsArrayFromParamsJson(paramsJson, params, rawParamsArray);
 
         // Execute query
         JSObject result = db.execute(statement, params);
@@ -137,13 +139,17 @@ public class SQLHTTPServer extends NanoHTTPD {
         JSONArray operations = request.getJSONArray("operations");
 
         JSONArray results = new JSONArray();
+        String rawOperationsArray = HttpRequestJsonParams.extractJsonArrayAfterKey(body, "operations");
+        List<String> rawOperations = HttpRequestJsonParams.splitTopLevelJsonArrayElements(rawOperationsArray);
         for (int i = 0; i < operations.length(); i++) {
             JSONObject operation = operations.getJSONObject(i);
             String statement = operation.getString("statement");
             JSONArray paramsJson = operation.has("params") ? operation.getJSONArray("params") : new JSONArray();
 
             JSArray params = new JSArray();
-            HttpRequestJsonParams.populateJsArrayFromParamsJson(paramsJson, params);
+            String rawOperation = rawOperations.get(i);
+            String rawParamsArray = operation.has("params") ? HttpRequestJsonParams.extractJsonArrayAfterKey(rawOperation, "params") : null;
+            HttpRequestJsonParams.populateJsArrayFromParamsJson(paramsJson, params, rawParamsArray);
 
             JSObject result = db.execute(statement, params);
             results.put(new JSONObject(result.toString()));

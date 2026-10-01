@@ -8,7 +8,6 @@ import com.getcapacitor.JSArray;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -33,13 +32,10 @@ public class HttpRequestJsonParamsTest {
     }
 
     @Test
-    public void convertRequestParam_jsonObjectValuesUseGetAsStringSemantics() throws Exception {
-        JSONObject obj = new JSONObject("{\"s\":\"hello\",\"n\":7,\"b\":false}");
-
-        JSONObject out = (JSONObject) HttpRequestJsonParams.convertRequestParam(obj);
+    public void convertRequestParamFromRawJson_preservesObjectNumericLiterals() throws Exception {
+        JSONObject out = (JSONObject) HttpRequestJsonParams.convertRequestParamFromRawJson("{\"n\":1.0,\"s\":\"hello\"}", null);
+        assertEquals("1.0", out.getString("n"));
         assertEquals("hello", out.getString("s"));
-        assertEquals("7", out.getString("n"));
-        assertEquals("false", out.getString("b"));
     }
 
     @Test
@@ -53,19 +49,19 @@ public class HttpRequestJsonParamsTest {
     }
 
     @Test
-    public void gsonStyleLongFromNumberString_parsesIntegerAndTruncatesDecimal() {
+    public void gsonStyleLongFromNumberString_matchesGson214() {
         assertEquals(100L, HttpRequestJsonParams.gsonStyleLongFromNumberString("100"));
         assertEquals(3L, HttpRequestJsonParams.gsonStyleLongFromNumberString("3.14"));
-        assertEquals(Long.MAX_VALUE, HttpRequestJsonParams.gsonStyleLongFromNumberString("1e20"));
+        assertEquals(7766279631452241920L, HttpRequestJsonParams.gsonStyleLongFromNumberString("1e20"));
     }
 
     @Test
-    public void malformedRequestJson_throws() {
+    public void extractJsonArrayAfterKey_throwsOnMalformedBody() {
         try {
-            new JSONTokener("{").nextValue();
+            HttpRequestJsonParams.extractJsonArrayAfterKey("{", "params");
             assertTrue("expected JSONException", false);
         } catch (JSONException expected) {
-            // Same error path as invalid Gson bodies surfacing as request failures
+            // Same error path as invalid request bodies in SQLHTTPServer
         }
     }
 
@@ -75,26 +71,34 @@ public class HttpRequestJsonParamsTest {
         nested.put(1);
         assertNull(HttpRequestJsonParams.convertRequestParam(nested));
 
-        JSONArray input = new JSONArray();
-        JSONArray nestedInInput = new JSONArray();
-        nestedInInput.put(1);
-        input.put(nestedInInput);
-        input.put("kept");
+        String rawParams = "[ [1], \"kept\" ]";
+        JSONArray input = new JSONArray(rawParams);
 
         JSArray params = new JSArray();
-        HttpRequestJsonParams.populateJsArrayFromParamsJson(input, params);
+        HttpRequestJsonParams.populateJsArrayFromParamsJson(input, params, rawParams);
         assertEquals(1, params.length());
         assertEquals("kept", params.get(0));
     }
 
     @Test
-    public void convertRequestParam_rejectsNestedObjectFieldsLikeGson() throws Exception {
-        JSONObject obj = new JSONObject("{\"meta\":{\"a\":1}}");
+    public void convertRequestParamFromRawJson_rejectsNestedObjectFieldsLikeGson() {
         try {
-            HttpRequestJsonParams.convertRequestParam(obj);
+            HttpRequestJsonParams.convertRequestParamFromRawJson("{\"meta\":{\"a\":1}}", null);
             assertTrue("expected IllegalStateException", false);
         } catch (IllegalStateException expected) {
             // Gson getAsString() on nested objects throws
         }
+    }
+
+    @Test
+    public void populateJsArrayFromParamsJson_usesRawNumberLiterals() throws Exception {
+        String rawParams = "[1e20]";
+        JSONArray input = new JSONArray("[100000000000000000000]");
+
+        JSArray params = new JSArray();
+        HttpRequestJsonParams.populateJsArrayFromParamsJson(input, params, rawParams);
+
+        assertEquals(1, params.length());
+        assertEquals(7766279631452241920L, params.get(0));
     }
 }
