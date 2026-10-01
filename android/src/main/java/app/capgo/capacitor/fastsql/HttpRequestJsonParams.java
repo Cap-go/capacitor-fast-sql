@@ -100,7 +100,8 @@ final class HttpRequestJsonParams {
         try {
             return Long.parseLong(s);
         } catch (NumberFormatException e) {
-            return new BigDecimal(s).longValue();
+            // Gson LazilyParsedNumber#longValue() uses a double parse + cast, not BigDecimal.
+            return (long) Double.parseDouble(s);
         }
     }
 
