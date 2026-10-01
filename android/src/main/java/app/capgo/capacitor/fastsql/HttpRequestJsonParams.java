@@ -17,29 +17,46 @@ final class HttpRequestJsonParams {
 
     static void populateJsArrayFromParamsJson(JSONArray paramsJson, JSArray params) throws JSONException {
         for (int i = 0; i < paramsJson.length(); i++) {
-            appendParam(params, paramsJson.get(i));
+            Object converted = convertRequestParam(paramsJson.get(i));
+            if (converted != null) {
+                params.put(converted);
+            }
         }
     }
 
-    static void appendParam(JSArray params, Object param) throws JSONException {
+    /**
+     * Converts one JSON param value for {@link JSArray#put(Object)}.
+     *
+     * @return converted value, or {@code null} to skip unsupported values (e.g. nested arrays)
+     */
+    static Object convertRequestParam(Object param) {
         if (param == JSONObject.NULL) {
-            params.put(JSONObject.NULL);
-        } else if (param instanceof Boolean) {
-            params.put(param);
-        } else if (param instanceof Number) {
-            putNumberLikeGson(params, (Number) param);
-        } else if (param instanceof String) {
-            params.put(param);
-        } else if (param instanceof JSONObject) {
+            return JSONObject.NULL;
+        }
+        if (param instanceof Boolean) {
+            return param;
+        }
+        if (param instanceof Number) {
+            return convertNumberLikeGson((Number) param);
+        }
+        if (param instanceof String) {
+            return param;
+        }
+        if (param instanceof JSONObject) {
             JSONObject obj = (JSONObject) param;
             JSONObject jsonObj = new JSONObject();
             Iterator<String> keys = obj.keys();
             while (keys.hasNext()) {
                 String key = keys.next();
-                jsonObj.put(key, elementGetAsString(obj.get(key)));
+                try {
+                    jsonObj.put(key, elementGetAsString(obj.get(key)));
+                } catch (JSONException e) {
+                    throw new IllegalStateException(e);
+                }
             }
-            params.put(jsonObj);
+            return jsonObj;
         }
+        return null;
     }
 
     /** Mirrors Gson {@code JsonElement#getAsString()} for object field values. */
@@ -57,12 +74,12 @@ final class HttpRequestJsonParams {
      * Mirrors Gson {@code JsonPrimitive#getAsLong()} with {@code getAsDouble()} fallback on
      * {@link NumberFormatException}, using LazilyParsedNumber-style parsing on the number's text.
      */
-    static void putNumberLikeGson(JSArray params, Number number) throws JSONException {
+    static Number convertNumberLikeGson(Number number) {
         String s = numberToJsonNumberString(number);
         try {
-            params.put(gsonStyleLongFromNumberString(s));
+            return gsonStyleLongFromNumberString(s);
         } catch (NumberFormatException e) {
-            params.put(gsonStyleDoubleFromNumberString(s, number));
+            return gsonStyleDoubleFromNumberString(s, number);
         }
     }
 

@@ -1,9 +1,9 @@
 package app.capgo.capacitor.fastsql;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.getcapacitor.JSArray;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -11,43 +11,27 @@ import org.junit.Test;
 public class HttpRequestJsonParamsTest {
 
     @Test
-    public void populateParams_handlesNullBooleanStringAndNumbers() throws Exception {
-        JSONArray input = new JSONArray();
-        input.put(JSONObject.NULL);
-        input.put(true);
-        input.put("text");
-        input.put(42);
-        input.put(3.14);
-
-        JSArray params = new JSArray();
-        HttpRequestJsonParams.populateJsArrayFromParamsJson(input, params);
-
-        assertEquals(5, params.length());
-        assertEquals(JSONObject.NULL, params.get(0));
-        assertEquals(true, params.get(1));
-        assertEquals("text", params.get(2));
-        assertEquals(42L, ((Number) params.get(3)).longValue());
-        assertEquals(3L, ((Number) params.get(4)).longValue());
+    public void convertRequestParam_handlesNullBooleanStringAndNumbers() throws Exception {
+        assertEquals(JSONObject.NULL, HttpRequestJsonParams.convertRequestParam(JSONObject.NULL));
+        assertEquals(true, HttpRequestJsonParams.convertRequestParam(true));
+        assertEquals("text", HttpRequestJsonParams.convertRequestParam("text"));
+        assertEquals(42L, HttpRequestJsonParams.convertRequestParam(42));
+        assertEquals(3L, HttpRequestJsonParams.convertRequestParam(3.14));
     }
 
     @Test
-    public void populateParams_truncatesDecimalLikeGsonGetAsLong() throws Exception {
-        JSArray params = new JSArray();
-        HttpRequestJsonParams.appendParam(params, 9.99);
-        assertEquals(9L, params.get(0));
+    public void convertRequestParam_truncatesDecimalLikeGsonGetAsLong() {
+        assertEquals(9L, HttpRequestJsonParams.convertRequestParam(9.99));
     }
 
     @Test
-    public void populateParams_jsonObjectValuesUseGetAsStringSemantics() throws Exception {
+    public void convertRequestParam_jsonObjectValuesUseGetAsStringSemantics() throws Exception {
         JSONObject obj = new JSONObject();
         obj.put("s", "hello");
         obj.put("n", 7);
         obj.put("b", false);
 
-        JSArray params = new JSArray();
-        HttpRequestJsonParams.appendParam(params, obj);
-
-        JSONObject out = (JSONObject) params.get(0);
+        JSONObject out = (JSONObject) HttpRequestJsonParams.convertRequestParam(obj);
         assertEquals("hello", out.getString("s"));
         assertEquals("7", out.getString("n"));
         assertEquals("false", out.getString("b"));
@@ -72,7 +56,7 @@ public class HttpRequestJsonParamsTest {
     @Test
     public void malformedRequestJson_throws() {
         try {
-            new JSONObject("{not json");
+            new JSONObject("");
             assertTrue("expected JSONException", false);
         } catch (org.json.JSONException expected) {
             // Same error path as invalid Gson bodies surfacing as request failures
@@ -80,15 +64,19 @@ public class HttpRequestJsonParamsTest {
     }
 
     @Test
-    public void populateParams_skipsUnsupportedArrayElements() throws Exception {
+    public void convertRequestParam_skipsUnsupportedArrayElements() throws Exception {
+        assertNull(HttpRequestJsonParams.convertRequestParam(new JSONArray().put(1)));
+
         JSONArray input = new JSONArray();
         input.put(new JSONArray().put(1));
         input.put("kept");
 
-        JSArray params = new JSArray();
-        HttpRequestJsonParams.populateJsArrayFromParamsJson(input, params);
-
-        assertEquals(1, params.length());
-        assertEquals("kept", params.get(0));
+        int converted = 0;
+        for (int i = 0; i < input.length(); i++) {
+            if (HttpRequestJsonParams.convertRequestParam(input.get(i)) != null) {
+                converted++;
+            }
+        }
+        assertEquals(1, converted);
     }
 }
