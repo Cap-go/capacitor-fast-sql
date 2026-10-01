@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.getcapacitor.JSArray;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,6 +56,7 @@ public class HttpRequestJsonParamsTest {
     public void gsonStyleLongFromNumberString_parsesIntegerAndTruncatesDecimal() {
         assertEquals(100L, HttpRequestJsonParams.gsonStyleLongFromNumberString("100"));
         assertEquals(3L, HttpRequestJsonParams.gsonStyleLongFromNumberString("3.14"));
+        assertEquals(Long.MAX_VALUE, HttpRequestJsonParams.gsonStyleLongFromNumberString("1e20"));
     }
 
     @Test
@@ -79,12 +81,20 @@ public class HttpRequestJsonParamsTest {
         input.put(nestedInInput);
         input.put("kept");
 
-        int converted = 0;
-        for (int i = 0; i < input.length(); i++) {
-            if (HttpRequestJsonParams.convertRequestParam(input.get(i)) != null) {
-                converted++;
-            }
+        JSArray params = new JSArray();
+        HttpRequestJsonParams.populateJsArrayFromParamsJson(input, params);
+        assertEquals(1, params.length());
+        assertEquals("kept", params.get(0));
+    }
+
+    @Test
+    public void convertRequestParam_rejectsNestedObjectFieldsLikeGson() throws Exception {
+        JSONObject obj = new JSONObject("{\"meta\":{\"a\":1}}");
+        try {
+            HttpRequestJsonParams.convertRequestParam(obj);
+            assertTrue("expected IllegalStateException", false);
+        } catch (IllegalStateException expected) {
+            // Gson getAsString() on nested objects throws
         }
-        assertEquals(1, converted);
     }
 }

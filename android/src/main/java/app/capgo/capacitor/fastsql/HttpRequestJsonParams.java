@@ -67,6 +67,15 @@ final class HttpRequestJsonParams {
         if (value instanceof String) {
             return (String) value;
         }
+        if (value instanceof Number) {
+            return JSONObject.numberToString((Number) value);
+        }
+        if (value instanceof Boolean) {
+            return value.toString();
+        }
+        if (value instanceof JSONObject || value instanceof JSONArray) {
+            throw new IllegalStateException("Cannot get string from non-primitive");
+        }
         return String.valueOf(value);
     }
 
@@ -87,7 +96,7 @@ final class HttpRequestJsonParams {
         try {
             return Long.parseLong(s);
         } catch (NumberFormatException e) {
-            return (long) Double.parseDouble(s);
+            return new BigDecimal(s).longValue();
         }
     }
 
