@@ -70,7 +70,7 @@ public class HttpRequestJsonParamsTest {
     }
 
     @Test
-    public void convertRequestParam_skipsUnsupportedArrayElements() throws Exception {
+    public void populateJsArrayFromParamsJson_skipsUnsupportedArrayElements() throws Exception {
         JSONArray nested = new JSONArray();
         nested.put(1);
         assertNull(HttpRequestJsonParams.convertRequestParam(nested));

@@ -68,7 +68,11 @@ final class HttpRequestJsonParams {
             return (String) value;
         }
         if (value instanceof Number) {
-            return JSONObject.numberToString((Number) value);
+            try {
+                return JSONObject.numberToString((Number) value);
+            } catch (JSONException e) {
+                throw new IllegalStateException(e);
+            }
         }
         if (value instanceof Boolean) {
             return value.toString();
