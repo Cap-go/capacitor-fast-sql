@@ -37,17 +37,38 @@ final class HttpRequestJsonParams {
     }
 
     static String extractJsonArrayAfterKey(String json, String key) throws JSONException {
-        String search = "\"" + key + "\"";
-        int idx = json.indexOf(search);
-        if (idx < 0) {
-            throw new JSONException("No key: " + key);
+        int i = skipWhitespace(json, 0);
+        if (i >= json.length() || json.charAt(i) != '{') {
+            throw new JSONException("Expected JSON object");
         }
-        idx = json.indexOf('[', idx + search.length());
-        if (idx < 0) {
-            throw new JSONException("No array for key: " + key);
+        i++;
+        while (i < json.length()) {
+            i = skipWhitespace(json, i);
+            if (json.charAt(i) == '}') {
+                throw new JSONException("No key: " + key);
+            }
+            int keyEnd = endOfJsonString(json, i);
+            String memberKey = parseQuotedStringToken(json, i, keyEnd);
+            i = skipWhitespace(json, keyEnd);
+            if (json.charAt(i) != ':') {
+                throw new JSONException("Expected ':' after object key");
+            }
+            i = skipWhitespace(json, i + 1);
+            if (memberKey.equals(key)) {
+                i = skipWhitespace(json, i);
+                if (i >= json.length() || json.charAt(i) != '[') {
+                    throw new JSONException("No array for key: " + key);
+                }
+                int end = indexOfMatchingBracket(json, i, '[', ']');
+                return json.substring(i, end + 1);
+            }
+            i = endOfJsonValue(json, i);
+            i = skipWhitespace(json, i);
+            if (i < json.length() && json.charAt(i) == ',') {
+                i++;
+            }
         }
-        int end = indexOfMatchingBracket(json, idx, '[', ']');
-        return json.substring(idx, end + 1);
+        throw new JSONException("No key: " + key);
     }
 
     /**
@@ -346,6 +367,14 @@ final class HttpRequestJsonParams {
             index++;
         }
         return index;
+    }
+
+    static String parseQuotedStringToken(String json, int start, int end) throws JSONException {
+        try {
+            return (String) new JSONTokener(json.substring(start, end)).nextValue();
+        } catch (JSONException e) {
+            throw new JSONException("Invalid object key", e);
+        }
     }
 
     private static void checkNumberStringLength(String s) {

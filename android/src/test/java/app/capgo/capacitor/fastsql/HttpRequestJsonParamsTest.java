@@ -56,13 +56,30 @@ public class HttpRequestJsonParamsTest {
     }
 
     @Test
-    public void extractJsonArrayAfterKey_throwsOnMalformedBody() {
+    public void extractJsonArrayAfterKey_throwsWhenKeyMissing() {
+        try {
+            HttpRequestJsonParams.extractJsonArrayAfterKey("{}", "params");
+            assertTrue("expected JSONException", false);
+        } catch (JSONException expected) {
+            // Missing params key
+        }
+    }
+
+    @Test
+    public void extractJsonArrayAfterKey_throwsOnMalformedObject() {
         try {
             HttpRequestJsonParams.extractJsonArrayAfterKey("{", "params");
             assertTrue("expected JSONException", false);
         } catch (JSONException expected) {
-            // Same error path as invalid request bodies in SQLHTTPServer
+            // Truncated JSON
         }
+    }
+
+    @Test
+    public void extractJsonArrayAfterKey_ignoresParamsSubstringInsideStringValue() throws Exception {
+        String body = "{\"statement\":\"see \\\"params\\\": [99]\",\"params\":[42]}";
+        String rawParams = HttpRequestJsonParams.extractJsonArrayAfterKey(body, "params");
+        assertEquals("[42]", rawParams);
     }
 
     @Test
