@@ -96,6 +96,22 @@ public class HttpRequestJsonParamsTest {
     }
 
     @Test
+    public void extractJsonArrayAfterKey_usesLastDuplicateWhenEarlierValueNotArray() throws Exception {
+        String body = "{\"params\":null,\"params\":[1]}";
+        assertEquals("[1]", HttpRequestJsonParams.extractJsonArrayAfterKey(body, "params"));
+    }
+
+    @Test
+    public void extractJsonArrayAfterKey_throwsWhenLastDuplicateValueNotArray() {
+        try {
+            HttpRequestJsonParams.extractJsonArrayAfterKey("{\"params\":[1],\"params\":null}", "params");
+            assertTrue("expected JSONException", false);
+        } catch (JSONException expected) {
+            assertTrue(expected.getMessage().contains("No array for key"));
+        }
+    }
+
+    @Test
     public void populateJsArrayFromParamsJson_skipsUnsupportedArrayElements() throws Exception {
         JSONArray nested = new JSONArray();
         nested.put(1);

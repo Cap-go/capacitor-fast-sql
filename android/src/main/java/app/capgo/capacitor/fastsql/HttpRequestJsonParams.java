@@ -43,11 +43,15 @@ final class HttpRequestJsonParams {
         }
         i++;
         String found = null;
+        boolean sawMatchingKey = false;
         while (i < json.length()) {
             i = skipWhitespace(json, i);
             if (json.charAt(i) == '}') {
                 if (found != null) {
                     return found;
+                }
+                if (sawMatchingKey) {
+                    throw new JSONException("No array for key: " + key);
                 }
                 throw new JSONException("No key: " + key);
             }
@@ -59,13 +63,16 @@ final class HttpRequestJsonParams {
             }
             i = skipWhitespace(json, i + 1);
             if (memberKey.equals(key)) {
+                sawMatchingKey = true;
                 i = skipWhitespace(json, i);
-                if (i >= json.length() || json.charAt(i) != '[') {
-                    throw new JSONException("No array for key: " + key);
+                if (i < json.length() && json.charAt(i) == '[') {
+                    int end = indexOfMatchingBracket(json, i, '[', ']');
+                    found = json.substring(i, end + 1);
+                    i = end + 1;
+                } else {
+                    found = null;
+                    i = endOfJsonValue(json, i);
                 }
-                int end = indexOfMatchingBracket(json, i, '[', ']');
-                found = json.substring(i, end + 1);
-                i = end + 1;
             } else {
                 i = endOfJsonValue(json, i);
             }
@@ -76,6 +83,9 @@ final class HttpRequestJsonParams {
         }
         if (found != null) {
             return found;
+        }
+        if (sawMatchingKey) {
+            throw new JSONException("No array for key: " + key);
         }
         throw new JSONException("No key: " + key);
     }
