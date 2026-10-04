@@ -83,6 +83,19 @@ public class HttpRequestJsonParamsTest {
     }
 
     @Test
+    public void extractJsonArrayAfterKey_usesLastDuplicateKeyLikeJSONObject() throws Exception {
+        String body = "{\"params\":[1,2],\"params\":[\"a\"]}";
+        String rawParams = HttpRequestJsonParams.extractJsonArrayAfterKey(body, "params");
+        assertEquals("[\"a\"]", rawParams);
+
+        JSONArray paramsJson = new JSONObject(body).getJSONArray("params");
+        JSArray params = new JSArray();
+        HttpRequestJsonParams.populateJsArrayFromParamsJson(paramsJson, params, rawParams);
+        assertEquals(1, params.length());
+        assertEquals("a", params.get(0));
+    }
+
+    @Test
     public void populateJsArrayFromParamsJson_skipsUnsupportedArrayElements() throws Exception {
         JSONArray nested = new JSONArray();
         nested.put(1);

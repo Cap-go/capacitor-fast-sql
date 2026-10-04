@@ -42,9 +42,13 @@ final class HttpRequestJsonParams {
             throw new JSONException("Expected JSON object");
         }
         i++;
+        String found = null;
         while (i < json.length()) {
             i = skipWhitespace(json, i);
             if (json.charAt(i) == '}') {
+                if (found != null) {
+                    return found;
+                }
                 throw new JSONException("No key: " + key);
             }
             int keyEnd = endOfJsonString(json, i);
@@ -60,13 +64,18 @@ final class HttpRequestJsonParams {
                     throw new JSONException("No array for key: " + key);
                 }
                 int end = indexOfMatchingBracket(json, i, '[', ']');
-                return json.substring(i, end + 1);
+                found = json.substring(i, end + 1);
+                i = end + 1;
+            } else {
+                i = endOfJsonValue(json, i);
             }
-            i = endOfJsonValue(json, i);
             i = skipWhitespace(json, i);
             if (i < json.length() && json.charAt(i) == ',') {
                 i++;
             }
+        }
+        if (found != null) {
+            return found;
         }
         throw new JSONException("No key: " + key);
     }
