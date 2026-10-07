@@ -1,13 +1,28 @@
 # @capgo/capacitor-fast-sql
-<a href="https://capgo.app/"><img src="https://capgo.app/readme-banner.svg?repo=Cap-go/capacitor-fast-sql" alt="Capgo - Instant updates for Capacitor" /></a>
+
+Run SQLite fast in your Capacitor app: queries go through a local HTTP channel instead of the bridge, so large result sets and sync jobs stay quick. A practical replacement for IndexedDB, with optional encryption.
+
+<a href="https://capgo.app/?ref=plugin_fast_sql"><img src="https://capgo.app/readme-banner.svg?repo=Cap-go/capacitor-fast-sql" alt="Capgo - Instant updates for Capacitor" /></a>
 
 <div align="center">
-  <h2><a href="https://capgo.app/?ref=plugin_fast_sql"> ➡️ Get Instant updates for your App with Capgo</a></h2>
-  <h2><a href="https://capgo.app/consulting/?ref=plugin_fast_sql"> Missing a feature? We'll build the plugin for you 💪</a></h2>
+  <p><b>Capgo</b>: open-source live updates for Ionic and Capacitor apps. Ship OTA fixes and features instantly, without waiting for app store review.</p>
+  <h2><a href="https://capgo.app/register/?ref=plugin_fast_sql">➡️ Get started for free</a></h2>
+  <p>14-day unlimited free trial. No credit card required</p>
+  <p><a href="https://capgo.app/consulting/?ref=plugin_fast_sql">Missing a feature? We'll build the plugin for you 💪</a></p>
 </div>
 
-High-performance native SQLite plugin with HTTP server for efficient sync operations and IndexedDB replacement.
-Official Capgo alternative to Ionic Appflow Secure Storage.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Cap-go/capacitor-fast-sql/main/assets/github-social-preview.png" alt="@capgo/capacitor-fast-sql for Capacitor apps" width="300" />
+</p>
+
+## Key features
+
+- **Fast path**: `connect()` opens the database and starts a local server, `getServerInfo()` returns its port and token for direct calls.
+- **SQL**: `execute()` runs statements with parameters, plus batch operations.
+- **Transactions**: `beginTransaction()`, `commitTransaction()` and `rollbackTransaction()`.
+- **Encryption**: optional encrypted databases on iOS and Android via SQLCipher.
+- **Web**: `configureWeb()` sets up the official SQLite Wasm module, with OPFS persistence when your server allows it.
+- **Platforms**: iOS, Android and Web. Native SQLite on iOS and Android, SQLite Wasm on web.
 
 ## Why Fast SQL?
 
@@ -80,13 +95,13 @@ This plugin runs a local HTTP server on `localhost`. iOS App Transport Security 
 </dict>
 ```
 
-This only permits cleartext to loopback addresses (`localhost` / `127.0.0.1`) — it does not weaken ATS for external connections.
+This only permits cleartext to loopback addresses (`localhost` / `127.0.0.1`), it does not weaken ATS for external connections.
 
 ## Android Configuration
 
 This plugin runs a local HTTP server on `localhost` to bypass Capacitor's bridge for performance. Android 9+ blocks cleartext (non-HTTPS) traffic by default, so you **must** allow it for `localhost`.
 
-**Option A — Scoped to localhost only (recommended):**
+**Option A, Scoped to localhost only (recommended):**
 
 Create `android/app/src/main/res/xml/network_security_config.xml`:
 
@@ -109,7 +124,7 @@ Then reference it in your `AndroidManifest.xml`:
 </application>
 ```
 
-**Option B — Allow all cleartext (simpler but less secure):**
+**Option B, Allow all cleartext (simpler but less secure):**
 
 ```xml
 <application
@@ -156,7 +171,7 @@ Then run `pod install` in the `ios/App` directory. If you skip this subspec, kee
 
 ## Web Platform
 
-On the web, this plugin uses the official [@sqlite.org/sqlite-wasm](https://github.com/sqlite/sqlite-wasm) build with [OPFS](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system) for persistence. SQLite reads and writes the database file directly — it is not loaded entirely into RAM or mirrored through IndexedDB.
+On the web, this plugin uses the official [@sqlite.org/sqlite-wasm](https://github.com/sqlite/sqlite-wasm) build with [OPFS](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system) for persistence. SQLite reads and writes the database file directly, it is not loaded entirely into RAM or mirrored through IndexedDB.
 
 For OPFS to work, your web server must send Cross-Origin Isolation headers:
 
@@ -195,7 +210,7 @@ await CapgoCapacitorFastSql.configureWeb({
 const db = await FastSQL.connect({ database: 'myapp' });
 ```
 
-`configureWeb()` is a no-op on iOS and Android — it is safe to call unconditionally.
+`configureWeb()` is a no-op on iOS and Android, it is safe to call unconditionally.
 
 > **Note:** Existing databases previously stored in IndexedDB by sql.js are not migrated automatically. Re-seed or import data after upgrading if needed.
 
