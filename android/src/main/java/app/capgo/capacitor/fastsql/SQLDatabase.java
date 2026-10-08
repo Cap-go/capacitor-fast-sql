@@ -184,7 +184,7 @@ public class SQLDatabase implements DatabaseConnection {
             } else if (value instanceof Float) {
                 stmt.bindDouble(index, ((Float) value).doubleValue());
             } else if (value instanceof Boolean) {
-                stmt.bindLong(index, ((Boolean) value) ? 1 : 0);
+                stmt.bindLong(index, (Boolean) value ? 1 : 0);
             } else if (value instanceof JSONObject) {
                 JSONObject obj = (JSONObject) value;
                 if (obj.has("_type") && "binary".equals(obj.getString("_type"))) {
