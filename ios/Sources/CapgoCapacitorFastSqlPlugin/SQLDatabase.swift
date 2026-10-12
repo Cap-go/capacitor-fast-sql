@@ -50,12 +50,11 @@ class SQLDatabase {
                 throw SQLError.encryptionKeyMissing
             }
             #if canImport(SQLCipher)
-            guard let keyData = key.data(using: .utf8) else {
-                throw SQLError.encryptionFailed(message: "Invalid encryption key encoding")
-            }
-            let keyResult = keyData.withUnsafeBytes { bytes in
-                sqlite3_key(db, bytes.baseAddress, Int32(keyData.count))
-            }
+            // `PRAGMA key` is SQLCipher's SQL interface to sqlite3_key(). It avoids
+            // calling sqlite3_key() directly, which SQLCipher's headers only declare
+            // when SQLITE_HAS_CODEC is defined for the importing target.
+            let escapedKey = key.replacingOccurrences(of: "'", with: "''")
+            let keyResult = sqlite3_exec(db, "PRAGMA key = '\(escapedKey)'", nil, nil, nil)
             if keyResult != SQLITE_OK {
                 let error = String(cString: sqlite3_errmsg(db))
                 throw SQLError.encryptionFailed(message: error)
