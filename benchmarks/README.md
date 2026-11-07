@@ -5,6 +5,10 @@ communication fixes. The harness uses existing public APIs and changes no native
 transport, SQL settings, production API, or advertised performance claims.
 No device benchmark results have been collected or committed.
 
+The implementation lives in `example-app/src/benchmarks/current.ts` so the
+example can build independently from a packed plugin. `benchmarks/current.ts`
+re-exports that same implementation for the repository checks.
+
 ## Run
 
 Use a Bun version that supports lockfile version 2. This checkout was installed

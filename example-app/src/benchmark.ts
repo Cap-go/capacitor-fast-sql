@@ -1,6 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { FastSQL, FastSQLVectorStore, CapgoCapacitorFastSql } from '@capgo/capacitor-fast-sql';
-import { runCurrentBenchmark } from '../../benchmarks/current';
+import { runCurrentBenchmark } from './benchmarks/current';
 
 function inputValue(id: string): string {
   const input = document.getElementById(id);
