@@ -1,4 +1,4 @@
-import type { SQLValue, SQLRow, SQLResult, SQLBatchOperation, IsolationLevel } from './definitions';
+import type { SQLValue, SQLRow, SQLResult, SQLBatchOperation, SQLBatchOptions, IsolationLevel } from './definitions';
 
 /**
  * Common interface for SQL database connections.
@@ -7,7 +7,7 @@ import type { SQLValue, SQLRow, SQLResult, SQLBatchOperation, IsolationLevel } f
 export interface SQLConnection {
   getDatabaseName(): string;
   execute(statement: string, params?: SQLValue[]): Promise<SQLResult>;
-  executeBatch(operations: SQLBatchOperation[]): Promise<SQLResult[]>;
+  executeBatch(operations: SQLBatchOperation[], options?: SQLBatchOptions): Promise<SQLResult[]>;
   beginTransaction(isolationLevel?: IsolationLevel): Promise<void>;
   commit(): Promise<void>;
   rollback(): Promise<void>;

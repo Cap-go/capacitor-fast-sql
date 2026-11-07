@@ -4,6 +4,7 @@ import type {
   SQLRow,
   SQLResult,
   SQLBatchOperation,
+  SQLBatchOptions,
   IsolationLevel,
 } from './definitions';
 import type { SQLConnection } from './sql-connection';
@@ -46,7 +47,10 @@ export class WebSQLConnection implements SQLConnection {
    * @param operations - Array of SQL operations to execute
    * @returns Array of results for each operation
    */
-  async executeBatch(operations: SQLBatchOperation[]): Promise<SQLResult[]> {
+  async executeBatch(operations: SQLBatchOperation[], options?: SQLBatchOptions): Promise<SQLResult[]> {
+    if (options?.atomic) {
+      return this.transaction((connection) => connection.executeBatch(operations));
+    }
     const results: SQLResult[] = [];
     for (const op of operations) {
       results.push(await this.execute(op.statement, op.params));

@@ -77,3 +77,22 @@ test('callback failure rolls back and releases the root connection', async () =>
     db.close();
   }
 });
+
+test('atomic batches roll back earlier operations while default batches preserve partial success', async () => {
+  const { db, conn } = connection();
+  const operations = [
+    { statement: "INSERT INTO sample VALUES ('first')" },
+    { statement: 'INSERT INTO missing_table VALUES (1)' },
+  ];
+  try {
+    await expect(conn.executeBatch(operations, { atomic: true })).rejects.toThrow();
+    expect(db.query('SELECT * FROM sample').all()).toEqual([]);
+    await expect(conn.executeBatch(operations)).rejects.toThrow();
+    expect(db.query('SELECT value FROM sample').all()).toEqual([{ value: 'first' }]);
+    await conn.transaction(async (scoped) => {
+      await expect(scoped.executeBatch([], { atomic: true })).rejects.toThrow('managed by the callback');
+    });
+  } finally {
+    db.close();
+  }
+});
