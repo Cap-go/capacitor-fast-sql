@@ -13,6 +13,8 @@ import { WebSQLConnection } from './web-sql-connection';
  * and managing multiple databases simultaneously.
  */
 export class FastSQL {
+  private static opening = new Map<string, Promise<SQLConnection>>();
+  private static openOptions = new Map<string, SQLConnectionOptions>();
   private static connections: Map<string, SQLConnection> = new Map();
   private static sharedConnections: Set<string> = new Set();
   private static connectionRetainers: Map<string, number> = new Map();
@@ -25,13 +27,42 @@ export class FastSQL {
    * @returns SQLConnection instance for executing queries
    */
   static async connect(options: SQLConnectionOptions): Promise<SQLConnection> {
-    // Check if already connected
-    const existing = this.connections.get(options.database);
+    const saved = this.openOptions.get(options.database);
+    if (saved && !this.optionsMatch(saved, options)) {
+      throw new Error(`Database '${options.database}' is already opening or open with different options`);
+    }
+    const existing = this.connections.get(options.database) ?? this.opening.get(options.database);
     if (existing) {
       this.sharedConnections.add(options.database);
       return existing;
     }
 
+    const snapshot = { ...options };
+    this.openOptions.set(options.database, snapshot);
+    const pending = this.open(snapshot);
+    this.opening.set(options.database, pending);
+    try {
+      return await pending;
+    } catch (error) {
+      this.openOptions.delete(options.database);
+      this.sharedConnections.delete(options.database);
+      throw error;
+    } finally {
+      this.opening.delete(options.database);
+    }
+  }
+
+  private static optionsMatch(left: SQLConnectionOptions, right: SQLConnectionOptions): boolean {
+    return (
+      Boolean(left.encrypted) === Boolean(right.encrypted) &&
+      left.encryptionKey === right.encryptionKey &&
+      Boolean(left.readOnly) === Boolean(right.readOnly) &&
+      Boolean(left.walMode) === Boolean(right.walMode) &&
+      Boolean(left.performancePresets) === Boolean(right.performancePresets)
+    );
+  }
+
+  private static async open(options: SQLConnectionOptions): Promise<SQLConnection> {
     // Connect via native plugin
     const info = await CapgoCapacitorFastSql.connect(options);
 
@@ -56,6 +87,7 @@ export class FastSQL {
    * @param database - Database name to close
    */
   static async disconnect(database: string): Promise<void> {
+    await this.opening.get(database);
     const connection = this.connections.get(database);
     if (!connection) {
       throw new Error(`Database '${database}' is not connected`);
@@ -71,6 +103,7 @@ export class FastSQL {
 
     // Remove connection
     this.connections.delete(database);
+    this.openOptions.delete(database);
     this.sharedConnections.delete(database);
     this.connectionRetainers.delete(database);
     this.pendingDisconnects.delete(database);
@@ -126,7 +159,7 @@ export class FastSQL {
    * Close all open connections
    */
   static async disconnectAll(): Promise<void> {
-    const databases = Array.from(this.connections.keys());
+    const databases = Array.from(new Set([...this.connections.keys(), ...this.opening.keys()]));
     await Promise.all(
       databases.map((db) => {
         this.connectionRetainers.delete(db);
