@@ -1,4 +1,4 @@
-import type { IsolationLevel, SQLBatchOperation, SQLResult, SQLRow, SQLValue } from './definitions';
+import type { IsolationLevel, SQLBatchOperation, SQLBatchOptions, SQLResult, SQLRow, SQLValue } from './definitions';
 import type { SQLConnection } from './sql-connection';
 
 /** Serializes high-level callers and gives transaction callbacks a scoped connection. */
@@ -39,7 +39,10 @@ export class ManagedSQLConnection implements SQLConnection {
     return this.enqueue(() => this.delegate.execute(statement, params));
   }
 
-  async executeBatch(operations: SQLBatchOperation[]): Promise<SQLResult[]> {
+  async executeBatch(operations: SQLBatchOperation[], options?: SQLBatchOptions): Promise<SQLResult[]> {
+    if (options?.atomic) {
+      return this.transaction((connection) => connection.executeBatch(operations));
+    }
     this.checkAvailable();
     return this.enqueue(() => this.delegate.executeBatch(operations));
   }

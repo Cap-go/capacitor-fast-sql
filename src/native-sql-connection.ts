@@ -1,4 +1,4 @@
-import type { SQLValue, SQLRow, SQLResult, SQLBatchOperation } from './definitions';
+import type { SQLValue, SQLRow, SQLResult, SQLBatchOperation, SQLBatchOptions } from './definitions';
 import { IsolationLevel } from './definitions';
 import type { SQLConnection } from './sql-connection';
 
@@ -65,7 +65,10 @@ export class NativeSQLConnection implements SQLConnection {
    * @param operations - Array of SQL operations to execute
    * @returns Array of results for each operation
    */
-  async executeBatch(operations: SQLBatchOperation[]): Promise<SQLResult[]> {
+  async executeBatch(operations: SQLBatchOperation[], options?: SQLBatchOptions): Promise<SQLResult[]> {
+    if (options?.atomic) {
+      return this.transaction((connection) => connection.executeBatch(operations));
+    }
     const response = await fetch(`${this.baseUrl}/batch`, {
       method: 'POST',
       headers: {

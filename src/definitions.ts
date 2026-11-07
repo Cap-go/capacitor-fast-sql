@@ -45,6 +45,19 @@ export interface SQLBatchOperation {
   params?: SQLValue[];
 }
 
+/** Options for SQLConnection.executeBatch. */
+export interface SQLBatchOptions {
+  /**
+   * Roll back all batch writes if an operation fails. Default false preserves
+   * existing partial-success behavior. Consider true only for a future major.
+   * Requires no active transaction. Inside a transaction callback, omit this flag
+   * because the surrounding transaction already owns atomicity.
+   * Operations must not contain SQL transaction-control statements.
+   * @default false
+   */
+  atomic?: boolean;
+}
+
 /**
  * Database connection options
  */
