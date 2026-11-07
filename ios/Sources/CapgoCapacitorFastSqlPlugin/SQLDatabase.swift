@@ -13,6 +13,7 @@ private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self
  * SQLite database wrapper for iOS
  */
 class SQLDatabase {
+    let isReadOnly: Bool
     private var db: OpaquePointer?
     private let path: String
     private var inTransaction = false
@@ -20,13 +21,15 @@ class SQLDatabase {
     init(
         path: String,
         encrypted: Bool = false,
+        readOnly: Bool = false,
         encryptionKey: String? = nil,
         walMode: Bool = false,
         performancePresets: Bool = false
     ) throws {
         self.path = path
+        self.isReadOnly = readOnly
 
-        let flags = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX
+        let flags = (readOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE) | SQLITE_OPEN_FULLMUTEX
         let result = sqlite3_open_v2(path, &db, flags, nil)
 
         guard result == SQLITE_OK else {
@@ -64,7 +67,7 @@ class SQLDatabase {
             #endif
         }
 
-        try applyPerformanceOptions(walMode: walMode, performancePresets: performancePresets)
+        try applyPerformanceOptions(walMode: walMode && !readOnly, performancePresets: performancePresets)
         needsClose = false
     }
 

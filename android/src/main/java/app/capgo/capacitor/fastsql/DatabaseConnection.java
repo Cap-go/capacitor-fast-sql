@@ -12,5 +12,7 @@ public interface DatabaseConnection {
 
     void rollbackTransaction() throws Exception;
 
+    boolean isReadOnly();
+
     void close();
 }

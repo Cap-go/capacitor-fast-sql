@@ -58,6 +58,9 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
   }
 
   async connect(options: SQLConnectionOptions): Promise<{ port: number; token: string; database: string }> {
+    if (options.readOnly) {
+      throw new Error('Read-only opens are not supported by the SQLite Wasm Worker transport');
+    }
     if (this.databases.has(options.database)) {
       const existing = this.databases.get(options.database)!;
       return {
