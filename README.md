@@ -383,7 +383,7 @@ bypassing Capacitor's standard bridge for better performance with sync operation
 ### connect(...)
 
 ```typescript
-connect(options: SQLConnectionOptions) => Promise<{ port: number; token: string; database: string; }>
+connect(options: SQLConnectionOptions) => Promise<{ port: number; token: string; database: string; persistent?: boolean; }>
 ```
 
 Initialize the database connection and start the HTTP server.
@@ -392,7 +392,7 @@ Initialize the database connection and start the HTTP server.
 | ------------- | --------------------------------------------------------------------- | -------------------- |
 | **`options`** | <code><a href="#sqlconnectionoptions">SQLConnectionOptions</a></code> | - Connection options |
 
-**Returns:** <code>Promise&lt;{ port: number; token: string; database: string; }&gt;</code>
+**Returns:** <code>Promise&lt;{ port: number; token: string; database: string; persistent?: boolean; }&gt;</code>
 
 **Since:** 0.0.1
 
@@ -419,7 +419,7 @@ Close database connection and stop the HTTP server.
 ### getServerInfo(...)
 
 ```typescript
-getServerInfo(options: { database: string; }) => Promise<{ port: number; token: string; }>
+getServerInfo(options: { database: string; }) => Promise<{ port: number; token: string; persistent?: boolean; }>
 ```
 
 Get the HTTP server port and token for direct communication.
@@ -428,7 +428,7 @@ Get the HTTP server port and token for direct communication.
 | ------------- | ---------------------------------- | --------------- |
 | **`options`** | <code>{ database: string; }</code> | - Database name |
 
-**Returns:** <code>Promise&lt;{ port: number; token: string; }&gt;</code>
+**Returns:** <code>Promise&lt;{ port: number; token: string; persistent?: boolean; }&gt;</code>
 
 **Since:** 0.0.1
 
@@ -658,10 +658,11 @@ OPFS persistence requires Cross-Origin Isolation headers on your web server:
 `Cross-Origin-Opener-Policy: same-origin` and
 `Cross-Origin-Embedder-Policy: require-corp`.
 
-| Prop          | Type                                                        | Description                                                                                                                                                  | Default           |
-| ------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| **`useOpfs`** | <code>boolean</code>                                        | Prefer OPFS persistence via a Web Worker (default: `true`). When OPFS is unavailable, the plugin falls back to a non-persistent database and logs a warning. | <code>true</code> |
-| **`worker`**  | <code><a href="#sqlitewebworker">SqliteWebWorker</a></code> | Custom Worker instance or factory for SQLite Wasm. Advanced: override the default worker from `@sqlite.org/sqlite-wasm`.                                     |                   |
+| Prop                     | Type                                                        | Description                                                                                                                                                                                                                          | Default            |
+| ------------------------ | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
+| **`useOpfs`**            | <code>boolean</code>                                        | Prefer OPFS persistence via a Web Worker (default: `true`). When OPFS is unavailable, the plugin falls back to a non-persistent database and logs a warning.                                                                         | <code>true</code>  |
+| **`requirePersistence`** | <code>boolean</code>                                        | Reject web connections unless the Worker confirms persistent storage. Defaults to false for compatibility. Consider requiring persistence by default in the next Capacitor major, rather than changing fallback behavior in a minor. | <code>false</code> |
+| **`worker`**             | <code><a href="#sqlitewebworker">SqliteWebWorker</a></code> | Custom Worker instance or factory for SQLite Wasm. Advanced: override the default worker from `@sqlite.org/sqlite-wasm`.                                                                                                             |                    |
 
 
 ### Type Aliases
