@@ -138,6 +138,21 @@
   <body>
     <div class="container">
       <h1>Native SQL</h1>
+      <div class="section">
+        <h2>Current transport baseline</h2>
+        <p>Uses a separate benchmark database. Run on a release build and keep the JSON report.</p>
+        <input id="baseline-device" placeholder="Device model" />
+        <input id="baseline-os" placeholder="OS version" />
+        <input id="baseline-build" placeholder="Native build configuration" />
+        <input id="baseline-revision" placeholder="Full Git revision" />
+        <select id="baseline-patching">
+          <option value="unknown">HTTP patching: unknown</option>
+          <option value="disabled">HTTP patching disabled</option>
+          <option value="enabled">HTTP patching enabled</option>
+        </select>
+        <button id="run-baseline">Run baseline and download JSON</button>
+        <pre id="baseline-output">Ready. Device runs are required for performance conclusions.</pre>
+      </div>
 
       <div class="section">
         <h2>Database Connection</h2>
