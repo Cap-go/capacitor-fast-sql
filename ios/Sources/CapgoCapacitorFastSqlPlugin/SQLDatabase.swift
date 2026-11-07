@@ -148,8 +148,9 @@ class SQLDatabase {
             }
         }
 
-        let changes = sqlite3_changes(db)
-        let lastInsertId = sqlite3_last_insert_rowid(db)
+        let readOnly = sqlite3_stmt_readonly(stmt) != 0
+        let changes = readOnly ? 0 : sqlite3_changes(db)
+        let lastInsertId = readOnly ? 0 : sqlite3_last_insert_rowid(db)
 
         return [
             "rows": rows,
