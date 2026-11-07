@@ -214,7 +214,10 @@ class SQLDatabase {
                   type == "binary",
                   let base64 = dict["_data"] as? String,
                   let data = Data(base64Encoded: base64) {
-            // Handle binary data
+            // SQLite treats a null blob pointer as SQL NULL, even with length zero.
+            if data.isEmpty {
+                return sqlite3_bind_zeroblob(stmt, index, 0)
+            }
             return data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
                 sqlite3_bind_blob(stmt, index, bytes.baseAddress, Int32(data.count), sqliteTransient)
             }
@@ -241,6 +244,9 @@ class SQLDatabase {
             }
             return NSNull()
         case SQLITE_BLOB:
+            if sqlite3_column_bytes(stmt, index) == 0 {
+                return ["_type": "binary", "_data": ""]
+            }
             if let blob = sqlite3_column_blob(stmt, index) {
                 let size = sqlite3_column_bytes(stmt, index)
                 let data = Data(bytes: blob, count: Int(size))
