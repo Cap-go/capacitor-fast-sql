@@ -152,7 +152,7 @@ public class SQLHTTPServer extends NanoHTTPD {
             HttpRequestJsonParams.populateJsArrayFromParamsJson(paramsJson, params, rawParamsArray);
 
             JSObject result = db.execute(statement, params);
-            results.put(new JSONObject(result.toString()));
+            results.put(result);
         }
 
         return newFixedLengthResponse(Response.Status.OK, "application/json", results.toString());
