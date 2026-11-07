@@ -20,6 +20,7 @@ import org.json.JSONObject;
  */
 public class SQLHTTPServer extends NanoHTTPD {
 
+    static final int MAX_REQUEST_BYTES = 64 * 1024 * 1024;
     private final String token;
     private final Map<String, DatabaseConnection> databases;
 
@@ -68,6 +69,10 @@ public class SQLHTTPServer extends NanoHTTPD {
 
         try {
             return routeRequest(session, db);
+        } catch (IOException error) {
+            Response response = newFixedLengthResponse(Response.Status.BAD_REQUEST, "text/plain", error.getMessage());
+            response.closeConnection(true);
+            return addCorsHeaders(response);
         } catch (Exception error) {
             return addCorsHeaders(newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "Error: " + error.getMessage()));
         }
@@ -157,10 +162,26 @@ public class SQLHTTPServer extends NanoHTTPD {
     }
 
     private String readRequestBody(IHTTPSession session) throws IOException {
-        int contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
+        if (session.getHeaders().containsKey("transfer-encoding")) {
+            throw new IOException("Chunked request bodies are not supported");
+        }
+        int contentLength = requestBodyLength(session.getHeaders().get("content-length"));
         byte[] buffer = new byte[contentLength];
         new DataInputStream(session.getInputStream()).readFully(buffer);
         return new String(buffer, StandardCharsets.UTF_8);
+    }
+
+    static int requestBodyLength(String header) throws IOException {
+        if (header == null) return 0;
+        try {
+            long length = Long.parseLong(header);
+            if (length < 0 || length > MAX_REQUEST_BYTES) {
+                throw new IOException("Request body must be between 0 and 64 MiB");
+            }
+            return (int) length;
+        } catch (NumberFormatException error) {
+            throw new IOException("Invalid Content-Length", error);
+        }
     }
 
     private static String generateToken() {
