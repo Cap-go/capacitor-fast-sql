@@ -33,7 +33,7 @@ public class SQLHTTPServer extends NanoHTTPD {
     });
 
     public SQLHTTPServer(Map<String, DatabaseConnection> databases) throws IOException {
-        super(findAvailablePort());
+        super("127.0.0.1", 0);
         this.databases = databases;
         this.token = generateToken();
     }
@@ -192,25 +192,5 @@ public class SQLHTTPServer extends NanoHTTPD {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
-    }
-
-    private static int findAvailablePort() {
-        // Try ports in the range 9000-9100
-        for (int port = 9000; port < 9100; port++) {
-            try {
-                NanoHTTPD testServer = new NanoHTTPD(port) {
-                    @Override
-                    public Response serve(IHTTPSession session) {
-                        return null;
-                    }
-                };
-                testServer.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-                testServer.stop();
-                return port;
-            } catch (IOException e) {
-                // Port not available, try next one
-            }
-        }
-        return 9000; // Fallback
     }
 }
