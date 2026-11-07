@@ -1,7 +1,6 @@
 package app.capgo.capacitor.fastsql;
 
 import com.getcapacitor.JSArray;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,8 +10,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 /**
- * Converts HTTP request JSON parameter arrays to {@link JSArray} values with the same
- * semantics as the previous Gson-based parsing in {@link SQLHTTPServer}.
+ * Converts HTTP JSON parameters to SQLite-compatible values without truncating numbers.
  */
 final class HttpRequestJsonParams {
 
@@ -103,7 +101,7 @@ final class HttpRequestJsonParams {
             return param;
         }
         if (param instanceof Number) {
-            return convertNumberLikeGson((Number) param);
+            return parseSqlNumber(param.toString());
         }
         if (param instanceof String) {
             return param;
@@ -146,7 +144,7 @@ final class HttpRequestJsonParams {
                 throw new IllegalStateException(e);
             }
         }
-        return convertNumberLikeGsonFromLiteral(raw);
+        return parseSqlNumber(raw);
     }
 
     /** Mirrors Gson {@code JsonElement#getAsString()} for object field values. */
@@ -197,44 +195,15 @@ final class HttpRequestJsonParams {
         return raw;
     }
 
-    /**
-     * Mirrors Gson {@code JsonPrimitive#getAsLong()} with {@code getAsDouble()} fallback on
-     * {@link NumberFormatException}, using LazilyParsedNumber-style parsing on the number's text.
-     */
-    static Number convertNumberLikeGson(Number number) {
-        return convertNumberLikeGsonFromLiteral(numberToJsonNumberString(number));
-    }
-
-    static Number convertNumberLikeGsonFromLiteral(String literal) {
+    static Number parseSqlNumber(String literal) {
+        checkNumberStringLength(literal);
         try {
-            return gsonStyleLongFromNumberString(literal);
-        } catch (NumberFormatException e) {
-            return gsonStyleDoubleFromNumberString(literal, Double.parseDouble(literal));
+            return Long.parseLong(literal);
+        } catch (NumberFormatException error) {
+            double value = Double.parseDouble(literal);
+            if (!Double.isFinite(value)) throw new NumberFormatException("SQL numbers must be finite");
+            return value;
         }
-    }
-
-    static long gsonStyleLongFromNumberString(String s) {
-        checkNumberStringLength(s);
-        try {
-            return Long.parseLong(s);
-        } catch (NumberFormatException e) {
-            return parseBigDecimalLikeGson(s).longValue();
-        }
-    }
-
-    static double gsonStyleDoubleFromNumberString(String s, Number number) {
-        try {
-            return Double.parseDouble(s);
-        } catch (NumberFormatException e) {
-            return number.doubleValue();
-        }
-    }
-
-    static String numberToJsonNumberString(Number number) {
-        if (number instanceof BigDecimal) {
-            return ((BigDecimal) number).toPlainString();
-        }
-        return number.toString();
     }
 
     static JSONObject convertFlatObjectParamFromRawJson(String raw) {
@@ -400,14 +369,5 @@ final class HttpRequestJsonParams {
         if (s.length() > MAX_NUMBER_STRING_LENGTH) {
             throw new NumberFormatException("Number string too large");
         }
-    }
-
-    private static BigDecimal parseBigDecimalLikeGson(String s) {
-        checkNumberStringLength(s);
-        BigDecimal decimal = new BigDecimal(s);
-        if (Math.abs((long) decimal.scale()) >= 10_000) {
-            throw new NumberFormatException("Number has unsupported scale");
-        }
-        return decimal;
     }
 }

@@ -23,12 +23,12 @@ public class HttpRequestJsonParamsTest {
         assertEquals(true, HttpRequestJsonParams.convertRequestParam(true));
         assertEquals("text", HttpRequestJsonParams.convertRequestParam("text"));
         assertEquals(42L, HttpRequestJsonParams.convertRequestParam(42));
-        assertEquals(3L, HttpRequestJsonParams.convertRequestParam(3.14));
+        assertEquals(3.14, HttpRequestJsonParams.convertRequestParam(3.14));
     }
 
     @Test
-    public void convertRequestParam_truncatesDecimalLikeGsonGetAsLong() {
-        assertEquals(9L, HttpRequestJsonParams.convertRequestParam(9.99));
+    public void convertRequestParam_preservesDecimals() {
+        assertEquals(9.99, HttpRequestJsonParams.convertRequestParam(9.99));
     }
 
     @Test
@@ -49,10 +49,10 @@ public class HttpRequestJsonParamsTest {
     }
 
     @Test
-    public void gsonStyleLongFromNumberString_matchesGson214() {
-        assertEquals(100L, HttpRequestJsonParams.gsonStyleLongFromNumberString("100"));
-        assertEquals(3L, HttpRequestJsonParams.gsonStyleLongFromNumberString("3.14"));
-        assertEquals(7766279631452241920L, HttpRequestJsonParams.gsonStyleLongFromNumberString("1e20"));
+    public void numericLiteralsDoNotTruncateOrWrap() {
+        assertEquals(100L, HttpRequestJsonParams.parseSqlNumber("100"));
+        assertEquals(3.14, HttpRequestJsonParams.parseSqlNumber("3.14"));
+        assertEquals(1e20, HttpRequestJsonParams.parseSqlNumber("1e20"));
     }
 
     @Test
@@ -145,6 +145,20 @@ public class HttpRequestJsonParamsTest {
         HttpRequestJsonParams.populateJsArrayFromParamsJson(input, params, rawParams);
 
         assertEquals(1, params.length());
-        assertEquals(7766279631452241920L, params.get(0));
+        assertEquals(1e20, params.get(0));
+    }
+
+    @Test
+    public void httpParsedDecimalReachesSqliteAsReal() throws Exception {
+        SQLDatabase database = new SQLDatabase(":memory:", false, false);
+        try {
+            JSArray params = new JSArray();
+            HttpRequestJsonParams.populateJsArrayFromParamsJson(new JSONArray("[3.14,3.14]"), params, "[3.14,3.14]");
+            JSONObject row = database.execute("SELECT ? AS value, typeof(?) AS kind", params).getJSONArray("rows").getJSONObject(0);
+            assertEquals(3.14, row.getDouble("value"), 0.0);
+            assertEquals("real", row.getString("kind"));
+        } finally {
+            database.close();
+        }
     }
 }
