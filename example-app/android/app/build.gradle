@@ -41,7 +41,21 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
-    implementation 'net.zetetic:sqlcipher-android:4.20.0'
+    if (providers.gradleProperty('fastSqlIncludeSqlCipher').getOrElse('true').toBoolean()) {
+        implementation 'net.zetetic:sqlcipher-android:4.20.0'
+    }
+}
+
+// Ensure the optional-dependency smoke build really excludes SQLCipher, including transitives.
+tasks.register('verifyNoSqlCipherRuntime') {
+    doLast {
+        def includesSqlCipher = configurations.releaseRuntimeClasspath.incoming.resolutionResult.allComponents.any {
+            it.moduleVersion?.group == 'net.zetetic' && it.moduleVersion?.name == 'sqlcipher-android'
+        }
+        if (includesSqlCipher) {
+            throw new GradleException('The no-SQLCipher smoke build still includes SQLCipher at runtime')
+        }
+    }
 }
 
 apply from: 'capacitor.build.gradle'

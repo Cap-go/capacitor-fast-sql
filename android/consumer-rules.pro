@@ -4,6 +4,9 @@
 # R8 must keep the type so the optional SQLCipher dependency still resolves at runtime.
 -keep class net.zetetic.database.sqlcipher.SQLiteDatabase { *; }
 
+# SQLCipher is compileOnly: plain-SQLite apps must also minify without its classes.
+-dontwarn net.zetetic.database.sqlcipher.**
+
 # EncryptedSQLDatabase loads the SQLCipher JNI library by name; keep JNI method names linked from Java.
 -keepclasseswithmembernames class * {
     native <methods>;
