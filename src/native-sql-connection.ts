@@ -19,7 +19,13 @@ export class NativeSQLConnection implements SQLConnection {
     this.database = database;
     this.port = port;
     this.token = token;
-    this.baseUrl = `http://localhost:${port}`;
+    this.baseUrl = `http://127.0.0.1:${port}`;
+  }
+
+  private browserFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+    const savedFetch: unknown = Reflect.get(globalThis, 'CapacitorWebFetch');
+    const browserFetch = typeof savedFetch === 'function' ? savedFetch : globalThis.fetch;
+    return browserFetch.call(globalThis, input, init);
   }
 
   /**
@@ -37,7 +43,7 @@ export class NativeSQLConnection implements SQLConnection {
    * @returns Query results
    */
   async execute(statement: string, params?: SQLValue[]): Promise<SQLResult> {
-    const response = await fetch(`${this.baseUrl}/execute`, {
+    const response = await this.browserFetch(`${this.baseUrl}/execute`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -66,7 +72,7 @@ export class NativeSQLConnection implements SQLConnection {
    * @returns Array of results for each operation
    */
   async executeBatch(operations: SQLBatchOperation[]): Promise<SQLResult[]> {
-    const response = await fetch(`${this.baseUrl}/batch`, {
+    const response = await this.browserFetch(`${this.baseUrl}/batch`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -100,7 +106,7 @@ export class NativeSQLConnection implements SQLConnection {
       throw new Error('Transaction already in progress');
     }
 
-    const response = await fetch(`${this.baseUrl}/transaction/begin`, {
+    const response = await this.browserFetch(`${this.baseUrl}/transaction/begin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -128,7 +134,7 @@ export class NativeSQLConnection implements SQLConnection {
       throw new Error('No transaction in progress');
     }
 
-    const response = await fetch(`${this.baseUrl}/transaction/commit`, {
+    const response = await this.browserFetch(`${this.baseUrl}/transaction/commit`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${this.token}`,
@@ -152,7 +158,7 @@ export class NativeSQLConnection implements SQLConnection {
       throw new Error('No transaction in progress');
     }
 
-    const response = await fetch(`${this.baseUrl}/transaction/rollback`, {
+    const response = await this.browserFetch(`${this.baseUrl}/transaction/rollback`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${this.token}`,
