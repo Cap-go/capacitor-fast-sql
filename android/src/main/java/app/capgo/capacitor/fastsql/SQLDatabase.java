@@ -1,15 +1,14 @@
 package app.capgo.capacitor.fastsql;
 
 import android.database.Cursor;
+import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteProgram;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Base64;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
-import java.util.ArrayList;
-import java.util.List;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -36,25 +35,24 @@ public class SQLDatabase implements DatabaseConnection {
             throw new Exception("Database is not open");
         }
 
-        // Check if this is a query (SELECT) or a modification (INSERT/UPDATE/DELETE)
-        String trimmedStatement = statement.trim().toUpperCase();
-        boolean isQuery =
-            trimmedStatement.startsWith("SELECT") || trimmedStatement.startsWith("PRAGMA") || trimmedStatement.startsWith("EXPLAIN");
-
-        if (isQuery) {
-            return executeQuery(statement, params);
-        } else {
-            return executeUpdate(statement, params);
-        }
-    }
-
-    private JSObject executeQuery(String statement, JSArray params) throws Exception {
-        Cursor cursor = null;
+        Cursor cursor = db.rawQueryWithFactory(
+            (database, driver, editTable, query) -> {
+                try {
+                    bindParams(query, params);
+                } catch (Exception error) {
+                    throw new IllegalArgumentException("Invalid query parameters", error);
+                }
+                return new SQLiteCursor(driver, editTable, query);
+            },
+            statement,
+            new String[0],
+            null
+        );
         try {
-            // Prepare statement with parameters
-            String[] bindArgs = convertParamsToStringArray(params);
-            cursor = db.rawQuery(statement, bindArgs);
-
+            if (cursor.getColumnCount() == 0) {
+                cursor.close();
+                return executeUpdate(statement, params);
+            }
             // Build result
             JSArray rows = new JSArray();
             while (cursor.moveToNext()) {
@@ -136,33 +134,7 @@ public class SQLDatabase implements DatabaseConnection {
         inTransaction = false;
     }
 
-    private String[] convertParamsToStringArray(JSArray params) throws JSONException {
-        if (params == null || params.length() == 0) {
-            return null;
-        }
-
-        List<String> args = new ArrayList<>();
-        for (int i = 0; i < params.length(); i++) {
-            Object value = params.get(i);
-            if (value == null || value == JSONObject.NULL) {
-                args.add(null);
-            } else if (value instanceof JSONObject) {
-                JSONObject obj = (JSONObject) value;
-                if (obj.has("_type") && "binary".equals(obj.getString("_type"))) {
-                    // For queries, we can't bind binary data as string
-                    // This is a limitation - for binary data, use executeUpdate
-                    args.add(obj.getString("_data"));
-                } else {
-                    args.add(value.toString());
-                }
-            } else {
-                args.add(value.toString());
-            }
-        }
-        return args.toArray(new String[0]);
-    }
-
-    private void bindParams(SQLiteStatement stmt, JSArray params) throws Exception {
+    private void bindParams(SQLiteProgram stmt, JSArray params) throws Exception {
         if (params == null || params.length() == 0) {
             return;
         }
