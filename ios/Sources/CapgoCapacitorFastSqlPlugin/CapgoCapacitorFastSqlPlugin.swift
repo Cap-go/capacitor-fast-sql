@@ -177,6 +177,10 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     @objc func beginTransaction(_ call: CAPPluginCall) {
+        guard (call.getString("isolationLevel") ?? "SERIALIZABLE") == "SERIALIZABLE" else {
+            call.reject("Only SERIALIZABLE transaction isolation is supported")
+            return
+        }
         guard let database = call.getString("database") else {
             call.reject("Database name is required")
             return
