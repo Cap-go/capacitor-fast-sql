@@ -12,11 +12,25 @@ class SQLHTTPServer {
     let port: Int
     let token: String
     private var databases: [String: SQLDatabase]
+    private let allowedOrigin: String
     private let databasesLock = NSLock()
     private var server: Server?
     private var isRunning = false
 
-    init(databases: [String: SQLDatabase]) throws {
+    init(databases: [String: SQLDatabase], origin: URL? = nil) throws {
+        let url = origin ?? URL(string: "capacitor://localhost")!
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+        components.scheme = components.scheme?.lowercased()
+        components.host = components.host?.lowercased()
+        if (components.scheme == "https" && components.port == 443) || (components.scheme == "http" && components.port == 80) {
+            components.port = nil
+        }
+        components.path = ""
+        components.query = nil
+        components.fragment = nil
+        components.user = nil
+        components.password = nil
+        self.allowedOrigin = components.string!
         self.databases = databases
         self.token = SQLHTTPServer.generateToken()
         self.port = try SQLHTTPServer.findAvailablePort()
@@ -76,12 +90,17 @@ class SQLHTTPServer {
 
     // MARK: - CORS Headers
 
-    private let corsHeaders: HTTPHeaders = [
-        .accessControlAllowOrigin: "*",
+    private var corsHeaders: HTTPHeaders { [
+        .accessControlAllowOrigin: allowedOrigin,
         .accessControlAllowMethods: "POST, OPTIONS",
         .accessControlAllowHeaders: "Content-Type, Authorization, X-Database",
         .accessControlMaxAge: "86400"
-    ]
+    ] }
+
+    private func acceptsOrigin(_ request: HTTPRequest) -> Bool {
+        guard let origin = request.headers["Origin"] else { return true }
+        return origin == allowedOrigin
+    }
 
     private func corsPreflightResponse() -> HTTPResponse {
         return HTTPResponse(.ok, headers: corsHeaders)
@@ -102,10 +121,11 @@ class SQLHTTPServer {
         // CORS preflight for all endpoints
         let preflightPaths = ["/execute", "/batch", "/transaction/begin", "/transaction/commit", "/transaction/rollback"]
         for path in preflightPaths {
-            server.route(.OPTIONS, path) { [weak self] _ in
+            server.route(.OPTIONS, path) { [weak self] request in
                 guard let self = self else {
                     return HTTPResponse(.internalServerError)
                 }
+                guard self.acceptsOrigin(request) else { return HTTPResponse(.forbidden) }
                 return self.corsPreflightResponse()
             }
         }
@@ -115,6 +135,7 @@ class SQLHTTPServer {
             guard let self = self else {
                 return HTTPResponse(.internalServerError)
             }
+            guard self.acceptsOrigin(request) else { return HTTPResponse(.forbidden) }
             return self.addCorsHeaders(self.handleExecuteRequest(request: request))
         }
 
@@ -123,6 +144,7 @@ class SQLHTTPServer {
             guard let self = self else {
                 return HTTPResponse(.internalServerError)
             }
+            guard self.acceptsOrigin(request) else { return HTTPResponse(.forbidden) }
             return self.addCorsHeaders(self.handleBatchRequest(request: request))
         }
 
@@ -131,6 +153,7 @@ class SQLHTTPServer {
             guard let self = self else {
                 return HTTPResponse(.internalServerError)
             }
+            guard self.acceptsOrigin(request) else { return HTTPResponse(.forbidden) }
             return self.addCorsHeaders(self.handleBeginTransactionRequest(request: request))
         }
 
@@ -138,6 +161,7 @@ class SQLHTTPServer {
             guard let self = self else {
                 return HTTPResponse(.internalServerError)
             }
+            guard self.acceptsOrigin(request) else { return HTTPResponse(.forbidden) }
             return self.addCorsHeaders(self.handleCommitTransactionRequest(request: request))
         }
 
@@ -145,6 +169,7 @@ class SQLHTTPServer {
             guard let self = self else {
                 return HTTPResponse(.internalServerError)
             }
+            guard self.acceptsOrigin(request) else { return HTTPResponse(.forbidden) }
             return self.addCorsHeaders(self.handleRollbackTransactionRequest(request: request))
         }
     }

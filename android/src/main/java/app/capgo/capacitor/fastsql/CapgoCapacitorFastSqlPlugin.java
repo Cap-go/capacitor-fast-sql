@@ -77,7 +77,10 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
 
             // Start HTTP server if not already running
             if (server == null) {
-                server = new SQLHTTPServer(databases);
+                server = new SQLHTTPServer(
+                    databases,
+                    getBridge().getServerUrl() != null ? getBridge().getServerUrl() : getBridge().getLocalUrl()
+                );
                 server.start();
             }
 
