@@ -46,6 +46,8 @@ case "$platform" in
     bunx cap sync android
     cd android
     ./gradlew build test
+    ./gradlew :app:assembleRelease
+    ./gradlew :app:verifyNoSqlCipherRuntime :app:assembleRelease -PfastSqlIncludeSqlCipher=false
     ;;
   ios)
     if [ ! -d ios ]; then
