@@ -284,8 +284,13 @@ export class FastSQLVectorStore implements VectorStore {
       .filter(params.predicate)
       .map((row) => row.id);
 
-    for (const id of ids) {
-      await this.connection.run(`DELETE FROM ${VECTOR_TABLE} WHERE store = ? AND id = ?`, [this.store, id]);
+    for (let offset = 0; offset < ids.length; offset += 100) {
+      await this.connection.executeBatch(
+        ids.slice(offset, offset + 100).map((id) => ({
+          statement: `DELETE FROM ${VECTOR_TABLE} WHERE store = ? AND id = ?`,
+          params: [this.store, id],
+        })),
+      );
     }
   }
 
