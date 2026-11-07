@@ -9,9 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -25,12 +22,6 @@ public class SQLHTTPServer extends NanoHTTPD {
 
     private final String token;
     private final Map<String, DatabaseConnection> databases;
-    private final ExecutorService requestExecutor = Executors.newSingleThreadExecutor((runnable) -> {
-        Thread thread = new Thread(runnable);
-        thread.setName("FastSQL-DB");
-        thread.setDaemon(true);
-        return thread;
-    });
 
     public SQLHTTPServer(Map<String, DatabaseConnection> databases) throws IOException {
         super(findAvailablePort());
@@ -55,12 +46,6 @@ public class SQLHTTPServer extends NanoHTTPD {
     }
 
     @Override
-    public void stop() {
-        super.stop();
-        requestExecutor.shutdownNow();
-    }
-
-    @Override
     public Response serve(IHTTPSession session) {
         if (Method.OPTIONS.equals(session.getMethod())) {
             return addCorsHeaders(newFixedLengthResponse(Response.Status.OK, "text/plain", ""));
@@ -82,14 +67,9 @@ public class SQLHTTPServer extends NanoHTTPD {
         }
 
         try {
-            return requestExecutor.submit(() -> routeRequest(session, db)).get();
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            String message = cause != null ? cause.getMessage() : e.getMessage();
-            return addCorsHeaders(newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "Error: " + message));
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return addCorsHeaders(newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "Request interrupted"));
+            return routeRequest(session, db);
+        } catch (Exception error) {
+            return addCorsHeaders(newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "Error: " + error.getMessage()));
         }
     }
 

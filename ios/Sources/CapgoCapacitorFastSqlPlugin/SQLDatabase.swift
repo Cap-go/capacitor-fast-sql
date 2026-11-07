@@ -14,6 +14,7 @@ private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self
  */
 class SQLDatabase {
     let isReadOnly: Bool
+    private let operationLock = NSRecursiveLock()
     private var db: OpaquePointer?
     private let path: String
     private var inTransaction = false
@@ -86,6 +87,8 @@ class SQLDatabase {
     }
 
     func close() {
+        operationLock.lock()
+        defer { operationLock.unlock() }
         if let db = db {
             sqlite3_close(db)
             self.db = nil
@@ -93,6 +96,8 @@ class SQLDatabase {
     }
 
     func execute(statement: String, params: [Any]) throws -> [String: Any] {
+        operationLock.lock()
+        defer { operationLock.unlock() }
         guard let db = db else {
             throw SQLError.notOpen
         }
@@ -162,6 +167,8 @@ class SQLDatabase {
     }
 
     func beginTransaction() throws {
+        operationLock.lock()
+        defer { operationLock.unlock() }
         guard !inTransaction else {
             throw SQLError.transactionAlreadyActive
         }
@@ -170,6 +177,8 @@ class SQLDatabase {
     }
 
     func commitTransaction() throws {
+        operationLock.lock()
+        defer { operationLock.unlock() }
         guard inTransaction else {
             throw SQLError.noTransactionActive
         }
@@ -178,6 +187,8 @@ class SQLDatabase {
     }
 
     func rollbackTransaction() throws {
+        operationLock.lock()
+        defer { operationLock.unlock() }
         guard inTransaction else {
             throw SQLError.noTransactionActive
         }

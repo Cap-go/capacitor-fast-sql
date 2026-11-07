@@ -7,8 +7,8 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Native SQL Plugin for Android
@@ -21,7 +21,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
 
     private final String pluginVersion = "8.2.16";
 
-    private Map<String, DatabaseConnection> databases = new HashMap<>();
+    private Map<String, DatabaseConnection> databases = new ConcurrentHashMap<>();
     private SQLHTTPServer server;
 
     @PluginMethod
@@ -78,6 +78,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
             } else {
                 db = new SQLDatabase(dbFile.getAbsolutePath(), walMode, performancePresets, readOnly);
             }
+            db = new SerializedDatabase(db);
             databases.put(database, db);
 
             // Start HTTP server if not already running
