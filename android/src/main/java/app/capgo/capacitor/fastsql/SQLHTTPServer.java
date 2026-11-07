@@ -159,7 +159,15 @@ public class SQLHTTPServer extends NanoHTTPD {
     }
 
     private Response handleBeginTransaction(IHTTPSession session, DatabaseConnection db) throws Exception {
-        readRequestBody(session); // drain any body to keep the connection clean for keep-alive
+        String body = readRequestBody(session);
+        JSONObject request = body.isEmpty() ? new JSONObject() : new JSONObject(body);
+        if (!"SERIALIZABLE".equals(request.optString("isolationLevel", "SERIALIZABLE"))) {
+            return newFixedLengthResponse(
+                Response.Status.BAD_REQUEST,
+                "text/plain",
+                "Only SERIALIZABLE transaction isolation is supported"
+            );
+        }
         db.beginTransaction();
         return newFixedLengthResponse(Response.Status.OK, "application/json", "{}");
     }

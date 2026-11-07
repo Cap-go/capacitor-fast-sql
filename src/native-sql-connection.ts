@@ -1,6 +1,7 @@
 import type { SQLValue, SQLRow, SQLResult, SQLBatchOperation } from './definitions';
 import { IsolationLevel } from './definitions';
 import type { SQLConnection } from './sql-connection';
+import { assertSupportedIsolation } from './transaction-isolation';
 
 /**
  * SQL Connection class that uses HTTP protocol for efficient communication
@@ -96,6 +97,7 @@ export class NativeSQLConnection implements SQLConnection {
    * @param isolationLevel - Optional isolation level
    */
   async beginTransaction(isolationLevel?: IsolationLevel): Promise<void> {
+    assertSupportedIsolation(isolationLevel);
     if (this.inTransaction) {
       throw new Error('Transaction already in progress');
     }

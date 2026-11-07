@@ -283,6 +283,12 @@ class SQLHTTPServer {
     }
 
     private func handleBeginTransactionRequest(request: HTTPRequest) -> HTTPResponse {
+        if !request.body.isEmpty {
+            guard let body = try? JSONSerialization.jsonObject(with: request.body) as? [String: Any],
+                  (body["isolationLevel"] as? String ?? "SERIALIZABLE") == "SERIALIZABLE" else {
+                return HTTPResponse(.badRequest, body: Data("Only SERIALIZABLE transaction isolation is supported".utf8))
+            }
+        }
         // Authenticate
         guard let authHeader = request.headers["Authorization"],
               authHeader == "Bearer \(token)" else {

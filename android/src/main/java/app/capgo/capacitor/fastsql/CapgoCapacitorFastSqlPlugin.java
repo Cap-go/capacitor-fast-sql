@@ -173,6 +173,10 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
 
     @PluginMethod
     public void beginTransaction(PluginCall call) {
+        if (!"SERIALIZABLE".equals(call.getString("isolationLevel", "SERIALIZABLE"))) {
+            call.reject("Only SERIALIZABLE transaction isolation is supported");
+            return;
+        }
         String database = call.getString("database");
         if (database == null) {
             call.reject("Database name is required");
