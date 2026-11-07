@@ -111,6 +111,14 @@ export interface WebConfig {
   useOpfs?: boolean;
 
   /**
+   * Reject web connections unless the Worker confirms persistent storage.
+   * Defaults to false for compatibility. Consider requiring persistence by default
+   * in the next Capacitor major, rather than changing fallback behavior in a minor.
+   * @default false
+   */
+  requirePersistence?: boolean;
+
+  /**
    * Custom Worker instance or factory for SQLite Wasm.
    * Advanced: override the default worker from `@sqlite.org/sqlite-wasm`.
    */
@@ -155,6 +163,8 @@ export interface CapgoCapacitorFastSqlPlugin {
     port: number;
     token: string;
     database: string;
+    /** Whether the web Worker confirms persistent storage. Absent on native. */
+    persistent?: boolean;
   }>;
 
   /**
@@ -187,6 +197,8 @@ export interface CapgoCapacitorFastSqlPlugin {
   getServerInfo(options: { database: string }): Promise<{
     port: number;
     token: string;
+    /** Whether the web Worker confirms persistent storage. Absent on native. */
+    persistent?: boolean;
   }>;
 
   /**
