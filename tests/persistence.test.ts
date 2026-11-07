@@ -48,3 +48,12 @@ test('connect and server info report confirmed persistence', async () => {
   await expect(plugin.configureWeb({ useOpfs: false })).rejects.toThrow('before opening');
   await plugin.disconnect({ database: 'persistent' });
 });
+
+test('read-only opens still reject before creating a Worker database', async () => {
+  const plugin = new CapgoCapacitorFastSqlWeb();
+  const before = opens;
+  await expect(plugin.connect({ database: 'read-only', readOnly: true })).rejects.toThrow(
+    'Read-only opens are not supported',
+  );
+  expect(opens).toBe(before);
+});

@@ -65,7 +65,9 @@ export interface SQLConnectionOptions {
   encryptionKey?: string;
 
   /**
-   * Read-only mode
+   * Open an existing native database read-only. Writes and missing-file opens fail.
+   * WAL mode changes are skipped for read-only connections.
+   * The web Worker transport rejects this option instead of silently opening writable.
    */
   readOnly?: boolean;
 
@@ -124,7 +126,9 @@ export interface WebConfig {
 }
 
 /**
- * Transaction isolation levels
+ * Transaction isolation levels. Only Serializable is supported by the current
+ * SQLite backends. Other values are retained for source compatibility but reject
+ * before starting a transaction; they are not silently mapped to another level.
  */
 export enum IsolationLevel {
   ReadUncommitted = 'READ UNCOMMITTED',

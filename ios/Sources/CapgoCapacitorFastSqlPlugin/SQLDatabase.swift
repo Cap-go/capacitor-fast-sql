@@ -13,6 +13,7 @@ private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self
  * SQLite database wrapper for iOS
  */
 class SQLDatabase {
+    let isReadOnly: Bool
     private var db: OpaquePointer?
     private let path: String
     private var inTransaction = false
@@ -20,13 +21,15 @@ class SQLDatabase {
     init(
         path: String,
         encrypted: Bool = false,
+        readOnly: Bool = false,
         encryptionKey: String? = nil,
         walMode: Bool = false,
         performancePresets: Bool = false
     ) throws {
         self.path = path
+        self.isReadOnly = readOnly
 
-        let flags = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX
+        let flags = (readOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE) | SQLITE_OPEN_FULLMUTEX
         let result = sqlite3_open_v2(path, &db, flags, nil)
 
         guard result == SQLITE_OK else {
@@ -64,7 +67,7 @@ class SQLDatabase {
             #endif
         }
 
-        try applyPerformanceOptions(walMode: walMode, performancePresets: performancePresets)
+        try applyPerformanceOptions(walMode: walMode && !readOnly, performancePresets: performancePresets)
         needsClose = false
     }
 
@@ -148,8 +151,9 @@ class SQLDatabase {
             }
         }
 
-        let changes = sqlite3_changes(db)
-        let lastInsertId = sqlite3_last_insert_rowid(db)
+        let readOnly = sqlite3_stmt_readonly(stmt) != 0
+        let changes = readOnly ? 0 : sqlite3_changes(db)
+        let lastInsertId = readOnly ? 0 : sqlite3_last_insert_rowid(db)
 
         return [
             "rows": rows,
@@ -211,7 +215,10 @@ class SQLDatabase {
                   type == "binary",
                   let base64 = dict["_data"] as? String,
                   let data = Data(base64Encoded: base64) {
-            // Handle binary data
+            // SQLite treats a null blob pointer as SQL NULL, even with length zero.
+            if data.isEmpty {
+                return sqlite3_bind_zeroblob(stmt, index, 0)
+            }
             return data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
                 sqlite3_bind_blob(stmt, index, bytes.baseAddress, Int32(data.count), sqliteTransient)
             }
@@ -238,6 +245,9 @@ class SQLDatabase {
             }
             return NSNull()
         case SQLITE_BLOB:
+            if sqlite3_column_bytes(stmt, index) == 0 {
+                return ["_type": "binary", "_data": ""]
+            }
             if let blob = sqlite3_column_blob(stmt, index) {
                 let size = sqlite3_column_bytes(stmt, index)
                 let data = Data(bytes: blob, count: Int(size))

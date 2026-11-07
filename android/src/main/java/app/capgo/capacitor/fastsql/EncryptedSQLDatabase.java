@@ -5,9 +5,9 @@ import android.util.Base64;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import net.zetetic.database.sqlcipher.SQLiteCursor;
 import net.zetetic.database.sqlcipher.SQLiteDatabase;
+import net.zetetic.database.sqlcipher.SQLiteProgram;
 import net.zetetic.database.sqlcipher.SQLiteStatement;
 import org.json.JSONObject;
 
@@ -20,6 +20,11 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
     private volatile boolean inTransaction = false;
 
     public EncryptedSQLDatabase(String path, String encryptionKey, boolean walMode, boolean performancePresets) throws Exception {
+        this(path, encryptionKey, walMode, performancePresets, false);
+    }
+
+    public EncryptedSQLDatabase(String path, String encryptionKey, boolean walMode, boolean performancePresets, boolean readOnly)
+        throws Exception {
         if (encryptionKey == null || encryptionKey.isEmpty()) {
             throw new Exception("Encryption key is required when encrypted is true");
         }
@@ -34,8 +39,14 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
             );
         }
         byte[] keyBytes = encryptionKey.getBytes(StandardCharsets.UTF_8);
-        this.db = SQLiteDatabase.openOrCreateDatabase(path, keyBytes, null, null);
-        SQLPerformanceConfig.apply(db::execSQL, walMode, performancePresets);
+        this.db = readOnly
+            ? SQLiteDatabase.openDatabase(path, keyBytes, null, SQLiteDatabase.OPEN_READONLY, null)
+            : SQLiteDatabase.openOrCreateDatabase(path, keyBytes, null, null);
+        SQLPerformanceConfig.apply(db::execSQL, walMode && !readOnly, performancePresets);
+    }
+
+    public boolean isReadOnly() {
+        return db.isReadOnly();
     }
 
     public void close() {
@@ -49,23 +60,24 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
             throw new Exception("Database is not open");
         }
 
-        String trimmedStatement = statement.trim().toUpperCase();
-        boolean isQuery =
-            trimmedStatement.startsWith("SELECT") || trimmedStatement.startsWith("PRAGMA") || trimmedStatement.startsWith("EXPLAIN");
-
-        if (isQuery) {
-            return executeQuery(statement, params);
-        } else {
-            return executeUpdate(statement, params);
-        }
-    }
-
-    private JSObject executeQuery(String statement, JSArray params) throws Exception {
-        Cursor cursor = null;
+        Cursor cursor = db.rawQueryWithFactory(
+            (database, driver, editTable, query) -> {
+                try {
+                    bindParams(query, params);
+                } catch (Exception error) {
+                    throw new IllegalArgumentException("Invalid query parameters", error);
+                }
+                return new SQLiteCursor(driver, editTable, query);
+            },
+            statement,
+            new String[0],
+            null
+        );
         try {
-            String[] bindArgs = convertParamsToStringArray(params);
-            cursor = db.rawQuery(statement, bindArgs);
-
+            if (cursor.getColumnCount() == 0) {
+                cursor.close();
+                return executeUpdate(statement, params);
+            }
             JSArray rows = new JSArray();
             while (cursor.moveToNext()) {
                 JSObject row = new JSObject();
@@ -142,32 +154,7 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
         inTransaction = false;
     }
 
-    private String[] convertParamsToStringArray(JSArray params) throws Exception {
-        if (params == null || params.length() == 0) {
-            return new String[0];
-        }
-
-        List<String> args = new ArrayList<>();
-        for (int i = 0; i < params.length(); i++) {
-            Object value = params.get(i);
-
-            if (value == null || value == JSONObject.NULL) {
-                args.add(null);
-            } else if (value instanceof JSONObject) {
-                JSONObject obj = (JSONObject) value;
-                if (obj.has("_type") && "binary".equals(obj.getString("_type"))) {
-                    args.add(obj.getString("_data"));
-                } else {
-                    args.add(value.toString());
-                }
-            } else {
-                args.add(value.toString());
-            }
-        }
-        return args.toArray(new String[0]);
-    }
-
-    private void bindParams(SQLiteStatement stmt, JSArray params) throws Exception {
+    private void bindParams(SQLiteProgram stmt, JSArray params) throws Exception {
         if (params == null || params.length() == 0) {
             return;
         }

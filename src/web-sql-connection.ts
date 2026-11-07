@@ -7,6 +7,7 @@ import type {
   IsolationLevel,
 } from './definitions';
 import type { SQLConnection } from './sql-connection';
+import { assertSupportedIsolation } from './transaction-isolation';
 
 /**
  * Web implementation of SQLConnection that calls the Capacitor plugin directly,
@@ -60,6 +61,7 @@ export class WebSQLConnection implements SQLConnection {
    * @param isolationLevel - Optional isolation level
    */
   async beginTransaction(isolationLevel?: IsolationLevel): Promise<void> {
+    assertSupportedIsolation(isolationLevel);
     if (this.inTransaction) {
       throw new Error('Transaction already in progress');
     }

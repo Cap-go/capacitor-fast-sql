@@ -10,6 +10,7 @@ import type {
   IsolationLevel,
   WebConfig,
 } from './definitions';
+import { assertSupportedIsolation } from './transaction-isolation';
 
 type DbInfo = {
   dbId: string;
@@ -60,12 +61,18 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
   }
 
   private dbPath(database: string): string {
+    if (!database || database === '.' || database === '..' || /[/\\\0]/.test(database)) {
+      throw new Error('Database must be a non-empty file name without path separators');
+    }
     return `/capgo-fast-sql/${database}.sqlite3`;
   }
 
   async connect(
     options: SQLConnectionOptions,
   ): Promise<{ port: number; token: string; database: string; persistent: boolean }> {
+    if (options.readOnly) {
+      throw new Error('Read-only opens are not supported by the SQLite Wasm Worker transport');
+    }
     if (this.databases.has(options.database)) {
       const existing = this.databases.get(options.database)!;
       return {
@@ -76,15 +83,15 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
       };
     }
 
-    const promiser = await this.getPromiser();
     const path = this.dbPath(options.database);
+    const promiser = await this.getPromiser();
     const useOpfs = this.webConfig.useOpfs !== false;
 
     let openResult;
     if (useOpfs) {
       try {
         openResult = await promiser('open', {
-          filename: `file:${path}?vfs=opfs`,
+          filename: `file:/capgo-fast-sql/${encodeURIComponent(options.database)}.sqlite3?vfs=opfs`,
         });
       } catch (opfsError) {
         if (this.webConfig.requirePersistence) throw opfsError;
@@ -200,6 +207,7 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
   }
 
   async beginTransaction(options: { database: string; isolationLevel?: IsolationLevel }): Promise<void> {
+    assertSupportedIsolation(options.isolationLevel);
     await this.execute({
       database: options.database,
       statement: 'BEGIN TRANSACTION',
