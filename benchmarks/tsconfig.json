@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "noEmit": true,
+    "paths": {
+      "@capgo/capacitor-fast-sql": [
+        "../src/index.ts"
+      ]
+    }
+  },
+  "files": [],
+  "include": [
+    "./current.ts",
+    "../src"
+  ]
+}
