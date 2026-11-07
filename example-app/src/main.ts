@@ -1,3 +1,4 @@
+import './benchmark';
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { Capacitor } from '@capacitor/core';
 import type { SQLConnection } from '@capgo/capacitor-fast-sql';
