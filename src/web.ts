@@ -41,7 +41,13 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
    * Must be called before connect() when overriding the default worker.
    */
   async configureWeb(config: WebConfig): Promise<void> {
-    this.webConfig = config;
+    if (this.promiserPromise || this.databases.size > 0) {
+      throw new Error('Configure web storage before opening the first database');
+    }
+    if (config.requirePersistence && config.useOpfs === false) {
+      throw new Error('requirePersistence requires OPFS');
+    }
+    this.webConfig = { ...config };
     this.promiserPromise = null;
   }
 
@@ -57,13 +63,16 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
     return `/capgo-fast-sql/${database}.sqlite3`;
   }
 
-  async connect(options: SQLConnectionOptions): Promise<{ port: number; token: string; database: string }> {
+  async connect(
+    options: SQLConnectionOptions,
+  ): Promise<{ port: number; token: string; database: string; persistent: boolean }> {
     if (this.databases.has(options.database)) {
       const existing = this.databases.get(options.database)!;
       return {
         port: existing.port,
         token: existing.token,
         database: options.database,
+        persistent: existing.persistent,
       };
     }
 
@@ -78,6 +87,7 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
           filename: `file:${path}?vfs=opfs`,
         });
       } catch (opfsError) {
+        if (this.webConfig.requirePersistence) throw opfsError;
         console.warn(
           '[CapgoCapacitorFastSql] OPFS unavailable; web database will not persist across reloads. ' +
             'Serve with Cross-Origin-Opener-Policy: same-origin and Cross-Origin-Embedder-Policy: require-corp.',
@@ -95,7 +105,15 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
       throw new Error('Failed to open SQLite Wasm database: missing dbId');
     }
 
-    await this.applyPerformanceConfig(promiser, dbId, options);
+    try {
+      if (this.webConfig.requirePersistence && !persistent) {
+        throw new Error('SQLite Worker did not confirm persistent storage');
+      }
+      await this.applyPerformanceConfig(promiser, dbId, options);
+    } catch (error) {
+      await promiser({ type: 'close', dbId, args: {} });
+      throw error;
+    }
 
     const token = this.generateToken();
     const port = this.nextPort++;
@@ -105,6 +123,7 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
       port,
       token,
       database: options.database,
+      persistent,
     };
   }
 
@@ -120,7 +139,7 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
     this.databases.delete(options.database);
   }
 
-  async getServerInfo(options: { database: string }): Promise<{ port: number; token: string }> {
+  async getServerInfo(options: { database: string }): Promise<{ port: number; token: string; persistent: boolean }> {
     const dbInfo = this.databases.get(options.database);
     if (!dbInfo) {
       throw new Error(`Database '${options.database}' is not connected`);
@@ -129,6 +148,7 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
     return {
       port: dbInfo.port,
       token: dbInfo.token,
+      persistent: dbInfo.persistent,
     };
   }
 
