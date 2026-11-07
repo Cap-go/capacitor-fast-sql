@@ -118,7 +118,9 @@ export interface WebConfig {
 }
 
 /**
- * Transaction isolation levels
+ * Transaction isolation levels. Only Serializable is supported by the current
+ * SQLite backends. Other values are retained for source compatibility but reject
+ * before starting a transaction; they are not silently mapped to another level.
  */
 export enum IsolationLevel {
   ReadUncommitted = 'READ UNCOMMITTED',

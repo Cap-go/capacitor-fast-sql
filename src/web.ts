@@ -10,6 +10,7 @@ import type {
   IsolationLevel,
   WebConfig,
 } from './definitions';
+import { assertSupportedIsolation } from './transaction-isolation';
 
 type DbInfo = {
   dbId: string;
@@ -186,6 +187,7 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
   }
 
   async beginTransaction(options: { database: string; isolationLevel?: IsolationLevel }): Promise<void> {
+    assertSupportedIsolation(options.isolationLevel);
     await this.execute({
       database: options.database,
       statement: 'BEGIN TRANSACTION',
