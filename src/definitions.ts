@@ -65,7 +65,9 @@ export interface SQLConnectionOptions {
   encryptionKey?: string;
 
   /**
-   * Read-only mode
+   * Open an existing native database read-only. Writes and missing-file opens fail.
+   * WAL mode changes are skipped for read-only connections.
+   * The web Worker transport rejects this option instead of silently opening writable.
    */
   readOnly?: boolean;
 

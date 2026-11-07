@@ -20,6 +20,11 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
     private volatile boolean inTransaction = false;
 
     public EncryptedSQLDatabase(String path, String encryptionKey, boolean walMode, boolean performancePresets) throws Exception {
+        this(path, encryptionKey, walMode, performancePresets, false);
+    }
+
+    public EncryptedSQLDatabase(String path, String encryptionKey, boolean walMode, boolean performancePresets, boolean readOnly)
+        throws Exception {
         if (encryptionKey == null || encryptionKey.isEmpty()) {
             throw new Exception("Encryption key is required when encrypted is true");
         }
@@ -34,8 +39,14 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
             );
         }
         byte[] keyBytes = encryptionKey.getBytes(StandardCharsets.UTF_8);
-        this.db = SQLiteDatabase.openOrCreateDatabase(path, keyBytes, null, null);
-        SQLPerformanceConfig.apply(db::execSQL, walMode, performancePresets);
+        this.db = readOnly
+            ? SQLiteDatabase.openDatabase(path, keyBytes, null, SQLiteDatabase.OPEN_READONLY, null)
+            : SQLiteDatabase.openOrCreateDatabase(path, keyBytes, null, null);
+        SQLPerformanceConfig.apply(db::execSQL, walMode && !readOnly, performancePresets);
+    }
+
+    public boolean isReadOnly() {
+        return db.isReadOnly();
     }
 
     public void close() {

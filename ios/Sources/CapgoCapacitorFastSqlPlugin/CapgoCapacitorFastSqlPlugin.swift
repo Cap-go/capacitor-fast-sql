@@ -44,7 +44,11 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
         }
 
         // Check if already connected
-        if databases[database] != nil {
+        if let existing = databases[database] {
+            guard existing.isReadOnly == (call.getBool("readOnly") ?? false) else {
+                call.reject("Database is already open with a different readOnly option")
+                return
+            }
             if let server = server {
                 call.resolve([
                     "port": server.port,
@@ -63,6 +67,7 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
             let db = try SQLDatabase(
                 path: dbPath,
                 encrypted: encrypted,
+                readOnly: call.getBool("readOnly") ?? false,
                 encryptionKey: encryptionKey,
                 walMode: walMode,
                 performancePresets: performancePresets

@@ -21,8 +21,18 @@ public class SQLDatabase implements DatabaseConnection {
     private volatile boolean inTransaction = false;
 
     public SQLDatabase(String path, boolean walMode, boolean performancePresets) throws Exception {
-        this.db = SQLiteDatabase.openOrCreateDatabase(path, null);
-        SQLPerformanceConfig.apply(db::execSQL, walMode, performancePresets);
+        this(path, walMode, performancePresets, false);
+    }
+
+    public SQLDatabase(String path, boolean walMode, boolean performancePresets, boolean readOnly) throws Exception {
+        this.db = readOnly
+            ? SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READONLY)
+            : SQLiteDatabase.openOrCreateDatabase(path, null);
+        SQLPerformanceConfig.apply(db::execSQL, walMode && !readOnly, performancePresets);
+    }
+
+    public boolean isReadOnly() {
+        return db.isReadOnly();
     }
 
     public void close() {
