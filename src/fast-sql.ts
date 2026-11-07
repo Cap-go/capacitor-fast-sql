@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 
 import type { SQLConnectionOptions } from './definitions';
+import { ManagedSQLConnection } from './managed-sql-connection';
 import { NativeSQLConnection } from './native-sql-connection';
 import { CapgoCapacitorFastSql } from './plugin';
 import type { SQLConnection } from './sql-connection';
@@ -43,6 +44,11 @@ export class FastSQL {
     } else {
       connection = new WebSQLConnection(info.database, CapgoCapacitorFastSql);
     }
+
+    connection = new ManagedSQLConnection(connection, {
+      retain: () => this.retainConnection(options.database),
+      release: () => this.releaseConnection(options.database),
+    });
 
     // Store connection
     this.connections.set(options.database, connection);
@@ -129,8 +135,6 @@ export class FastSQL {
     const databases = Array.from(this.connections.keys());
     await Promise.all(
       databases.map((db) => {
-        this.connectionRetainers.delete(db);
-        this.pendingDisconnects.delete(db);
         return this.disconnect(db);
       }),
     );
