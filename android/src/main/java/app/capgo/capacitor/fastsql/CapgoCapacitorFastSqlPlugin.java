@@ -250,8 +250,22 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
         call.resolve(ret);
     }
 
-    private File getDatabasePath(String database) {
-        File dataDir = getContext().getFilesDir();
-        return new File(dataDir, database + ".db");
+    private File getDatabasePath(String database) throws java.io.IOException {
+        if (
+            database.isEmpty() ||
+            database.equals(".") ||
+            database.equals("..") ||
+            database.indexOf('/') >= 0 ||
+            database.indexOf('\\') >= 0 ||
+            database.indexOf(0) >= 0
+        ) {
+            throw new java.io.IOException("Database must be a non-empty file name without path separators");
+        }
+        File dataDir = getContext().getFilesDir().getCanonicalFile();
+        File dbFile = new File(dataDir, database + ".db").getCanonicalFile();
+        if (!dataDir.equals(dbFile.getParentFile())) {
+            throw new java.io.IOException("Database path must remain inside app storage");
+        }
+        return dbFile;
     }
 }

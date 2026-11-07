@@ -245,6 +245,12 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func getDatabasePath(_ database: String) throws -> String {
+        guard !database.isEmpty, database != ".", database != "..",
+              !database.contains("/"), !database.contains("\\"), !database.contains("\0") else {
+            throw NSError(domain: "CapgoCapacitorFastSQL", code: 2, userInfo: [
+                NSLocalizedDescriptionKey: "Database must be a non-empty file name without path separators"
+            ])
+        }
         let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
         guard let documentsDirectory = paths.first else {
             throw NSError(domain: "CapgoCapacitorFastSQL", code: 1, userInfo: [
@@ -253,6 +259,13 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
         }
 
         let dbPath = (documentsDirectory as NSString).appendingPathComponent("\(database).db")
-        return dbPath
+        let root = URL(fileURLWithPath: documentsDirectory).resolvingSymlinksInPath().standardizedFileURL
+        let resolved = URL(fileURLWithPath: dbPath).resolvingSymlinksInPath().standardizedFileURL
+        guard resolved.deletingLastPathComponent().path == root.path else {
+            throw NSError(domain: "CapgoCapacitorFastSQL", code: 2, userInfo: [
+                NSLocalizedDescriptionKey: "Database path must remain inside app storage"
+            ])
+        }
+        return resolved.path
     }
 }

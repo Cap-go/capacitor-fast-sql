@@ -54,6 +54,9 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
   }
 
   private dbPath(database: string): string {
+    if (!database || database === '.' || database === '..' || /[/\\\0]/.test(database)) {
+      throw new Error('Database must be a non-empty file name without path separators');
+    }
     return `/capgo-fast-sql/${database}.sqlite3`;
   }
 
@@ -67,15 +70,15 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
       };
     }
 
-    const promiser = await this.getPromiser();
     const path = this.dbPath(options.database);
+    const promiser = await this.getPromiser();
     const useOpfs = this.webConfig.useOpfs !== false;
 
     let openResult;
     if (useOpfs) {
       try {
         openResult = await promiser('open', {
-          filename: `file:${path}?vfs=opfs`,
+          filename: `file:/capgo-fast-sql/${encodeURIComponent(options.database)}.sqlite3?vfs=opfs`,
         });
       } catch (opfsError) {
         console.warn(
