@@ -31,6 +31,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
             call.reject("Database name is required");
             return;
         }
+        boolean readOnly = call.getBoolean("readOnly", false);
         boolean encrypted = call.getBoolean("encrypted", false);
         String encryptionKey = call.getString("encryptionKey");
         boolean walMode = call.getBoolean("walMode", false);
@@ -42,6 +43,10 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
 
         // Check if already connected
         if (databases.containsKey(database)) {
+            if (databases.get(database).isReadOnly() != readOnly) {
+                call.reject("Database is already open with a different readOnly option");
+                return;
+            }
             if (server != null) {
                 JSObject ret = new JSObject();
                 ret.put("port", server.getPort());
@@ -69,9 +74,9 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
                     );
                     return;
                 }
-                db = new EncryptedSQLDatabase(dbFile.getAbsolutePath(), encryptionKey, walMode, performancePresets);
+                db = new EncryptedSQLDatabase(dbFile.getAbsolutePath(), encryptionKey, walMode, performancePresets, readOnly);
             } else {
-                db = new SQLDatabase(dbFile.getAbsolutePath(), walMode, performancePresets);
+                db = new SQLDatabase(dbFile.getAbsolutePath(), walMode, performancePresets, readOnly);
             }
             databases.put(database, db);
 
