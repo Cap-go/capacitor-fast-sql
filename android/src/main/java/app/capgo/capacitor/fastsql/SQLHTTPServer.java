@@ -24,6 +24,7 @@ import org.json.JSONObject;
 public class SQLHTTPServer extends NanoHTTPD {
 
     private final String token;
+    private final String allowedOrigin;
     private final Map<String, DatabaseConnection> databases;
     private final ExecutorService requestExecutor = Executors.newSingleThreadExecutor((runnable) -> {
         Thread thread = new Thread(runnable);
@@ -33,7 +34,17 @@ public class SQLHTTPServer extends NanoHTTPD {
     });
 
     public SQLHTTPServer(Map<String, DatabaseConnection> databases) throws IOException {
+        this(databases, "https://localhost");
+    }
+
+    public SQLHTTPServer(Map<String, DatabaseConnection> databases, String appUrl) throws IOException {
         super("127.0.0.1", 0);
+        java.net.URI uri = java.net.URI.create(appUrl);
+        String scheme = uri.getScheme().toLowerCase(java.util.Locale.ROOT);
+        String host = uri.getHost().toLowerCase(java.util.Locale.ROOT);
+        int port = uri.getPort();
+        boolean defaultPort = port == -1 || (scheme.equals("https") && port == 443) || (scheme.equals("http") && port == 80);
+        this.allowedOrigin = scheme + "://" + host + (defaultPort ? "" : ":" + port);
         this.databases = databases;
         this.token = generateToken();
     }
@@ -47,11 +58,15 @@ public class SQLHTTPServer extends NanoHTTPD {
     }
 
     private Response addCorsHeaders(Response response) {
-        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Origin", allowedOrigin);
         response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Database");
         response.addHeader("Access-Control-Max-Age", "86400");
         return response;
+    }
+
+    boolean acceptsOrigin(String origin) {
+        return origin == null || allowedOrigin.equals(origin);
     }
 
     @Override
@@ -62,6 +77,9 @@ public class SQLHTTPServer extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
+        if (!acceptsOrigin(session.getHeaders().get("origin"))) {
+            return newFixedLengthResponse(Response.Status.FORBIDDEN, "text/plain", "Origin is not allowed");
+        }
         if (Method.OPTIONS.equals(session.getMethod())) {
             return addCorsHeaders(newFixedLengthResponse(Response.Status.OK, "text/plain", ""));
         }

@@ -79,7 +79,7 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
                 var initialDatabases = databases
                 initialDatabases[database] = db
                 do {
-                    let newServer = try SQLHTTPServer(databases: initialDatabases)
+                    let newServer = try SQLHTTPServer(databases: initialDatabases, origin: bridge?.config.serverURL)
                     try newServer.start()
                     databases[database] = db
                     self.server = newServer
