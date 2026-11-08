@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { FastSQLVectorStore, CapgoCapacitorFastSql, NativeSQLConnection } from '@capgo/capacitor-fast-sql';
 import { runCurrentBenchmark } from './benchmarks/current';
 import { runComparison } from './benchmarks/comparison';
@@ -16,11 +17,14 @@ if (button instanceof HTMLButtonElement && output) {
     button.disabled = true;
     try {
       if (!Capacitor.isNativePlatform()) throw new Error('Run this baseline inside the native example app');
+      const active = await CapacitorUpdater.current();
+      if (active.bundle.id !== 'builtin') throw new Error('Benchmark requires bundled assets. Clean-install the app or reset CapacitorUpdater to builtin, then restart.');
       const patching = document.getElementById('baseline-patching');
       const httpPatching = patching instanceof HTMLSelectElement && (patching.value === 'enabled' || patching.value === 'disabled') ? patching.value : 'unknown';
       const environment = {
         sourceRevision: inputValue('baseline-revision'), device: inputValue('baseline-device'),
         os: inputValue('baseline-os'), nativeBuild: inputValue('baseline-build'), webView: navigator.userAgent,
+        assetBundle: active.bundle.id,
         httpPatching, transport: `${Capacitor.getPlatform()} current HTTP JSON via global fetch`,
       } satisfies Parameters<typeof runCurrentBenchmark>[0]['environment'];
       const compare = document.getElementById('compare-transports');
@@ -49,9 +53,9 @@ if (button instanceof HTMLButtonElement && output) {
         output.textContent = json;
         const exportInput = document.getElementById('benchmark-export');
         if (exportInput instanceof HTMLInputElement && exportInput.value.trim()) {
-          const endpoint = new URL(exportInput.value.trim());
-          if (endpoint.protocol !== 'http:' || !['localhost', '127.0.0.1'].includes(endpoint.hostname)) throw new Error('Use a local HTTP collector');
           try {
+            const endpoint = new URL(exportInput.value.trim());
+            if (endpoint.protocol !== 'http:' || !['localhost', '127.0.0.1'].includes(endpoint.hostname)) throw new Error('Use a local HTTP collector');
             const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: json });
             if (!response.ok) throw new Error(`Collector rejected report (${response.status})`);
           } catch (error) {

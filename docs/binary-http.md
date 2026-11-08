@@ -91,7 +91,11 @@ The echo path excludes SQLite. Vector results are checked for expected ranking.
 
 Use the native example's comparison checkbox and enter accurate device/build/
 revision details. OTA auto-updates are disabled in the example to preserve the
-installed benchmark assets. Optional report collection is local-only:
+installed benchmark assets.
+The runner also verifies the active updater bundle is `builtin` before starting.
+Use a clean install, or reset CapacitorUpdater to builtin and restart; disabling
+automatic update checks alone does not clear an already active OTA bundle.
+Optional report collection is local-only:
 
 ```sh
 bun scripts/collect-benchmark.ts benchmarks/results/my-device.json

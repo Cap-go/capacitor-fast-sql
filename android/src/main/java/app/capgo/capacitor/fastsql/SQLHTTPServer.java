@@ -104,13 +104,13 @@ public class SQLHTTPServer extends NanoHTTPD {
             return request.get(600, TimeUnit.SECONDS);
         } catch (TimeoutException | RejectedExecutionException error) {
             if (request != null) request.cancel(false);
-            return addCorsHeaders(
-                newFixedLengthResponse(
-                    Response.Status.SERVICE_UNAVAILABLE,
-                    "text/plain",
-                    "Request unavailable; a timed-out write may still complete. Do not automatically retry."
-                )
+            Response response = newFixedLengthResponse(
+                Response.Status.SERVICE_UNAVAILABLE,
+                "text/plain",
+                "Request unavailable; a timed-out write may still complete. Do not automatically retry."
             );
+            response.closeConnection(true);
+            return addCorsHeaders(response);
         } catch (ExecutionException e) {
             if (e.getCause() instanceof IOException || e.getCause() instanceof org.json.JSONException) {
                 Response response = newFixedLengthResponse(Response.Status.BAD_REQUEST, "text/plain", "Invalid SQL/frame request");

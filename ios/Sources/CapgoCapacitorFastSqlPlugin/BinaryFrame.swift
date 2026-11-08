@@ -28,6 +28,7 @@ enum BinaryFrame {
                 attachments.append(bytes)
                 return reference
             }
+            if let number = value as? NSNumber, !number.doubleValue.isFinite { throw BinaryFrameError.invalid }
             if let array = value as? [Any] { return try array.map { try encodeValue($0, depth: depth + 1) } }
             if let object = value as? [String: Any] {
                 return try object.mapValues { try encodeValue($0, depth: depth + 1) }

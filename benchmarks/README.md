@@ -24,6 +24,11 @@ device model, OS, build configuration and HTTP-patching setting. Keep "Compare
 JSON and binary HTTP" checked for the paired experiment; uncheck it for a single
 JSON baseline. Keep the raw downloaded/displayed JSON report. Automatic OTA
 updates are disabled in the example so installed benchmark assets remain stable.
+Disabling update checks does not clear a previously active OTA bundle. Clean-install
+the example before benchmarking, or call `CapacitorUpdater.reset()` with its default
+builtin target and restart the app. The runner calls `CapacitorUpdater.current()`
+before collecting samples, requires `bundle.id === 'builtin'`, and records that ID
+as `environment.assetBundle`. Do not label an OTA bundle with a native source revision.
 
 The implementation is inside `example-app/src/benchmarks/`, so the packed example
 builds without external repository files. `benchmarks/current.ts` re-exports it

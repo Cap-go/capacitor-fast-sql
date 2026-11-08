@@ -2,6 +2,26 @@ import XCTest
 @testable import CapgoCapacitorFastSqlPlugin
 
 final class BinaryFrameTests: XCTestCase {
+    func testHTTPRejectsInfiniteResponsesWithoutCrashing() async throws {
+        let database = try SQLDatabase(path: ":memory:")
+        let server = try SQLHTTPServer(databases: ["test": database])
+        try server.start()
+        defer { server.stop(); database.close() }
+        for binary in [false, true] {
+            let url = try XCTUnwrap(URL(string: "http://127.0.0.1:\(server.port)/execute"))
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.timeoutInterval = 10
+            request.setValue("Bearer \(server.token)", forHTTPHeaderField: "Authorization")
+            request.setValue("test", forHTTPHeaderField: "X-Database")
+            request.setValue(binary ? BinaryFrame.contentType : "application/json", forHTTPHeaderField: "Content-Type")
+            let payload: [String: Any] = ["statement": "SELECT 1e999 AS value", "params": []]
+            request.httpBody = try binary ? BinaryFrame.encode(payload) : JSONSerialization.data(withJSONObject: payload)
+            let (_, response) = try await URLSession.shared.data(for: request)
+            XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, 500)
+        }
+    }
+
     func testSharedJavaScriptGolden() throws {
         let url = try XCTUnwrap(Bundle.module.url(forResource: "binary-v1", withExtension: "bin", subdirectory: "Fixtures"))
         let request = try XCTUnwrap(try BinaryFrame.decode(Data(contentsOf: url)) as? [String: Any])
@@ -25,6 +45,14 @@ final class BinaryFrameTests: XCTestCase {
     }
 
     func testMalformedFrames() throws {
+        for number in [Double.infinity, -Double.infinity, Double.nan] {
+            XCTAssertThrowsError(try BinaryFrame.encode(["rows": [["value": number]]]))
+        }
+        let database = try SQLDatabase(path: ":memory:")
+        defer { database.close() }
+        let infinite = try database.execute(statement: "SELECT 1e999 AS value", params: [], binaryResults: true)
+        XCTAssertThrowsError(try BinaryFrame.encode(infinite))
+        XCTAssertFalse(JSONSerialization.isValidJSONObject(infinite))
         let valid = try BinaryFrame.encode(["value": Data([1, 2])])
         XCTAssertThrowsError(try BinaryFrame.decode(valid.dropLast()))
         var version = valid

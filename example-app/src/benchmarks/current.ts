@@ -8,6 +8,7 @@ export interface BenchmarkEnvironment {
   nativeBuild: string;
   httpPatching: 'enabled' | 'disabled' | 'unknown';
   transport: string;
+  assetBundle?: string;
 }
 
 export type TransportMetrics = ReturnType<NativeSQLConnection['getTransportMetrics']>;

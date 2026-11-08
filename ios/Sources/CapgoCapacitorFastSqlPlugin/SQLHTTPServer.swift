@@ -240,6 +240,7 @@ class SQLHTTPServer {
             }
             let data: Data
             do {
+                if !binary && !JSONSerialization.isValidJSONObject(result) { throw BinaryFrameError.invalid }
                 data = try binary ? BinaryFrame.encode(result) : JSONSerialization.data(withJSONObject: result)
             } catch {
                 return HTTPResponse(.internalServerError, body: Data("Could not encode SQL response; a write may already be committed".utf8))

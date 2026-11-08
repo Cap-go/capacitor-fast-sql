@@ -12,6 +12,7 @@ const config: CapacitorConfig = {
     },
     CapacitorUpdater: {
       appId: 'com.capgo.fastsql.example',
+      // Benchmark startup also verifies builtin assets; this does not reset an existing OTA bundle.
       autoUpdate: false,
       autoSplashscreen: true,
       directUpdate: 'always',
