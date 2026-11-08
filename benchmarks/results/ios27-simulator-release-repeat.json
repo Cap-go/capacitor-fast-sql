@@ -1,0 +1,4409 @@
+{
+  "schemaVersion": 1,
+  "environment": {
+    "sourceRevision": "2b661244e0a2edcee4e68ef4f9ef222850085f71",
+    "device": "iPhone simulator arm64, capgo-pr89-iphone",
+    "os": "iOS 27.0 simulator",
+    "nativeBuild": "Release optimized arm64, Apple M5 Pro host",
+    "webView": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+    "httpPatching": "disabled",
+    "transport": "ios JSON/binary HTTP comparison"
+  },
+  "order": [
+    "http-json",
+    "http-binary",
+    "http-binary",
+    "http-json",
+    "http-json",
+    "http-binary",
+    "http-binary",
+    "http-json"
+  ],
+  "runs": [
+    {
+      "round": 0,
+      "transport": "http-json",
+      "report": {
+        "schemaVersion": 2,
+        "timestamp": "2026-11-08T00:54:56.150Z",
+        "environment": {
+          "sourceRevision": "2b661244e0a2edcee4e68ef4f9ef222850085f71",
+          "device": "iPhone simulator arm64, capgo-pr89-iphone",
+          "os": "iOS 27.0 simulator",
+          "nativeBuild": "Release optimized arm64, Apple M5 Pro host",
+          "webView": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+          "httpPatching": "disabled",
+          "transport": "http-json"
+        },
+        "iterations": 10,
+        "warmups": 3,
+        "requestedOptions": {
+          "encrypted": false,
+          "walMode": false,
+          "performancePresets": false
+        },
+        "configuration": {
+          "sqlite": [
+            {
+              "version": "3.54.0"
+            }
+          ],
+          "journal": [
+            {
+              "journal_mode": "delete"
+            }
+          ],
+          "synchronous": [
+            {
+              "synchronous": 2
+            }
+          ],
+          "foreignKeys": [
+            {
+              "foreign_keys": 1
+            }
+          ],
+          "busyTimeout": [
+            {
+              "timeout": 0
+            }
+          ],
+          "pageSize": [
+            {
+              "page_size": 4096
+            }
+          ]
+        },
+        "fixture": {
+          "blobSizes": [
+            0,
+            65536,
+            1048576
+          ],
+          "rowCount": 1000,
+          "vectorRows": 1000,
+          "dimensions": 64
+        },
+        "results": [
+          {
+            "name": "tiny-select",
+            "unitsPerSample": 1,
+            "warmupMs": [
+              2,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 450,
+              "responseBytes": 550,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              2,
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              2
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "rows-1000",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              4,
+              4,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 790,
+              "responseBytes": 308230,
+              "encodeMs": 0,
+              "decodeMs": 2
+            },
+            "samplesMs": [
+              4,
+              4,
+              3,
+              4,
+              4,
+              3,
+              4,
+              3,
+              4,
+              3
+            ],
+            "meanMs": 3.6,
+            "p50Ms": 4,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "transport-echo-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              6,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 570,
+              "responseBytes": 670,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              2,
+              3,
+              2,
+              3
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-upload-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1170,
+              "responseBytes": 440,
+              "encodeMs": 1,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              2,
+              2,
+              3,
+              3,
+              2,
+              2,
+              2
+            ],
+            "meanMs": 2.5,
+            "p50Ms": 2,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-download-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              2,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 850,
+              "responseBytes": 830,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              2,
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              2,
+              3,
+              2
+            ],
+            "meanMs": 2.5,
+            "p50Ms": 2,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "transport-echo-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              11,
+              4,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 874410,
+              "responseBytes": 888110,
+              "encodeMs": 5,
+              "decodeMs": 2
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4
+            ],
+            "meanMs": 3.7,
+            "p50Ms": 4,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "blob-upload-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              4,
+              3,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 875010,
+              "responseBytes": 440,
+              "encodeMs": 3,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              4,
+              3,
+              4,
+              3,
+              3,
+              4,
+              4,
+              3,
+              3
+            ],
+            "meanMs": 3.4,
+            "p50Ms": 3,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "blob-download-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 850,
+              "responseBytes": 888270,
+              "encodeMs": 0,
+              "decodeMs": 2
+            },
+            "samplesMs": [
+              4,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 3.1,
+            "p50Ms": 3,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "transport-echo-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              26,
+              24,
+              23
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 13981610,
+              "responseBytes": 14202770,
+              "encodeMs": 105,
+              "decodeMs": 29
+            },
+            "samplesMs": [
+              23,
+              23,
+              25,
+              20,
+              24,
+              21,
+              22,
+              23,
+              17,
+              19
+            ],
+            "meanMs": 21.7,
+            "p50Ms": 22,
+            "p95Ms": 25,
+            "p99Ms": 25
+          },
+          {
+            "name": "blob-upload-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              15,
+              16,
+              13
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 13982210,
+              "responseBytes": 440,
+              "encodeMs": 127,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              14,
+              14,
+              18,
+              21,
+              24,
+              22,
+              26,
+              17,
+              20,
+              21
+            ],
+            "meanMs": 19.7,
+            "p50Ms": 20,
+            "p95Ms": 26,
+            "p99Ms": 26
+          },
+          {
+            "name": "blob-download-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              8,
+              9,
+              7
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 850,
+              "responseBytes": 14202930,
+              "encodeMs": 0,
+              "decodeMs": 29
+            },
+            "samplesMs": [
+              8,
+              8,
+              10,
+              8,
+              9,
+              8,
+              8,
+              8,
+              11,
+              8
+            ],
+            "meanMs": 8.6,
+            "p50Ms": 8,
+            "p95Ms": 11,
+            "p99Ms": 11
+          },
+          {
+            "name": "writes-100-individual",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              286,
+              281,
+              281
+            ],
+            "metrics": {
+              "dataRequests": 1000,
+              "requestBytes": 93800,
+              "responseBytes": 41930,
+              "encodeMs": 2,
+              "decodeMs": 3
+            },
+            "samplesMs": [
+              305,
+              285,
+              295,
+              303,
+              291,
+              288,
+              287,
+              298,
+              332,
+              294
+            ],
+            "meanMs": 297.8,
+            "p50Ms": 294,
+            "p95Ms": 332,
+            "p99Ms": 332
+          },
+          {
+            "name": "writes-100-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              38,
+              30,
+              40
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 94960,
+              "responseBytes": 42940,
+              "encodeMs": 1,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              33,
+              31,
+              36,
+              27,
+              39,
+              32,
+              28,
+              36,
+              31,
+              34
+            ],
+            "meanMs": 32.7,
+            "p50Ms": 32,
+            "p95Ms": 39,
+            "p99Ms": 39
+          },
+          {
+            "name": "writes-100-transaction-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              9,
+              9,
+              9
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 94960,
+              "responseBytes": 42940,
+              "encodeMs": 2,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              8,
+              8,
+              8,
+              9,
+              9,
+              9,
+              8,
+              8,
+              8,
+              9
+            ],
+            "meanMs": 8.4,
+            "p50Ms": 8,
+            "p95Ms": 9,
+            "p99Ms": 9
+          },
+          {
+            "name": "vector-top10-1000x64",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              9,
+              8,
+              8
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1480,
+              "responseBytes": 4452750,
+              "encodeMs": 0,
+              "decodeMs": 12
+            },
+            "samplesMs": [
+              8,
+              7,
+              7,
+              9,
+              8,
+              7,
+              7,
+              7,
+              8,
+              8
+            ],
+            "meanMs": 7.6,
+            "p50Ms": 7,
+            "p95Ms": 9,
+            "p99Ms": 9
+          }
+        ]
+      }
+    },
+    {
+      "round": 0,
+      "transport": "http-binary",
+      "report": {
+        "schemaVersion": 2,
+        "timestamp": "2026-11-08T00:55:07.611Z",
+        "environment": {
+          "sourceRevision": "2b661244e0a2edcee4e68ef4f9ef222850085f71",
+          "device": "iPhone simulator arm64, capgo-pr89-iphone",
+          "os": "iOS 27.0 simulator",
+          "nativeBuild": "Release optimized arm64, Apple M5 Pro host",
+          "webView": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+          "httpPatching": "disabled",
+          "transport": "http-binary"
+        },
+        "iterations": 10,
+        "warmups": 3,
+        "requestedOptions": {
+          "encrypted": false,
+          "walMode": false,
+          "performancePresets": false
+        },
+        "configuration": {
+          "sqlite": [
+            {
+              "version": "3.54.0"
+            }
+          ],
+          "journal": [
+            {
+              "journal_mode": "delete"
+            }
+          ],
+          "synchronous": [
+            {
+              "synchronous": 2
+            }
+          ],
+          "foreignKeys": [
+            {
+              "foreign_keys": 1
+            }
+          ],
+          "busyTimeout": [
+            {
+              "timeout": 0
+            }
+          ],
+          "pageSize": [
+            {
+              "page_size": 4096
+            }
+          ]
+        },
+        "fixture": {
+          "blobSizes": [
+            0,
+            65536,
+            1048576
+          ],
+          "rowCount": 1000,
+          "vectorRows": 1000,
+          "dimensions": 64
+        },
+        "results": [
+          {
+            "name": "tiny-select",
+            "unitsPerSample": 1,
+            "warmupMs": [
+              3,
+              2,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 570,
+              "responseBytes": 670,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              2,
+              3,
+              3,
+              2,
+              3,
+              2,
+              3,
+              2,
+              3,
+              2
+            ],
+            "meanMs": 2.5,
+            "p50Ms": 2,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "rows-1000",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              4,
+              4,
+              5
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 910,
+              "responseBytes": 308350,
+              "encodeMs": 0,
+              "decodeMs": 2
+            },
+            "samplesMs": [
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4
+            ],
+            "meanMs": 4,
+            "p50Ms": 4,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "transport-echo-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              2,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 550,
+              "responseBytes": 650,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              2,
+              3,
+              3,
+              2,
+              3,
+              2,
+              3,
+              2,
+              3,
+              2
+            ],
+            "meanMs": 2.5,
+            "p50Ms": 2,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-upload-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              2,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1150,
+              "responseBytes": 560,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              2,
+              2,
+              2,
+              3,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 2.7,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-download-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 970,
+              "responseBytes": 810,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              2,
+              3,
+              2,
+              3,
+              2,
+              3,
+              2,
+              3,
+              3
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "transport-echo-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              3,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 655950,
+              "responseBytes": 656050,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              2,
+              2,
+              3,
+              4,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 2.9,
+            "p50Ms": 3,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "blob-upload-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              4,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 656550,
+              "responseBytes": 560,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              2
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-download-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 970,
+              "responseBytes": 656210,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              2,
+              2,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 2.8,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "transport-echo-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              5,
+              6,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 10486370,
+              "responseBytes": 10486470,
+              "encodeMs": 2,
+              "decodeMs": 3
+            },
+            "samplesMs": [
+              7,
+              5,
+              5,
+              6,
+              6,
+              6,
+              7,
+              7,
+              6,
+              7
+            ],
+            "meanMs": 6.2,
+            "p50Ms": 6,
+            "p95Ms": 7,
+            "p99Ms": 7
+          },
+          {
+            "name": "blob-upload-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              7,
+              5,
+              5
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 10486970,
+              "responseBytes": 560,
+              "encodeMs": 1,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              4,
+              4,
+              5,
+              5,
+              4,
+              5,
+              5,
+              6,
+              5,
+              5
+            ],
+            "meanMs": 4.8,
+            "p50Ms": 5,
+            "p95Ms": 6,
+            "p99Ms": 6
+          },
+          {
+            "name": "blob-download-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              5,
+              4,
+              5
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 970,
+              "responseBytes": 10486630,
+              "encodeMs": 1,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              4,
+              4,
+              5,
+              5,
+              4,
+              4,
+              4,
+              4,
+              5,
+              5
+            ],
+            "meanMs": 4.4,
+            "p50Ms": 4,
+            "p95Ms": 5,
+            "p99Ms": 5
+          },
+          {
+            "name": "writes-100-individual",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              313,
+              326,
+              286
+            ],
+            "metrics": {
+              "dataRequests": 1000,
+              "requestBytes": 105800,
+              "responseBytes": 53930,
+              "encodeMs": 3,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              285,
+              286,
+              286,
+              289,
+              324,
+              288,
+              284,
+              284,
+              285,
+              295
+            ],
+            "meanMs": 290.6,
+            "p50Ms": 286,
+            "p95Ms": 324,
+            "p99Ms": 324
+          },
+          {
+            "name": "writes-100-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              37,
+              31,
+              29
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 95080,
+              "responseBytes": 43060,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              28,
+              30,
+              27,
+              29,
+              28,
+              31,
+              68,
+              30,
+              28,
+              28
+            ],
+            "meanMs": 32.7,
+            "p50Ms": 28,
+            "p95Ms": 68,
+            "p99Ms": 68
+          },
+          {
+            "name": "writes-100-transaction-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              8,
+              8,
+              8
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 95080,
+              "responseBytes": 43060,
+              "encodeMs": 1,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              9,
+              9,
+              9,
+              9,
+              9,
+              8,
+              8,
+              9,
+              8,
+              8
+            ],
+            "meanMs": 8.6,
+            "p50Ms": 9,
+            "p95Ms": 9,
+            "p99Ms": 9
+          },
+          {
+            "name": "vector-top10-1000x64",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              7,
+              8,
+              7
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1600,
+              "responseBytes": 3335080,
+              "encodeMs": 0,
+              "decodeMs": 10
+            },
+            "samplesMs": [
+              7,
+              8,
+              8,
+              7,
+              7,
+              7,
+              8,
+              8,
+              7,
+              9
+            ],
+            "meanMs": 7.6,
+            "p50Ms": 7,
+            "p95Ms": 9,
+            "p99Ms": 9
+          }
+        ]
+      }
+    },
+    {
+      "round": 1,
+      "transport": "http-binary",
+      "report": {
+        "schemaVersion": 2,
+        "timestamp": "2026-11-08T00:55:18.993Z",
+        "environment": {
+          "sourceRevision": "2b661244e0a2edcee4e68ef4f9ef222850085f71",
+          "device": "iPhone simulator arm64, capgo-pr89-iphone",
+          "os": "iOS 27.0 simulator",
+          "nativeBuild": "Release optimized arm64, Apple M5 Pro host",
+          "webView": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+          "httpPatching": "disabled",
+          "transport": "http-binary"
+        },
+        "iterations": 10,
+        "warmups": 3,
+        "requestedOptions": {
+          "encrypted": false,
+          "walMode": false,
+          "performancePresets": false
+        },
+        "configuration": {
+          "sqlite": [
+            {
+              "version": "3.54.0"
+            }
+          ],
+          "journal": [
+            {
+              "journal_mode": "delete"
+            }
+          ],
+          "synchronous": [
+            {
+              "synchronous": 2
+            }
+          ],
+          "foreignKeys": [
+            {
+              "foreign_keys": 1
+            }
+          ],
+          "busyTimeout": [
+            {
+              "timeout": 0
+            }
+          ],
+          "pageSize": [
+            {
+              "page_size": 4096
+            }
+          ]
+        },
+        "fixture": {
+          "blobSizes": [
+            0,
+            65536,
+            1048576
+          ],
+          "rowCount": 1000,
+          "vectorRows": 1000,
+          "dimensions": 64
+        },
+        "results": [
+          {
+            "name": "tiny-select",
+            "unitsPerSample": 1,
+            "warmupMs": [
+              3,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 570,
+              "responseBytes": 670,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 3,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "rows-1000",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              6,
+              5,
+              5
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 910,
+              "responseBytes": 308350,
+              "encodeMs": 0,
+              "decodeMs": 2
+            },
+            "samplesMs": [
+              5,
+              5,
+              4,
+              4,
+              4,
+              5,
+              4,
+              4,
+              4,
+              4
+            ],
+            "meanMs": 4.3,
+            "p50Ms": 4,
+            "p95Ms": 5,
+            "p99Ms": 5
+          },
+          {
+            "name": "transport-echo-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              2,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 550,
+              "responseBytes": 650,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              2,
+              3,
+              3,
+              2
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-upload-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1150,
+              "responseBytes": 560,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              3,
+              2,
+              2,
+              2,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 2.7,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-download-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              2,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 970,
+              "responseBytes": 810,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              2,
+              3,
+              2,
+              3,
+              3,
+              3,
+              3,
+              3,
+              2,
+              3
+            ],
+            "meanMs": 2.7,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "transport-echo-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 655950,
+              "responseBytes": 656050,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 3,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-upload-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 656550,
+              "responseBytes": 560,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              6,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              2,
+              3
+            ],
+            "meanMs": 3.2,
+            "p50Ms": 3,
+            "p95Ms": 6,
+            "p99Ms": 6
+          },
+          {
+            "name": "blob-download-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              2,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 970,
+              "responseBytes": 656210,
+              "encodeMs": 1,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              2,
+              2,
+              2,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 2.7,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "transport-echo-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              5,
+              5,
+              5
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 10486370,
+              "responseBytes": 10486470,
+              "encodeMs": 2,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              5,
+              4,
+              5,
+              5,
+              4,
+              5,
+              5,
+              5,
+              7,
+              4
+            ],
+            "meanMs": 4.9,
+            "p50Ms": 5,
+            "p95Ms": 7,
+            "p99Ms": 7
+          },
+          {
+            "name": "blob-upload-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              6,
+              4,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 10486970,
+              "responseBytes": 560,
+              "encodeMs": 1,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              5,
+              5,
+              8,
+              4,
+              4,
+              4,
+              4,
+              4,
+              5,
+              4
+            ],
+            "meanMs": 4.7,
+            "p50Ms": 4,
+            "p95Ms": 8,
+            "p99Ms": 8
+          },
+          {
+            "name": "blob-download-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              4,
+              4,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 970,
+              "responseBytes": 10486630,
+              "encodeMs": 1,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              4,
+              4,
+              4,
+              5,
+              5,
+              4,
+              5,
+              4,
+              4,
+              4
+            ],
+            "meanMs": 4.3,
+            "p50Ms": 4,
+            "p95Ms": 5,
+            "p99Ms": 5
+          },
+          {
+            "name": "writes-100-individual",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              294,
+              290,
+              293
+            ],
+            "metrics": {
+              "dataRequests": 1000,
+              "requestBytes": 105800,
+              "responseBytes": 53930,
+              "encodeMs": 1,
+              "decodeMs": 2
+            },
+            "samplesMs": [
+              324,
+              292,
+              291,
+              292,
+              290,
+              295,
+              293,
+              290,
+              288,
+              282
+            ],
+            "meanMs": 293.7,
+            "p50Ms": 291,
+            "p95Ms": 324,
+            "p99Ms": 324
+          },
+          {
+            "name": "writes-100-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              30,
+              41,
+              32
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 95080,
+              "responseBytes": 43060,
+              "encodeMs": 1,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              30,
+              27,
+              31,
+              27,
+              29,
+              27,
+              28,
+              28,
+              29,
+              31
+            ],
+            "meanMs": 28.7,
+            "p50Ms": 28,
+            "p95Ms": 31,
+            "p99Ms": 31
+          },
+          {
+            "name": "writes-100-transaction-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              9,
+              9,
+              8
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 95080,
+              "responseBytes": 43060,
+              "encodeMs": 1,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              8,
+              8,
+              8,
+              9,
+              9,
+              8,
+              9,
+              9,
+              9,
+              9
+            ],
+            "meanMs": 8.6,
+            "p50Ms": 9,
+            "p95Ms": 9,
+            "p99Ms": 9
+          },
+          {
+            "name": "vector-top10-1000x64",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              8,
+              8,
+              7
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1600,
+              "responseBytes": 3335080,
+              "encodeMs": 0,
+              "decodeMs": 7
+            },
+            "samplesMs": [
+              7,
+              7,
+              9,
+              7,
+              8,
+              7,
+              7,
+              8,
+              7,
+              7
+            ],
+            "meanMs": 7.4,
+            "p50Ms": 7,
+            "p95Ms": 9,
+            "p99Ms": 9
+          }
+        ]
+      }
+    },
+    {
+      "round": 1,
+      "transport": "http-json",
+      "report": {
+        "schemaVersion": 2,
+        "timestamp": "2026-11-08T00:55:30.824Z",
+        "environment": {
+          "sourceRevision": "2b661244e0a2edcee4e68ef4f9ef222850085f71",
+          "device": "iPhone simulator arm64, capgo-pr89-iphone",
+          "os": "iOS 27.0 simulator",
+          "nativeBuild": "Release optimized arm64, Apple M5 Pro host",
+          "webView": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+          "httpPatching": "disabled",
+          "transport": "http-json"
+        },
+        "iterations": 10,
+        "warmups": 3,
+        "requestedOptions": {
+          "encrypted": false,
+          "walMode": false,
+          "performancePresets": false
+        },
+        "configuration": {
+          "sqlite": [
+            {
+              "version": "3.54.0"
+            }
+          ],
+          "journal": [
+            {
+              "journal_mode": "delete"
+            }
+          ],
+          "synchronous": [
+            {
+              "synchronous": 2
+            }
+          ],
+          "foreignKeys": [
+            {
+              "foreign_keys": 1
+            }
+          ],
+          "busyTimeout": [
+            {
+              "timeout": 0
+            }
+          ],
+          "pageSize": [
+            {
+              "page_size": 4096
+            }
+          ]
+        },
+        "fixture": {
+          "blobSizes": [
+            0,
+            65536,
+            1048576
+          ],
+          "rowCount": 1000,
+          "vectorRows": 1000,
+          "dimensions": 64
+        },
+        "results": [
+          {
+            "name": "tiny-select",
+            "unitsPerSample": 1,
+            "warmupMs": [
+              3,
+              2,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 450,
+              "responseBytes": 550,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              2,
+              3,
+              2,
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              2
+            ],
+            "meanMs": 2.5,
+            "p50Ms": 2,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "rows-1000",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              4,
+              3,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 790,
+              "responseBytes": 308230,
+              "encodeMs": 0,
+              "decodeMs": 3
+            },
+            "samplesMs": [
+              4,
+              3,
+              4,
+              4,
+              3,
+              4,
+              3,
+              4,
+              3,
+              4
+            ],
+            "meanMs": 3.6,
+            "p50Ms": 4,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "transport-echo-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 570,
+              "responseBytes": 670,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              2,
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              2,
+              3
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-upload-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1170,
+              "responseBytes": 440,
+              "encodeMs": 0,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              2,
+              2,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 2.8,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-download-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              2,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 850,
+              "responseBytes": 830,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              2,
+              3,
+              2,
+              3,
+              2,
+              3,
+              2,
+              3
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "transport-echo-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              4,
+              4,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 874410,
+              "responseBytes": 888110,
+              "encodeMs": 1,
+              "decodeMs": 3
+            },
+            "samplesMs": [
+              3,
+              4,
+              4,
+              4,
+              3,
+              4,
+              4,
+              4,
+              3,
+              3
+            ],
+            "meanMs": 3.6,
+            "p50Ms": 4,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "blob-upload-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              5,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 875010,
+              "responseBytes": 440,
+              "encodeMs": 4,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              4,
+              3,
+              3,
+              3,
+              4,
+              3,
+              3,
+              4,
+              3
+            ],
+            "meanMs": 3.3,
+            "p50Ms": 3,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "blob-download-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              3,
+              4,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 850,
+              "responseBytes": 888270,
+              "encodeMs": 0,
+              "decodeMs": 2
+            },
+            "samplesMs": [
+              3,
+              3,
+              4,
+              3,
+              3,
+              3,
+              3,
+              3,
+              2,
+              3
+            ],
+            "meanMs": 3,
+            "p50Ms": 3,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "transport-echo-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              27,
+              25,
+              25
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 13981610,
+              "responseBytes": 14202770,
+              "encodeMs": 100,
+              "decodeMs": 28
+            },
+            "samplesMs": [
+              22,
+              17,
+              21,
+              18,
+              17,
+              19,
+              23,
+              27,
+              31,
+              21
+            ],
+            "meanMs": 21.6,
+            "p50Ms": 21,
+            "p95Ms": 31,
+            "p99Ms": 31
+          },
+          {
+            "name": "blob-upload-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              21,
+              20,
+              20
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 13982210,
+              "responseBytes": 440,
+              "encodeMs": 131,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              21,
+              18,
+              17,
+              19,
+              17,
+              23,
+              23,
+              24,
+              26,
+              18
+            ],
+            "meanMs": 20.6,
+            "p50Ms": 19,
+            "p95Ms": 26,
+            "p99Ms": 26
+          },
+          {
+            "name": "blob-download-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              9,
+              9,
+              9
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 850,
+              "responseBytes": 14202930,
+              "encodeMs": 0,
+              "decodeMs": 32
+            },
+            "samplesMs": [
+              10,
+              9,
+              9,
+              9,
+              8,
+              11,
+              8,
+              9,
+              8,
+              10
+            ],
+            "meanMs": 9.1,
+            "p50Ms": 9,
+            "p95Ms": 11,
+            "p99Ms": 11
+          },
+          {
+            "name": "writes-100-individual",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              291,
+              281,
+              281
+            ],
+            "metrics": {
+              "dataRequests": 1000,
+              "requestBytes": 93800,
+              "responseBytes": 41930,
+              "encodeMs": 3,
+              "decodeMs": 2
+            },
+            "samplesMs": [
+              296,
+              301,
+              303,
+              281,
+              281,
+              282,
+              305,
+              297,
+              315,
+              290
+            ],
+            "meanMs": 295.1,
+            "p50Ms": 296,
+            "p95Ms": 315,
+            "p99Ms": 315
+          },
+          {
+            "name": "writes-100-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              33,
+              29,
+              38
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 94960,
+              "responseBytes": 42940,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              30,
+              40,
+              35,
+              30,
+              35,
+              28,
+              40,
+              32,
+              30,
+              38
+            ],
+            "meanMs": 33.8,
+            "p50Ms": 32,
+            "p95Ms": 40,
+            "p99Ms": 40
+          },
+          {
+            "name": "writes-100-transaction-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              8,
+              8,
+              9
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 94960,
+              "responseBytes": 42940,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              10,
+              9,
+              9,
+              8,
+              8,
+              8,
+              8,
+              9,
+              9,
+              9
+            ],
+            "meanMs": 8.7,
+            "p50Ms": 9,
+            "p95Ms": 10,
+            "p99Ms": 10
+          },
+          {
+            "name": "vector-top10-1000x64",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              7,
+              12,
+              8
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1480,
+              "responseBytes": 4452750,
+              "encodeMs": 0,
+              "decodeMs": 16
+            },
+            "samplesMs": [
+              8,
+              8,
+              7,
+              9,
+              8,
+              8,
+              7,
+              8,
+              8,
+              7
+            ],
+            "meanMs": 7.8,
+            "p50Ms": 8,
+            "p95Ms": 9,
+            "p99Ms": 9
+          }
+        ]
+      }
+    },
+    {
+      "round": 2,
+      "transport": "http-json",
+      "report": {
+        "schemaVersion": 2,
+        "timestamp": "2026-11-08T00:55:42.724Z",
+        "environment": {
+          "sourceRevision": "2b661244e0a2edcee4e68ef4f9ef222850085f71",
+          "device": "iPhone simulator arm64, capgo-pr89-iphone",
+          "os": "iOS 27.0 simulator",
+          "nativeBuild": "Release optimized arm64, Apple M5 Pro host",
+          "webView": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+          "httpPatching": "disabled",
+          "transport": "http-json"
+        },
+        "iterations": 10,
+        "warmups": 3,
+        "requestedOptions": {
+          "encrypted": false,
+          "walMode": false,
+          "performancePresets": false
+        },
+        "configuration": {
+          "sqlite": [
+            {
+              "version": "3.54.0"
+            }
+          ],
+          "journal": [
+            {
+              "journal_mode": "delete"
+            }
+          ],
+          "synchronous": [
+            {
+              "synchronous": 2
+            }
+          ],
+          "foreignKeys": [
+            {
+              "foreign_keys": 1
+            }
+          ],
+          "busyTimeout": [
+            {
+              "timeout": 0
+            }
+          ],
+          "pageSize": [
+            {
+              "page_size": 4096
+            }
+          ]
+        },
+        "fixture": {
+          "blobSizes": [
+            0,
+            65536,
+            1048576
+          ],
+          "rowCount": 1000,
+          "vectorRows": 1000,
+          "dimensions": 64
+        },
+        "results": [
+          {
+            "name": "tiny-select",
+            "unitsPerSample": 1,
+            "warmupMs": [
+              3,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 450,
+              "responseBytes": 550,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              2,
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              3
+            ],
+            "meanMs": 2.7,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "rows-1000",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              4,
+              3,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 790,
+              "responseBytes": 308230,
+              "encodeMs": 0,
+              "decodeMs": 4
+            },
+            "samplesMs": [
+              4,
+              4,
+              4,
+              3,
+              4,
+              4,
+              4,
+              4,
+              3,
+              4
+            ],
+            "meanMs": 3.8,
+            "p50Ms": 4,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "transport-echo-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 570,
+              "responseBytes": 670,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              2,
+              3,
+              2,
+              3,
+              3,
+              2,
+              3
+            ],
+            "meanMs": 2.7,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-upload-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              2,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1170,
+              "responseBytes": 440,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              2,
+              3,
+              3,
+              3,
+              3,
+              2,
+              3,
+              3,
+              2,
+              2
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-download-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              2,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 850,
+              "responseBytes": 830,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              2,
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              2,
+              3,
+              3
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "transport-echo-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              4,
+              4,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 874410,
+              "responseBytes": 888110,
+              "encodeMs": 8,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              4,
+              4,
+              4,
+              3,
+              3,
+              3,
+              4,
+              5,
+              4,
+              4
+            ],
+            "meanMs": 3.8,
+            "p50Ms": 4,
+            "p95Ms": 5,
+            "p99Ms": 5
+          },
+          {
+            "name": "blob-upload-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              4,
+              4,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 875010,
+              "responseBytes": 440,
+              "encodeMs": 4,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              3,
+              4,
+              4,
+              3,
+              4,
+              3,
+              4,
+              4,
+              3,
+              3
+            ],
+            "meanMs": 3.5,
+            "p50Ms": 3,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "blob-download-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 850,
+              "responseBytes": 888270,
+              "encodeMs": 0,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              2,
+              3,
+              3,
+              3,
+              3,
+              3,
+              4
+            ],
+            "meanMs": 3,
+            "p50Ms": 3,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "transport-echo-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              22,
+              26,
+              27
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 13981610,
+              "responseBytes": 14202770,
+              "encodeMs": 89,
+              "decodeMs": 31
+            },
+            "samplesMs": [
+              24,
+              27,
+              23,
+              23,
+              27,
+              18,
+              17,
+              18,
+              17,
+              17
+            ],
+            "meanMs": 21.1,
+            "p50Ms": 18,
+            "p95Ms": 27,
+            "p99Ms": 27
+          },
+          {
+            "name": "blob-upload-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              28,
+              19,
+              20
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 13982210,
+              "responseBytes": 440,
+              "encodeMs": 105,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              19,
+              21,
+              17,
+              19,
+              19,
+              21,
+              23,
+              16,
+              17,
+              14
+            ],
+            "meanMs": 18.6,
+            "p50Ms": 19,
+            "p95Ms": 23,
+            "p99Ms": 23
+          },
+          {
+            "name": "blob-download-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              8,
+              8,
+              8
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 850,
+              "responseBytes": 14202930,
+              "encodeMs": 1,
+              "decodeMs": 33
+            },
+            "samplesMs": [
+              11,
+              8,
+              9,
+              8,
+              9,
+              10,
+              8,
+              10,
+              9,
+              10
+            ],
+            "meanMs": 9.2,
+            "p50Ms": 9,
+            "p95Ms": 11,
+            "p99Ms": 11
+          },
+          {
+            "name": "writes-100-individual",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              289,
+              286,
+              284
+            ],
+            "metrics": {
+              "dataRequests": 1000,
+              "requestBytes": 93800,
+              "responseBytes": 41930,
+              "encodeMs": 3,
+              "decodeMs": 2
+            },
+            "samplesMs": [
+              292,
+              296,
+              300,
+              287,
+              308,
+              288,
+              282,
+              284,
+              286,
+              283
+            ],
+            "meanMs": 290.6,
+            "p50Ms": 287,
+            "p95Ms": 308,
+            "p99Ms": 308
+          },
+          {
+            "name": "writes-100-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              30,
+              28,
+              28
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 94960,
+              "responseBytes": 42940,
+              "encodeMs": 0,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              27,
+              27,
+              29,
+              27,
+              30,
+              27,
+              30,
+              29,
+              29,
+              30
+            ],
+            "meanMs": 28.5,
+            "p50Ms": 29,
+            "p95Ms": 30,
+            "p99Ms": 30
+          },
+          {
+            "name": "writes-100-transaction-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              9,
+              10,
+              10
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 94960,
+              "responseBytes": 42940,
+              "encodeMs": 0,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              10,
+              9,
+              9,
+              8,
+              8,
+              9,
+              8,
+              8,
+              9,
+              9
+            ],
+            "meanMs": 8.7,
+            "p50Ms": 9,
+            "p95Ms": 10,
+            "p99Ms": 10
+          },
+          {
+            "name": "vector-top10-1000x64",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              7,
+              8,
+              8
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1480,
+              "responseBytes": 4452750,
+              "encodeMs": 0,
+              "decodeMs": 13
+            },
+            "samplesMs": [
+              9,
+              8,
+              7,
+              8,
+              7,
+              9,
+              8,
+              7,
+              9,
+              9
+            ],
+            "meanMs": 8.1,
+            "p50Ms": 8,
+            "p95Ms": 9,
+            "p99Ms": 9
+          }
+        ]
+      }
+    },
+    {
+      "round": 2,
+      "transport": "http-binary",
+      "report": {
+        "schemaVersion": 2,
+        "timestamp": "2026-11-08T00:55:54.176Z",
+        "environment": {
+          "sourceRevision": "2b661244e0a2edcee4e68ef4f9ef222850085f71",
+          "device": "iPhone simulator arm64, capgo-pr89-iphone",
+          "os": "iOS 27.0 simulator",
+          "nativeBuild": "Release optimized arm64, Apple M5 Pro host",
+          "webView": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+          "httpPatching": "disabled",
+          "transport": "http-binary"
+        },
+        "iterations": 10,
+        "warmups": 3,
+        "requestedOptions": {
+          "encrypted": false,
+          "walMode": false,
+          "performancePresets": false
+        },
+        "configuration": {
+          "sqlite": [
+            {
+              "version": "3.54.0"
+            }
+          ],
+          "journal": [
+            {
+              "journal_mode": "delete"
+            }
+          ],
+          "synchronous": [
+            {
+              "synchronous": 2
+            }
+          ],
+          "foreignKeys": [
+            {
+              "foreign_keys": 1
+            }
+          ],
+          "busyTimeout": [
+            {
+              "timeout": 0
+            }
+          ],
+          "pageSize": [
+            {
+              "page_size": 4096
+            }
+          ]
+        },
+        "fixture": {
+          "blobSizes": [
+            0,
+            65536,
+            1048576
+          ],
+          "rowCount": 1000,
+          "vectorRows": 1000,
+          "dimensions": 64
+        },
+        "results": [
+          {
+            "name": "tiny-select",
+            "unitsPerSample": 1,
+            "warmupMs": [
+              3,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 570,
+              "responseBytes": 670,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              2,
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              2,
+              3
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "rows-1000",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              4,
+              4,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 910,
+              "responseBytes": 308350,
+              "encodeMs": 0,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              5
+            ],
+            "meanMs": 4.1,
+            "p50Ms": 4,
+            "p95Ms": 5,
+            "p99Ms": 5
+          },
+          {
+            "name": "transport-echo-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              2,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 550,
+              "responseBytes": 650,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              2,
+              3,
+              3,
+              2,
+              3,
+              2,
+              3,
+              2,
+              3,
+              3
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-upload-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              2,
+              2,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1150,
+              "responseBytes": 560,
+              "encodeMs": 0,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              3,
+              3,
+              2,
+              3,
+              3,
+              3,
+              3,
+              3,
+              2,
+              3
+            ],
+            "meanMs": 2.8,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-download-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 970,
+              "responseBytes": 810,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              2,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 2.9,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "transport-echo-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 655950,
+              "responseBytes": 656050,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              3,
+              2,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 2.9,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-upload-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              4,
+              4,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 656550,
+              "responseBytes": 560,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              2,
+              3
+            ],
+            "meanMs": 2.9,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-download-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 970,
+              "responseBytes": 656210,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 3,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "transport-echo-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              6,
+              5,
+              5
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 10486370,
+              "responseBytes": 10486470,
+              "encodeMs": 3,
+              "decodeMs": 2
+            },
+            "samplesMs": [
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              6,
+              7,
+              5
+            ],
+            "meanMs": 5.3,
+            "p50Ms": 5,
+            "p95Ms": 7,
+            "p99Ms": 7
+          },
+          {
+            "name": "blob-upload-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              8,
+              5,
+              5
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 10486970,
+              "responseBytes": 560,
+              "encodeMs": 2,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              4,
+              4,
+              6,
+              5,
+              4,
+              4,
+              4,
+              4,
+              5,
+              6
+            ],
+            "meanMs": 4.6,
+            "p50Ms": 4,
+            "p95Ms": 6,
+            "p99Ms": 6
+          },
+          {
+            "name": "blob-download-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              5,
+              5,
+              5
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 970,
+              "responseBytes": 10486630,
+              "encodeMs": 0,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              4,
+              5,
+              5,
+              5,
+              5,
+              5,
+              6,
+              5,
+              5,
+              5
+            ],
+            "meanMs": 5,
+            "p50Ms": 5,
+            "p95Ms": 6,
+            "p99Ms": 6
+          },
+          {
+            "name": "writes-100-individual",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              347,
+              324,
+              297
+            ],
+            "metrics": {
+              "dataRequests": 1000,
+              "requestBytes": 105800,
+              "responseBytes": 53930,
+              "encodeMs": 4,
+              "decodeMs": 7
+            },
+            "samplesMs": [
+              316,
+              287,
+              284,
+              283,
+              284,
+              303,
+              290,
+              296,
+              286,
+              284
+            ],
+            "meanMs": 291.3,
+            "p50Ms": 286,
+            "p95Ms": 316,
+            "p99Ms": 316
+          },
+          {
+            "name": "writes-100-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              31,
+              57,
+              30
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 95080,
+              "responseBytes": 43060,
+              "encodeMs": 0,
+              "decodeMs": 1
+            },
+            "samplesMs": [
+              26,
+              29,
+              28,
+              27,
+              30,
+              27,
+              30,
+              26,
+              30,
+              30
+            ],
+            "meanMs": 28.3,
+            "p50Ms": 28,
+            "p95Ms": 30,
+            "p99Ms": 30
+          },
+          {
+            "name": "writes-100-transaction-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              10,
+              9,
+              9
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 95080,
+              "responseBytes": 43060,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              10,
+              9,
+              9,
+              10,
+              9,
+              10,
+              9,
+              9,
+              9,
+              9
+            ],
+            "meanMs": 9.3,
+            "p50Ms": 9,
+            "p95Ms": 10,
+            "p99Ms": 10
+          },
+          {
+            "name": "vector-top10-1000x64",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              8,
+              8,
+              7
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1600,
+              "responseBytes": 3335080,
+              "encodeMs": 0,
+              "decodeMs": 10
+            },
+            "samplesMs": [
+              7,
+              8,
+              9,
+              9,
+              8,
+              9,
+              8,
+              7,
+              9,
+              8
+            ],
+            "meanMs": 8.2,
+            "p50Ms": 8,
+            "p95Ms": 9,
+            "p99Ms": 9
+          }
+        ]
+      }
+    },
+    {
+      "round": 3,
+      "transport": "http-binary",
+      "report": {
+        "schemaVersion": 2,
+        "timestamp": "2026-11-08T00:56:05.614Z",
+        "environment": {
+          "sourceRevision": "2b661244e0a2edcee4e68ef4f9ef222850085f71",
+          "device": "iPhone simulator arm64, capgo-pr89-iphone",
+          "os": "iOS 27.0 simulator",
+          "nativeBuild": "Release optimized arm64, Apple M5 Pro host",
+          "webView": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+          "httpPatching": "disabled",
+          "transport": "http-binary"
+        },
+        "iterations": 10,
+        "warmups": 3,
+        "requestedOptions": {
+          "encrypted": false,
+          "walMode": false,
+          "performancePresets": false
+        },
+        "configuration": {
+          "sqlite": [
+            {
+              "version": "3.54.0"
+            }
+          ],
+          "journal": [
+            {
+              "journal_mode": "delete"
+            }
+          ],
+          "synchronous": [
+            {
+              "synchronous": 2
+            }
+          ],
+          "foreignKeys": [
+            {
+              "foreign_keys": 1
+            }
+          ],
+          "busyTimeout": [
+            {
+              "timeout": 0
+            }
+          ],
+          "pageSize": [
+            {
+              "page_size": 4096
+            }
+          ]
+        },
+        "fixture": {
+          "blobSizes": [
+            0,
+            65536,
+            1048576
+          ],
+          "rowCount": 1000,
+          "vectorRows": 1000,
+          "dimensions": 64
+        },
+        "results": [
+          {
+            "name": "tiny-select",
+            "unitsPerSample": 1,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 570,
+              "responseBytes": 670,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              3,
+              4,
+              3,
+              3,
+              3,
+              3,
+              2
+            ],
+            "meanMs": 3,
+            "p50Ms": 3,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "rows-1000",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              5,
+              4,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 910,
+              "responseBytes": 308350,
+              "encodeMs": 0,
+              "decodeMs": 2
+            },
+            "samplesMs": [
+              5,
+              4,
+              6,
+              5,
+              4,
+              5,
+              4,
+              4,
+              5,
+              4
+            ],
+            "meanMs": 4.6,
+            "p50Ms": 4,
+            "p95Ms": 6,
+            "p99Ms": 6
+          },
+          {
+            "name": "transport-echo-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 550,
+              "responseBytes": 650,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              16,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              4,
+              3,
+              3
+            ],
+            "meanMs": 4.4,
+            "p50Ms": 3,
+            "p95Ms": 16,
+            "p99Ms": 16
+          },
+          {
+            "name": "blob-upload-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1150,
+              "responseBytes": 560,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              3,
+              2,
+              2,
+              3
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-download-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              2,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 970,
+              "responseBytes": 810,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              2,
+              3,
+              2,
+              3,
+              2,
+              3,
+              3,
+              2
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "transport-echo-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              2,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 655950,
+              "responseBytes": 656050,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "meanMs": 2.5,
+            "p50Ms": 2,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-upload-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              3,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 656550,
+              "responseBytes": 560,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              2,
+              3,
+              3,
+              3,
+              2,
+              3,
+              3,
+              2
+            ],
+            "meanMs": 2.7,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-download-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 970,
+              "responseBytes": 656210,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 3,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "transport-echo-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              5,
+              5,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 10486370,
+              "responseBytes": 10486470,
+              "encodeMs": 3,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              5,
+              6,
+              5,
+              5,
+              5,
+              7,
+              7,
+              6,
+              5,
+              6
+            ],
+            "meanMs": 5.7,
+            "p50Ms": 5,
+            "p95Ms": 7,
+            "p99Ms": 7
+          },
+          {
+            "name": "blob-upload-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              7,
+              4,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 10486970,
+              "responseBytes": 560,
+              "encodeMs": 2,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              6,
+              5,
+              5,
+              5,
+              6,
+              5,
+              5,
+              5,
+              5,
+              5
+            ],
+            "meanMs": 5.2,
+            "p50Ms": 5,
+            "p95Ms": 6,
+            "p99Ms": 6
+          },
+          {
+            "name": "blob-download-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              4,
+              4,
+              5
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 970,
+              "responseBytes": 10486630,
+              "encodeMs": 1,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              5,
+              6,
+              4,
+              4,
+              4,
+              4,
+              5,
+              4,
+              3,
+              4
+            ],
+            "meanMs": 4.3,
+            "p50Ms": 4,
+            "p95Ms": 6,
+            "p99Ms": 6
+          },
+          {
+            "name": "writes-100-individual",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              298,
+              370,
+              295
+            ],
+            "metrics": {
+              "dataRequests": 1000,
+              "requestBytes": 105800,
+              "responseBytes": 53930,
+              "encodeMs": 3,
+              "decodeMs": 5
+            },
+            "samplesMs": [
+              294,
+              290,
+              298,
+              294,
+              288,
+              288,
+              286,
+              302,
+              316,
+              286
+            ],
+            "meanMs": 294.2,
+            "p50Ms": 290,
+            "p95Ms": 316,
+            "p99Ms": 316
+          },
+          {
+            "name": "writes-100-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              30,
+              26,
+              32
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 95080,
+              "responseBytes": 43060,
+              "encodeMs": 1,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              26,
+              31,
+              27,
+              28,
+              28,
+              26,
+              31,
+              26,
+              32,
+              26
+            ],
+            "meanMs": 28.1,
+            "p50Ms": 27,
+            "p95Ms": 32,
+            "p99Ms": 32
+          },
+          {
+            "name": "writes-100-transaction-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              8,
+              9,
+              9
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 95080,
+              "responseBytes": 43060,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              9,
+              8,
+              8,
+              12,
+              8,
+              8,
+              8,
+              8,
+              9,
+              9
+            ],
+            "meanMs": 8.7,
+            "p50Ms": 8,
+            "p95Ms": 12,
+            "p99Ms": 12
+          },
+          {
+            "name": "vector-top10-1000x64",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              8,
+              7,
+              7
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1600,
+              "responseBytes": 3335080,
+              "encodeMs": 0,
+              "decodeMs": 8
+            },
+            "samplesMs": [
+              7,
+              8,
+              7,
+              7,
+              8,
+              8,
+              7,
+              7,
+              7,
+              9
+            ],
+            "meanMs": 7.5,
+            "p50Ms": 7,
+            "p95Ms": 9,
+            "p99Ms": 9
+          }
+        ]
+      }
+    },
+    {
+      "round": 3,
+      "transport": "http-json",
+      "report": {
+        "schemaVersion": 2,
+        "timestamp": "2026-11-08T00:56:17.529Z",
+        "environment": {
+          "sourceRevision": "2b661244e0a2edcee4e68ef4f9ef222850085f71",
+          "device": "iPhone simulator arm64, capgo-pr89-iphone",
+          "os": "iOS 27.0 simulator",
+          "nativeBuild": "Release optimized arm64, Apple M5 Pro host",
+          "webView": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+          "httpPatching": "disabled",
+          "transport": "http-json"
+        },
+        "iterations": 10,
+        "warmups": 3,
+        "requestedOptions": {
+          "encrypted": false,
+          "walMode": false,
+          "performancePresets": false
+        },
+        "configuration": {
+          "sqlite": [
+            {
+              "version": "3.54.0"
+            }
+          ],
+          "journal": [
+            {
+              "journal_mode": "delete"
+            }
+          ],
+          "synchronous": [
+            {
+              "synchronous": 2
+            }
+          ],
+          "foreignKeys": [
+            {
+              "foreign_keys": 1
+            }
+          ],
+          "busyTimeout": [
+            {
+              "timeout": 0
+            }
+          ],
+          "pageSize": [
+            {
+              "page_size": 4096
+            }
+          ]
+        },
+        "fixture": {
+          "blobSizes": [
+            0,
+            65536,
+            1048576
+          ],
+          "rowCount": 1000,
+          "vectorRows": 1000,
+          "dimensions": 64
+        },
+        "results": [
+          {
+            "name": "tiny-select",
+            "unitsPerSample": 1,
+            "warmupMs": [
+              2,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 450,
+              "responseBytes": 550,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              2,
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              2,
+              3,
+              3
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "rows-1000",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              3,
+              4,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 790,
+              "responseBytes": 308230,
+              "encodeMs": 0,
+              "decodeMs": 2
+            },
+            "samplesMs": [
+              3,
+              4,
+              4,
+              3,
+              4,
+              4,
+              3,
+              4,
+              4,
+              3
+            ],
+            "meanMs": 3.6,
+            "p50Ms": 4,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "transport-echo-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 570,
+              "responseBytes": 670,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              2,
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              2,
+              3
+            ],
+            "meanMs": 2.6,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "blob-upload-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              3,
+              3,
+              2
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1170,
+              "responseBytes": 440,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              3,
+              3,
+              4,
+              3,
+              3,
+              2,
+              2,
+              3,
+              3,
+              2
+            ],
+            "meanMs": 2.8,
+            "p50Ms": 3,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "blob-download-0",
+            "unitsPerSample": 0,
+            "warmupMs": [
+              2,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 850,
+              "responseBytes": 830,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              2,
+              3,
+              2,
+              3,
+              2,
+              3,
+              3,
+              2,
+              3,
+              2
+            ],
+            "meanMs": 2.5,
+            "p50Ms": 2,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "transport-echo-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              4,
+              4,
+              4
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 874410,
+              "responseBytes": 888110,
+              "encodeMs": 3,
+              "decodeMs": 3
+            },
+            "samplesMs": [
+              4,
+              4,
+              4,
+              4,
+              3,
+              3,
+              4,
+              3,
+              3,
+              4
+            ],
+            "meanMs": 3.6,
+            "p50Ms": 4,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "blob-upload-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              4,
+              5,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 875010,
+              "responseBytes": 440,
+              "encodeMs": 5,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              4,
+              4,
+              3,
+              4,
+              3,
+              4,
+              3,
+              4,
+              3,
+              3
+            ],
+            "meanMs": 3.5,
+            "p50Ms": 3,
+            "p95Ms": 4,
+            "p99Ms": 4
+          },
+          {
+            "name": "blob-download-65536",
+            "unitsPerSample": 65536,
+            "warmupMs": [
+              2,
+              3,
+              3
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 850,
+              "responseBytes": 888270,
+              "encodeMs": 0,
+              "decodeMs": 2
+            },
+            "samplesMs": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "meanMs": 3,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3
+          },
+          {
+            "name": "transport-echo-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              27,
+              23,
+              22
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 13981610,
+              "responseBytes": 14202770,
+              "encodeMs": 115,
+              "decodeMs": 26
+            },
+            "samplesMs": [
+              23,
+              20,
+              23,
+              23,
+              24,
+              22,
+              22,
+              20,
+              23,
+              23
+            ],
+            "meanMs": 22.3,
+            "p50Ms": 23,
+            "p95Ms": 24,
+            "p99Ms": 24
+          },
+          {
+            "name": "blob-upload-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              22,
+              14,
+              21
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 13982210,
+              "responseBytes": 440,
+              "encodeMs": 106,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              19,
+              20,
+              21,
+              20,
+              21,
+              14,
+              15,
+              21,
+              13,
+              14
+            ],
+            "meanMs": 17.8,
+            "p50Ms": 19,
+            "p95Ms": 21,
+            "p99Ms": 21
+          },
+          {
+            "name": "blob-download-1048576",
+            "unitsPerSample": 1048576,
+            "warmupMs": [
+              9,
+              8,
+              9
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 850,
+              "responseBytes": 14202930,
+              "encodeMs": 0,
+              "decodeMs": 28
+            },
+            "samplesMs": [
+              9,
+              8,
+              8,
+              8,
+              8,
+              8,
+              9,
+              10,
+              9,
+              9
+            ],
+            "meanMs": 8.6,
+            "p50Ms": 8,
+            "p95Ms": 10,
+            "p99Ms": 10
+          },
+          {
+            "name": "writes-100-individual",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              293,
+              287,
+              290
+            ],
+            "metrics": {
+              "dataRequests": 1000,
+              "requestBytes": 93800,
+              "responseBytes": 41930,
+              "encodeMs": 3,
+              "decodeMs": 5
+            },
+            "samplesMs": [
+              290,
+              289,
+              334,
+              287,
+              299,
+              315,
+              306,
+              304,
+              296,
+              293
+            ],
+            "meanMs": 301.3,
+            "p50Ms": 296,
+            "p95Ms": 334,
+            "p99Ms": 334
+          },
+          {
+            "name": "writes-100-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              27,
+              28,
+              28
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 94960,
+              "responseBytes": 42940,
+              "encodeMs": 1,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              28,
+              29,
+              29,
+              29,
+              28,
+              27,
+              29,
+              28,
+              27,
+              29
+            ],
+            "meanMs": 28.3,
+            "p50Ms": 28,
+            "p95Ms": 29,
+            "p99Ms": 29
+          },
+          {
+            "name": "writes-100-transaction-batch",
+            "unitsPerSample": 100,
+            "warmupMs": [
+              9,
+              9,
+              9
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 94960,
+              "responseBytes": 42940,
+              "encodeMs": 0,
+              "decodeMs": 0
+            },
+            "samplesMs": [
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              8,
+              8,
+              8,
+              8
+            ],
+            "meanMs": 8.6,
+            "p50Ms": 9,
+            "p95Ms": 9,
+            "p99Ms": 9
+          },
+          {
+            "name": "vector-top10-1000x64",
+            "unitsPerSample": 1000,
+            "warmupMs": [
+              8,
+              7,
+              8
+            ],
+            "metrics": {
+              "dataRequests": 10,
+              "requestBytes": 1480,
+              "responseBytes": 4452750,
+              "encodeMs": 0,
+              "decodeMs": 13
+            },
+            "samplesMs": [
+              9,
+              8,
+              7,
+              7,
+              8,
+              8,
+              8,
+              7,
+              7,
+              7
+            ],
+            "meanMs": 7.6,
+            "p50Ms": 7,
+            "p95Ms": 9,
+            "p99Ms": 9
+          }
+        ]
+      }
+    }
+  ],
+  "pluginVersion": "8.2.17"
+}

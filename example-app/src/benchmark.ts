@@ -51,8 +51,12 @@ if (button instanceof HTMLButtonElement && output) {
         if (exportInput instanceof HTMLInputElement && exportInput.value.trim()) {
           const endpoint = new URL(exportInput.value.trim());
           if (endpoint.protocol !== 'http:' || !['localhost', '127.0.0.1'].includes(endpoint.hostname)) throw new Error('Use a local HTTP collector');
-          const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: json });
-          if (!response.ok) throw new Error('Collector rejected report');
+          try {
+            const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: json });
+            if (!response.ok) throw new Error(`Collector rejected report (${response.status})`);
+          } catch (error) {
+            output.textContent = `Report complete. Local export failed: ${String(error)}\n\n${json}`;
+          }
         }
         const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
         const link = document.createElement('a');
