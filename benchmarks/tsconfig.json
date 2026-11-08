@@ -12,6 +12,7 @@
   "files": [],
   "include": [
     "./current.ts",
-    "../src"
+    "../src",
+    "../example-app/src/benchmarks/*.ts"
   ]
 }

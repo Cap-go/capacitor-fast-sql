@@ -54,6 +54,7 @@ export class FastSQL {
 
   private static optionsMatch(left: SQLConnectionOptions, right: SQLConnectionOptions): boolean {
     return (
+      (left.transport ?? 'http-json') === (right.transport ?? 'http-json') &&
       Boolean(left.encrypted) === Boolean(right.encrypted) &&
       left.encryptionKey === right.encryptionKey &&
       Boolean(left.readOnly) === Boolean(right.readOnly) &&
@@ -63,14 +64,21 @@ export class FastSQL {
   }
 
   private static async open(options: SQLConnectionOptions): Promise<SQLConnection> {
+    const platform = Capacitor.getPlatform();
+    if (options.transport === 'http-binary' && platform !== 'ios' && platform !== 'android') {
+      throw new Error('Binary HTTP transport requires iOS or Android');
+    }
     // Connect via native plugin
     const info = await CapgoCapacitorFastSql.connect(options);
 
     // Create connection instance appropriate for the current platform
     let connection: SQLConnection;
-    const platform = Capacitor.getPlatform();
     if (platform === 'android' || platform === 'ios') {
-      connection = new NativeSQLConnection(info.database, info.port, info.token);
+      if (options.transport === 'http-binary' && info.binaryProtocolVersion !== 1) {
+        await CapgoCapacitorFastSql.disconnect({ database: options.database });
+        throw new Error('Native plugin does not support binary HTTP v1');
+      }
+      connection = new NativeSQLConnection(info.database, info.port, info.token, options.transport);
     } else {
       connection = new WebSQLConnection(info.database, CapgoCapacitorFastSql);
     }

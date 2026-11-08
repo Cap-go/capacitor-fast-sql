@@ -25,6 +25,7 @@ let package = Package(
         .testTarget(
             name: "CapgoCapacitorFastSqlPluginTests",
             dependencies: ["CapgoCapacitorFastSqlPlugin"],
-            path: "ios/Tests/CapgoCapacitorFastSqlPluginTests")
+            path: "ios/Tests/CapgoCapacitorFastSqlPluginTests",
+            resources: [.copy("Fixtures")])
     ]
 )

@@ -14,6 +14,7 @@ private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self
  */
 class SQLDatabase {
     let isReadOnly: Bool
+    private let operationLock = NSRecursiveLock()
     private var db: OpaquePointer?
     private let path: String
     private var inTransaction = false
@@ -86,13 +87,17 @@ class SQLDatabase {
     }
 
     func close() {
+        operationLock.lock()
+        defer { operationLock.unlock() }
         if let db = db {
             sqlite3_close(db)
             self.db = nil
         }
     }
 
-    func execute(statement: String, params: [Any]) throws -> [String: Any] {
+    func execute(statement: String, params: [Any], binaryResults: Bool = false) throws -> [String: Any] {
+        operationLock.lock()
+        defer { operationLock.unlock() }
         guard let db = db else {
             throw SQLError.notOpen
         }
@@ -139,7 +144,7 @@ class SQLDatabase {
                 var row: [String: Any] = [:]
                 for columnIndex in 0..<columnCount {
                     let columnName = columnNames[Int(columnIndex)]
-                    let value = getColumnValue(stmt: stmt, index: columnIndex)
+                    let value = getColumnValue(stmt: stmt, index: columnIndex, binaryResults: binaryResults)
                     row[columnName] = value
                 }
                 rows.append(row)
@@ -163,6 +168,8 @@ class SQLDatabase {
     }
 
     func beginTransaction() throws {
+        operationLock.lock()
+        defer { operationLock.unlock() }
         guard !inTransaction else {
             throw SQLError.transactionAlreadyActive
         }
@@ -171,6 +178,8 @@ class SQLDatabase {
     }
 
     func commitTransaction() throws {
+        operationLock.lock()
+        defer { operationLock.unlock() }
         guard inTransaction else {
             throw SQLError.noTransactionActive
         }
@@ -179,6 +188,8 @@ class SQLDatabase {
     }
 
     func rollbackTransaction() throws {
+        operationLock.lock()
+        defer { operationLock.unlock() }
         guard inTransaction else {
             throw SQLError.noTransactionActive
         }
@@ -197,6 +208,10 @@ class SQLDatabase {
         }
 
         // Handle different types
+        if let data = value as? Data {
+            if data.isEmpty { return sqlite3_bind_zeroblob(stmt, index, 0) }
+            return data.withUnsafeBytes { sqlite3_bind_blob(stmt, index, $0.baseAddress, Int32(data.count), sqliteTransient) }
+        }
         if let str = value as? String {
             return sqlite3_bind_text(stmt, index, str, -1, sqliteTransient)
         } else if let num = value as? NSNumber {
@@ -227,7 +242,7 @@ class SQLDatabase {
         return SQLITE_ERROR
     }
 
-    private func getColumnValue(stmt: OpaquePointer?, index: Int32) -> Any {
+    private func getColumnValue(stmt: OpaquePointer?, index: Int32, binaryResults: Bool) -> Any {
         guard let stmt = stmt else {
             return NSNull()
         }
@@ -246,11 +261,13 @@ class SQLDatabase {
             return NSNull()
         case SQLITE_BLOB:
             if sqlite3_column_bytes(stmt, index) == 0 {
+                if binaryResults { return Data() }
                 return ["_type": "binary", "_data": ""]
             }
             if let blob = sqlite3_column_blob(stmt, index) {
                 let size = sqlite3_column_bytes(stmt, index)
                 let data = Data(bytes: blob, count: Int(size))
+                if binaryResults { return data }
                 return [
                     "_type": "binary",
                     "_data": data.base64EncodedString()

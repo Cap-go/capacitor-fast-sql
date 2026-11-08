@@ -53,6 +53,7 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
                 call.resolve([
                     "port": server.port,
                     "token": server.token,
+                    "binaryProtocolVersion": 1,
                     "database": database
                 ])
                 return
@@ -102,6 +103,7 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
             call.resolve([
                 "port": server.port,
                 "token": server.token,
+                "binaryProtocolVersion": 1,
                 "database": database
             ])
         } catch {
@@ -151,7 +153,8 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
 
         call.resolve([
             "port": server.port,
-            "token": server.token
+            "token": server.token,
+            "binaryProtocolVersion": 1
         ])
     }
 

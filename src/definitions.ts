@@ -45,10 +45,21 @@ export interface SQLBatchOperation {
   params?: SQLValue[];
 }
 
+/** Native HTTP data encoding. JSON remains the compatibility default. */
+export type NativeSQLTransport = 'http-json' | 'http-binary';
+
 /**
  * Database connection options
  */
 export interface SQLConnectionOptions {
+  /**
+   * Native HTTP data encoding. Binary v1 sends BLOBs as raw bytes without base64.
+   * Opt-in on iOS/Android only; requires a native plugin advertising binary v1.
+   * JSON remains the default. No failed write is retried on another transport.
+   * @default 'http-json'
+   */
+  transport?: NativeSQLTransport;
+
   /**
    * Database name (file will be created in app data directory)
    */
@@ -165,6 +176,8 @@ export interface CapgoCapacitorFastSqlPlugin {
     database: string;
     /** Whether the web Worker confirms persistent storage. Absent on native. */
     persistent?: boolean;
+    /** Native binary HTTP protocol version, when supported. */
+    binaryProtocolVersion?: number;
   }>;
 
   /**
@@ -199,6 +212,8 @@ export interface CapgoCapacitorFastSqlPlugin {
     token: string;
     /** Whether the web Worker confirms persistent storage. Absent on native. */
     persistent?: boolean;
+    /** Native binary HTTP protocol version, when supported. */
+    binaryProtocolVersion?: number;
   }>;
 
   /**

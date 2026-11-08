@@ -150,7 +150,9 @@
           <option value="disabled">HTTP patching disabled</option>
           <option value="enabled">HTTP patching enabled</option>
         </select>
-        <button id="run-baseline">Run baseline and download JSON</button>
+        <label><input type="checkbox" id="compare-transports" checked /> Compare JSON and binary HTTP</label>
+        <input id="benchmark-export" placeholder="Optional local collector URL, e.g. http://localhost:9876/report" />
+        <button id="run-baseline">Run benchmark and download JSON</button>
         <pre id="baseline-output">Ready. Device runs are required for performance conclusions.</pre>
       </div>
 
