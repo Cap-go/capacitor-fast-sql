@@ -55,7 +55,9 @@ export interface SQLConnectionOptions {
   /**
    * Native HTTP data encoding. Binary v1 sends BLOBs as raw bytes without base64.
    * Opt-in on iOS/Android only; requires a native plugin advertising binary v1.
-   * JSON remains the default. No failed write is retried on another transport.
+   * JSON remains the default. Binary is experimental; reconsider the default only
+   * in a future major after device performance and conformance testing.
+   * No failed write is retried on another transport.
    * @default 'http-json'
    */
   transport?: NativeSQLTransport;

@@ -238,7 +238,12 @@ class SQLHTTPServer {
                     result = try db.execute(statement: operation.statement, params: params, binaryResults: binary)
                 }
             }
-            let data = try binary ? BinaryFrame.encode(result) : JSONSerialization.data(withJSONObject: result)
+            let data: Data
+            do {
+                data = try binary ? BinaryFrame.encode(result) : JSONSerialization.data(withJSONObject: result)
+            } catch {
+                return HTTPResponse(.internalServerError, body: Data("Could not encode SQL response; a write may already be committed".utf8))
+            }
             return HTTPResponse(.ok, headers: [.contentType: binary ? BinaryFrame.contentType : "application/json"], body: data)
         } catch is BinaryFrameError {
             return HTTPResponse(.badRequest, body: Data("Invalid binary/SQL request".utf8))

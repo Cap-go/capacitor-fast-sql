@@ -34,7 +34,7 @@ enum BinaryFrame {
             }
             return value
         }
-        let metadata = try JSONSerialization.data(withJSONObject: encodeValue(value, depth: 0), options: [.fragmentsAllowed, .sortedKeys])
+        let metadata = try JSONSerialization.data(withJSONObject: encodeValue(value, depth: 0), options: [.fragmentsAllowed])
         guard metadata.count <= maxMetadata, headerBytes + metadata.count + attachments.count <= maxBytes else { throw BinaryFrameError.limit }
         var output = Data(magic)
         for count in [metadata.count, attachments.count] {

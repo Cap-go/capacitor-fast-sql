@@ -168,7 +168,9 @@ public class SQLHTTPServer extends NanoHTTPD {
             } else result = executeOperation(db, request, binary);
         }
         if (!binary) return newFixedLengthResponse(Response.Status.OK, "application/json", result.toString());
-        byte[] response = BinaryFrame.encode(result);
+        byte[] response;
+        try { response = BinaryFrame.encode(result); }
+        catch (Exception error) { throw new IllegalStateException("Could not encode SQL response; a write may already be committed", error); }
         return newFixedLengthResponse(Response.Status.OK, BinaryFrame.CONTENT_TYPE, new ByteArrayInputStream(response), response.length);
     }
 
