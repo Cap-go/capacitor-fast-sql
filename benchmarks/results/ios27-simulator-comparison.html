@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      body {
+        margin: 0;
+        font-family: var(--font-sans, system-ui);
+        color: var(--foreground, #ddd);
+      }
+      p {
+        font-size: 13px;
+        color: var(--muted-foreground, #999);
+        line-height: 1.5;
+      }
+      .chart {
+        height: 325px;
+      }
+      .group {
+        margin: 18px 0;
+      }
+      .label {
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 6px 0;
+        font-size: 12px;
+      }
+      .kind {
+        width: 40px;
+        flex-shrink: 0;
+      }
+      .track {
+        height: 19px;
+        flex: 1;
+        position: relative;
+      }
+      .bar {
+        height: 19px;
+        border-radius: 3px;
+      }
+      .value {
+        width: 100px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .json {
+        background: var(--chart-1, #6d9fff);
+      }
+      .binary {
+        background: var(--chart-2, #55c9a8);
+      }
+      .note {
+        padding: 12px 16px;
+        border-radius: var(--radius, 8px);
+        background: var(--card, #222);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      Release iOS 27.0 simulator · 8 runs per transport · 80 samples per workload<br />Median of run p50 values,
+      milliseconds. Brackets show the run-p50 range. Lower is better.
+    </p>
+    <div class="chart">
+      <div class="group">
+        <div class="label">1 MiB echo</div>
+        <div class="row">
+          <span class="kind">JSON</span>
+          <div class="track"><div class="bar json" style="width: 78.26086956521739%"></div></div>
+          <span class="value">18 [17, 23]</span>
+        </div>
+        <div class="row">
+          <span class="kind">Binary</span>
+          <div class="track"><div class="bar binary" style="width: 21.73913043478261%"></div></div>
+          <span class="value">5 [4, 6]</span>
+        </div>
+      </div>
+      <div class="group">
+        <div class="label">1 MiB upload</div>
+        <div class="row">
+          <span class="kind">JSON</span>
+          <div class="track"><div class="bar json" style="width: 80.43478260869566%"></div></div>
+          <span class="value">18.5 [13, 20]</span>
+        </div>
+        <div class="row">
+          <span class="kind">Binary</span>
+          <div class="track"><div class="bar binary" style="width: 17.391304347826086%"></div></div>
+          <span class="value">4 [4, 5]</span>
+        </div>
+      </div>
+      <div class="group">
+        <div class="label">1 MiB download</div>
+        <div class="row">
+          <span class="kind">JSON</span>
+          <div class="track"><div class="bar json" style="width: 36.95652173913043%"></div></div>
+          <span class="value">8.5 [8, 9]</span>
+        </div>
+        <div class="row">
+          <span class="kind">Binary</span>
+          <div class="track"><div class="bar binary" style="width: 17.391304347826086%"></div></div>
+          <span class="value">4 [4, 5]</span>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      Tiny SELECT: 3 ms for both. Vector top-10: 7 ms for both. Small differences are inconclusive at the observed 1 ms
+      timer granularity. Simulator and background host activity limit production conclusions; Android device
+      measurements remain pending. JSON stays the default.
+    </div>
+  </body>
+</html>
