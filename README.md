@@ -509,12 +509,12 @@ Rollback the current transaction.
 ### getPluginVersion()
 
 ```typescript
-getPluginVersion() => Promise<{ version: string; }>
+getPluginVersion() => Promise<{ version: string; binaryProtocolVersion?: number; }>
 ```
 
 Get the native Capacitor plugin version.
 
-**Returns:** <code>Promise&lt;{ version: string; }&gt;</code>
+**Returns:** <code>Promise&lt;{ version: string; binaryProtocolVersion?: number; }&gt;</code>
 
 **Since:** 0.0.1
 

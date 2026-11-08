@@ -247,7 +247,8 @@ public class CapgoCapacitorFastSqlPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func getPluginVersion(_ call: CAPPluginCall) {
         call.resolve([
-            "version": pluginVersion
+            "version": pluginVersion,
+            "binaryProtocolVersion": 1
         ])
     }
 

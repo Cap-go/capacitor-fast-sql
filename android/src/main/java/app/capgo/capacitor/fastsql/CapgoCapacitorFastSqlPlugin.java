@@ -259,6 +259,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
     public void getPluginVersion(PluginCall call) {
         JSObject ret = new JSObject();
         ret.put("version", pluginVersion);
+        ret.put("binaryProtocolVersion", 1);
         call.resolve(ret);
     }
 

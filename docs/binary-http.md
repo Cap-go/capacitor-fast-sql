@@ -14,7 +14,9 @@ const rows = await connection.query('SELECT data FROM files');
 // rows[0].data is a Uint8Array, including for an empty BLOB.
 ```
 
-Native connect/server-info responses advertise `binaryProtocolVersion: 1`.
+Native version/connect/server-info responses advertise `binaryProtocolVersion: 1`.
+FastSQL checks the version response before calling native connect, so an older
+plugin rejects binary mode without opening or disconnecting any database.
 FastSQL rejects unsupported native versions and web usage before sending binary
 SQL requests. It does not replay failed writes as JSON or change adapters during
 a transaction. Direct NativeSQLConnection construction accepts an optional fourth

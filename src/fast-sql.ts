@@ -68,16 +68,16 @@ export class FastSQL {
     if (options.transport === 'http-binary' && platform !== 'ios' && platform !== 'android') {
       throw new Error('Binary HTTP transport requires iOS or Android');
     }
+    if (options.transport === 'http-binary') {
+      const capabilities = await CapgoCapacitorFastSql.getPluginVersion();
+      if (capabilities.binaryProtocolVersion !== 1) throw new Error('Native plugin does not support binary HTTP v1');
+    }
     // Connect via native plugin
     const info = await CapgoCapacitorFastSql.connect(options);
 
     // Create connection instance appropriate for the current platform
     let connection: SQLConnection;
     if (platform === 'android' || platform === 'ios') {
-      if (options.transport === 'http-binary' && info.binaryProtocolVersion !== 1) {
-        await CapgoCapacitorFastSql.disconnect({ database: options.database });
-        throw new Error('Native plugin does not support binary HTTP v1');
-      }
       connection = new NativeSQLConnection(info.database, info.port, info.token, options.transport);
     } else {
       connection = new WebSQLConnection(info.database, CapgoCapacitorFastSql);

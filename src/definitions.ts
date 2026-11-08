@@ -300,7 +300,11 @@ export interface CapgoCapacitorFastSqlPlugin {
    * console.log('Plugin version:', version);
    * ```
    */
-  getPluginVersion(): Promise<{ version: string }>;
+  getPluginVersion(): Promise<{
+    version: string;
+    /** Native transport capability, available without opening a database or starting a server. */
+    binaryProtocolVersion?: number;
+  }>;
 
   /**
    * Configure web-specific options for the official SQLite Wasm module.
