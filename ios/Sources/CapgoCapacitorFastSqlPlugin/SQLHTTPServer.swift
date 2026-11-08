@@ -215,7 +215,13 @@ class SQLHTTPServer {
         guard request.body.count <= BinaryFrame.maxBytes else { return HTTPResponse(.payloadTooLarge) }
         let binary = request.headers["Content-Type"] == BinaryFrame.contentType
         do {
-            let decoded = try binary ? BinaryFrame.decode(request.body) : JSONSerialization.jsonObject(with: request.body)
+            let decoded: Any
+            if binary {
+                decoded = try BinaryFrame.decode(request.body)
+            } else {
+                guard let json = try? JSONSerialization.jsonObject(with: request.body) else { throw BinaryFrameError.invalid }
+                decoded = json
+            }
             guard let json = decoded as? [String: Any] else { throw BinaryFrameError.invalid }
             let result: Any
             if kind == "batch" {
