@@ -67,3 +67,56 @@ test('all workloads validate real SQLite fixtures and clean up', async () => {
     db.close();
   }
 });
+
+test('comparison alternates AB/BA order and exercises identical fixtures', async () => {
+  const { runComparison } = await import('../benchmarks/current');
+  const db = new Database(':memory:');
+  const plugin = {
+    async execute({ statement, params = [] }: { statement: string; params?: SQLValue[] }) {
+      const bindings = params.map((value) => (typeof value === 'boolean' ? Number(value) : value));
+      return { rows: db.query<Record<string, SQLValue>, typeof bindings>(statement).all(...bindings), rowsAffected: 0 };
+    },
+    async beginTransaction() {
+      db.run('BEGIN');
+    },
+    async commitTransaction() {
+      db.run('COMMIT');
+    },
+    async rollbackTransaction() {
+      db.run('ROLLBACK');
+    },
+    async connect() {
+      return { database: 'fast_sql_benchmark', port: 0, token: '' };
+    },
+    async disconnect() {},
+    async getServerInfo() {
+      return { port: 0, token: '' };
+    },
+    async getPluginVersion() {
+      return { version: 'test' };
+    },
+    async configureWeb() {},
+  };
+  try {
+    const report = await runComparison({
+      environment,
+      rounds: 2,
+      iterations: 1,
+      warmups: 0,
+      fixture: { blobSizes: [0, 256], rowCount: 17, vectorRows: 10, dimensions: 2 },
+      createVectorStore: (connection) =>
+        FastSQLVectorStore.fromConnection(connection, { store: 'baseline', embeddingDimension: 2 }),
+      createAdapter: async () => ({
+        connection: new WebSQLConnection('fast_sql_benchmark', plugin),
+        echo: async (value) => value,
+        getMetrics: () => ({ dataRequests: 0, requestBytes: 0, responseBytes: 0, encodeMs: 0, decodeMs: 0 }),
+      }),
+    });
+    expect(report.order).toEqual(['http-json', 'http-binary', 'http-binary', 'http-json']);
+    expect(report.runs).toHaveLength(4);
+    expect(report.runs.every((run) => run.report.results.length === 12)).toBe(true);
+    expect(report.runs.every((run) => run.report.fixture.vectorRows === 10)).toBe(true);
+  } finally {
+    db.close();
+  }
+});

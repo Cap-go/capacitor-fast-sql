@@ -51,6 +51,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
                 JSObject ret = new JSObject();
                 ret.put("port", server.getPort());
                 ret.put("token", server.getToken());
+                ret.put("binaryProtocolVersion", 1);
                 ret.put("database", database);
                 call.resolve(ret);
                 return;
@@ -89,6 +90,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
             JSObject ret = new JSObject();
             ret.put("port", server.getPort());
             ret.put("token", server.getToken());
+            ret.put("binaryProtocolVersion", 1);
             ret.put("database", database);
             call.resolve(ret);
         } catch (Exception e) {
@@ -143,6 +145,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
         JSObject ret = new JSObject();
         ret.put("port", server.getPort());
         ret.put("token", server.getToken());
+        ret.put("binaryProtocolVersion", 1);
         call.resolve(ret);
     }
 
@@ -256,6 +259,7 @@ public class CapgoCapacitorFastSqlPlugin extends Plugin {
     public void getPluginVersion(PluginCall call) {
         JSObject ret = new JSObject();
         ret.put("version", pluginVersion);
+        ret.put("binaryProtocolVersion", 1);
         call.resolve(ret);
     }
 

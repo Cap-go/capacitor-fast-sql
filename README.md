@@ -383,7 +383,7 @@ bypassing Capacitor's standard bridge for better performance with sync operation
 ### connect(...)
 
 ```typescript
-connect(options: SQLConnectionOptions) => Promise<{ port: number; token: string; database: string; persistent?: boolean; }>
+connect(options: SQLConnectionOptions) => Promise<{ port: number; token: string; database: string; persistent?: boolean; binaryProtocolVersion?: number; }>
 ```
 
 Initialize the database connection and start the HTTP server.
@@ -392,7 +392,7 @@ Initialize the database connection and start the HTTP server.
 | ------------- | --------------------------------------------------------------------- | -------------------- |
 | **`options`** | <code><a href="#sqlconnectionoptions">SQLConnectionOptions</a></code> | - Connection options |
 
-**Returns:** <code>Promise&lt;{ port: number; token: string; database: string; persistent?: boolean; }&gt;</code>
+**Returns:** <code>Promise&lt;{ port: number; token: string; database: string; persistent?: boolean; binaryProtocolVersion?: number; }&gt;</code>
 
 **Since:** 0.0.1
 
@@ -419,7 +419,7 @@ Close database connection and stop the HTTP server.
 ### getServerInfo(...)
 
 ```typescript
-getServerInfo(options: { database: string; }) => Promise<{ port: number; token: string; persistent?: boolean; }>
+getServerInfo(options: { database: string; }) => Promise<{ port: number; token: string; persistent?: boolean; binaryProtocolVersion?: number; }>
 ```
 
 Get the HTTP server port and token for direct communication.
@@ -428,7 +428,7 @@ Get the HTTP server port and token for direct communication.
 | ------------- | ---------------------------------- | --------------- |
 | **`options`** | <code>{ database: string; }</code> | - Database name |
 
-**Returns:** <code>Promise&lt;{ port: number; token: string; persistent?: boolean; }&gt;</code>
+**Returns:** <code>Promise&lt;{ port: number; token: string; persistent?: boolean; binaryProtocolVersion?: number; }&gt;</code>
 
 **Since:** 0.0.1
 
@@ -509,12 +509,12 @@ Rollback the current transaction.
 ### getPluginVersion()
 
 ```typescript
-getPluginVersion() => Promise<{ version: string; }>
+getPluginVersion() => Promise<{ version: string; binaryProtocolVersion?: number; }>
 ```
 
 Get the native Capacitor plugin version.
 
-**Returns:** <code>Promise&lt;{ version: string; }&gt;</code>
+**Returns:** <code>Promise&lt;{ version: string; binaryProtocolVersion?: number; }&gt;</code>
 
 **Since:** 0.0.1
 
@@ -548,14 +548,15 @@ or supply a custom Worker. This method is a no-op on iOS and Android.
 
 Database connection options
 
-| Prop                     | Type                 | Description                                                                                                                                                                                                                | Since  |
-| ------------------------ | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| **`database`**           | <code>string</code>  | Database name (file will be created in app data directory)                                                                                                                                                                 |        |
-| **`encrypted`**          | <code>boolean</code> | Enable encryption (iOS/Android only)                                                                                                                                                                                       |        |
-| **`encryptionKey`**      | <code>string</code>  | Encryption key (required if encrypted is true)                                                                                                                                                                             |        |
-| **`readOnly`**           | <code>boolean</code> | Open an existing native database read-only. Writes and missing-file opens fail. WAL mode changes are skipped for read-only connections. The web Worker transport rejects this option instead of silently opening writable. |        |
-| **`walMode`**            | <code>boolean</code> | Enable WAL (Write-Ahead Logging) journal mode for better concurrency and performance. Executes `PRAGMA journal_mode = WAL` immediately after opening the database.                                                         | 8.0.49 |
-| **`performancePresets`** | <code>boolean</code> | Apply recommended SQLite performance PRAGMAs after opening the database: `synchronous = NORMAL`, `busy_timeout = 5000`, `cache_size = -2000`, and `foreign_keys = ON`.                                                     | 8.0.49 |
+| Prop                     | Type                                                              | Description                                                                                                                                                                                                                                                                                                                                                  | Default                  | Since  |
+| ------------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ | ------ |
+| **`transport`**          | <code><a href="#nativesqltransport">NativeSQLTransport</a></code> | Native HTTP data encoding. Binary v1 sends BLOBs as raw bytes without base64. Opt-in on iOS/Android only; requires a native plugin advertising binary v1. JSON remains the default. Binary is experimental; reconsider the default only in a future major after device performance and conformance testing. No failed write is retried on another transport. | <code>'http-json'</code> |        |
+| **`database`**           | <code>string</code>                                               | Database name (file will be created in app data directory)                                                                                                                                                                                                                                                                                                   |                          |        |
+| **`encrypted`**          | <code>boolean</code>                                              | Enable encryption (iOS/Android only)                                                                                                                                                                                                                                                                                                                         |                          |        |
+| **`encryptionKey`**      | <code>string</code>                                               | Encryption key (required if encrypted is true)                                                                                                                                                                                                                                                                                                               |                          |        |
+| **`readOnly`**           | <code>boolean</code>                                              | Open an existing native database read-only. Writes and missing-file opens fail. WAL mode changes are skipped for read-only connections. The web Worker transport rejects this option instead of silently opening writable.                                                                                                                                   |                          |        |
+| **`walMode`**            | <code>boolean</code>                                              | Enable WAL (Write-Ahead Logging) journal mode for better concurrency and performance. Executes `PRAGMA journal_mode = WAL` immediately after opening the database.                                                                                                                                                                                           |                          | 8.0.49 |
+| **`performancePresets`** | <code>boolean</code>                                              | Apply recommended SQLite performance PRAGMAs after opening the database: `synchronous = NORMAL`, `busy_timeout = 5000`, `cache_size = -2000`, and `foreign_keys = ON`.                                                                                                                                                                                       |                          | 8.0.49 |
 
 
 #### SQLResult
@@ -666,6 +667,13 @@ OPFS persistence requires Cross-Origin Isolation headers on your web server:
 
 
 ### Type Aliases
+
+
+#### NativeSQLTransport
+
+Native HTTP data encoding. JSON remains the compatibility default.
+
+<code>'http-json' | 'http-binary'</code>
 
 
 #### SQLValue

@@ -100,7 +100,7 @@ class SQLHTTPServer {
         guard let server = server else { return }
 
         // CORS preflight for all endpoints
-        let preflightPaths = ["/execute", "/batch", "/transaction/begin", "/transaction/commit", "/transaction/rollback"]
+        let preflightPaths = ["/execute", "/batch", "/echo", "/transaction/begin", "/transaction/commit", "/transaction/rollback"]
         for path in preflightPaths {
             server.route(.OPTIONS, path) { [weak self] _ in
                 guard let self = self else {
@@ -124,6 +124,11 @@ class SQLHTTPServer {
                 return HTTPResponse(.internalServerError)
             }
             return self.addCorsHeaders(self.handleBatchRequest(request: request))
+        }
+
+        server.route(.POST, "/echo") { [weak self] request in
+            guard let self = self else { return HTTPResponse(.internalServerError) }
+            return self.addCorsHeaders(self.handleDataRequest(request: request, kind: "echo"))
         }
 
         // Transaction endpoints
@@ -196,90 +201,68 @@ class SQLHTTPServer {
     // MARK: - Request Handlers
 
     private func handleExecuteRequest(request: HTTPRequest) -> HTTPResponse {
-        // Authenticate
-        guard let authHeader = request.headers["Authorization"],
-              authHeader == "Bearer \(token)" else {
-            return HTTPResponse(.unauthorized)
-        }
-
-        // Get database name
-        guard let database = request.headers["X-Database"] else {
-            let bodyData = "Database header required".data(using: .utf8)!
-            return HTTPResponse(.badRequest, body: bodyData)
-        }
-
-        // Check if database exists
-        guard let db = registeredDatabase(forKey: database) else {
-            let bodyData = "Database not found".data(using: .utf8)!
-            return HTTPResponse(.notFound, body: bodyData)
-        }
-
-        // Parse request body
-        let bodyData = request.body
-        guard let json = try? JSONSerialization.jsonObject(with: bodyData) as? [String: Any],
-              let statement = json["statement"] as? String else {
-            let errorData = "Invalid request body".data(using: .utf8)!
-            return HTTPResponse(.badRequest, body: errorData)
-        }
-
-        let params = (json["params"] as? [Any] ?? [])
-
-        do {
-            let result = try db.execute(statement: statement, params: params)
-            let resultData = try JSONSerialization.data(withJSONObject: result)
-            return HTTPResponse(.ok, headers: [.contentType: "application/json"], body: resultData)
-        } catch {
-            let errorData = "Error: \(error.localizedDescription)".data(using: .utf8)!
-            return HTTPResponse(.internalServerError, body: errorData)
-        }
+        return handleDataRequest(request: request, kind: "execute")
     }
 
     private func handleBatchRequest(request: HTTPRequest) -> HTTPResponse {
-        // Authenticate
-        guard let authHeader = request.headers["Authorization"],
-              authHeader == "Bearer \(token)" else {
-            return HTTPResponse(.unauthorized)
-        }
+        return handleDataRequest(request: request, kind: "batch")
+    }
 
-        // Get database name
-        guard let database = request.headers["X-Database"] else {
-            let bodyData = "Database header required".data(using: .utf8)!
-            return HTTPResponse(.badRequest, body: bodyData)
-        }
-
-        // Check if database exists
-        guard let db = registeredDatabase(forKey: database) else {
-            let bodyData = "Database not found".data(using: .utf8)!
-            return HTTPResponse(.notFound, body: bodyData)
-        }
-
-        // Parse request body
-        let bodyData = request.body
-        guard let json = try? JSONSerialization.jsonObject(with: bodyData) as? [String: Any],
-              let operations = json["operations"] as? [[String: Any]] else {
-            let errorData = "Invalid request body".data(using: .utf8)!
-            return HTTPResponse(.badRequest, body: errorData)
-        }
-
-        var results: [[String: Any]] = []
-
+    private func handleDataRequest(request: HTTPRequest, kind: String) -> HTTPResponse {
+        guard request.headers["Authorization"] == "Bearer \(token)" else { return HTTPResponse(.unauthorized) }
+        guard let database = request.headers["X-Database"] else { return HTTPResponse(.badRequest) }
+        guard let db = registeredDatabase(forKey: database) else { return HTTPResponse(.notFound) }
+        guard request.body.count <= BinaryFrame.maxBytes else { return HTTPResponse(.payloadTooLarge) }
+        let binary = request.headers["Content-Type"] == BinaryFrame.contentType
         do {
-            for operation in operations {
-                guard let statement = operation["statement"] as? String else {
-                    let errorData = "Invalid operation: missing statement".data(using: .utf8)!
-                    return HTTPResponse(.badRequest, body: errorData)
-                }
-                let params = (operation["params"] as? [Any] ?? [])
-                let result = try db.execute(statement: statement, params: params)
-                results.append(result)
+            let decoded: Any
+            if binary {
+                decoded = try BinaryFrame.decode(request.body)
+            } else {
+                guard let json = try? JSONSerialization.jsonObject(with: request.body) else { throw BinaryFrameError.invalid }
+                decoded = json
             }
-
-            let resultData = try JSONSerialization.data(withJSONObject: results)
-            return HTTPResponse(.ok, headers: [.contentType: "application/json"], body: resultData)
+            guard let json = decoded as? [String: Any] else { throw BinaryFrameError.invalid }
+            let result: Any
+            if kind == "batch" {
+                guard let operations = json["operations"] as? [[String: Any]], operations.count <= 10000 else { throw BinaryFrameError.invalid }
+                let parsed = try operations.map { try parseOperation($0) }
+                result = try parsed.map { try db.execute(statement: $0.statement, params: $0.params, binaryResults: binary) }
+            } else {
+                let operation = try parseOperation(json)
+                let params = operation.params
+                if kind == "echo" {
+                    guard params.count == 1 else { throw BinaryFrameError.invalid }
+                    result = ["rows": [["value": params[0]]], "rowsAffected": 0]
+                } else {
+                    result = try db.execute(statement: operation.statement, params: params, binaryResults: binary)
+                }
+            }
+            let data: Data
+            do {
+                if !binary && !JSONSerialization.isValidJSONObject(result) { throw BinaryFrameError.invalid }
+                data = try binary ? BinaryFrame.encode(result) : JSONSerialization.data(withJSONObject: result)
+            } catch {
+                return HTTPResponse(.internalServerError, body: Data("Could not encode SQL response; a write may already be committed".utf8))
+            }
+            return HTTPResponse(.ok, headers: [.contentType: binary ? BinaryFrame.contentType : "application/json"], body: data)
+        } catch is BinaryFrameError {
+            return HTTPResponse(.badRequest, body: Data("Invalid binary/SQL request".utf8))
         } catch {
-            let errorData = "Error: \(error.localizedDescription)".data(using: .utf8)!
-            return HTTPResponse(.internalServerError, body: errorData)
+            return HTTPResponse(.internalServerError, body: Data("Error: \(error.localizedDescription)".utf8))
         }
+    }
+
+    private func parseOperation(_ operation: [String: Any]) throws -> (statement: String, params: [Any]) {
+        guard let statement = operation["statement"] as? String else { throw BinaryFrameError.invalid }
+        if let raw = operation["params"], !(raw is [Any]) { throw BinaryFrameError.invalid }
+        for value in operation["params"] as? [Any] ?? [] {
+            if value is NSNull || value is String || value is Data { continue }
+            if let number = value as? NSNumber, number.doubleValue.isFinite { continue }
+            if let blob = value as? [String: Any], blob["_type"] as? String == "binary", blob["_data"] is String { continue }
+            throw BinaryFrameError.invalid
+        }
+        return (statement, operation["params"] as? [Any] ?? [])
     }
 
     private func handleBeginTransactionRequest(request: HTTPRequest) -> HTTPResponse {

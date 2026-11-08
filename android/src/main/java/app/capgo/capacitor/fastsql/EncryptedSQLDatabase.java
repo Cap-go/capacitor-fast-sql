@@ -56,6 +56,14 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
     }
 
     public JSObject execute(String statement, JSArray params) throws Exception {
+        return execute(statement, params, false);
+    }
+
+    public JSObject executeBinary(String statement, JSArray params) throws Exception {
+        return execute(statement, params, true);
+    }
+
+    private JSObject execute(String statement, JSArray params, boolean binaryResults) throws Exception {
         if (db == null || !db.isOpen()) {
             throw new Exception("Database is not open");
         }
@@ -83,7 +91,7 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
                 JSObject row = new JSObject();
                 for (int i = 0; i < cursor.getColumnCount(); i++) {
                     String columnName = cursor.getColumnName(i);
-                    Object value = getColumnValue(cursor, i);
+                    Object value = getColumnValue(cursor, i, binaryResults);
                     row.put(columnName, value);
                 }
                 rows.put(row);
@@ -165,6 +173,8 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
 
             if (value == null || value == JSONObject.NULL) {
                 stmt.bindNull(index);
+            } else if (value instanceof byte[]) {
+                stmt.bindBlob(index, (byte[]) value);
             } else if (value instanceof String) {
                 stmt.bindString(index, (String) value);
             } else if (value instanceof Integer) {
@@ -192,7 +202,7 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
         }
     }
 
-    private Object getColumnValue(Cursor cursor, int index) {
+    private Object getColumnValue(Cursor cursor, int index, boolean binaryResults) {
         int type = cursor.getType(index);
         switch (type) {
             case Cursor.FIELD_TYPE_NULL:
@@ -205,6 +215,7 @@ public class EncryptedSQLDatabase implements DatabaseConnection {
                 return cursor.getString(index);
             case Cursor.FIELD_TYPE_BLOB:
                 byte[] blob = cursor.getBlob(index);
+                if (binaryResults) return blob;
                 String base64 = Base64.encodeToString(blob, Base64.NO_WRAP);
                 JSObject blobObj = new JSObject();
                 blobObj.put("_type", "binary");

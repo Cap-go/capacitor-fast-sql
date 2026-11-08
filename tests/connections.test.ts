@@ -1,10 +1,15 @@
+import { Capacitor } from '@capacitor/core';
 import { expect, mock, test } from 'bun:test';
 
 let opens = 0;
 let closes = 0;
 let failOpen = false;
+let binaryProtocolVersion: number | undefined;
 mock.module('../src/plugin', () => ({
   CapgoCapacitorFastSql: {
+    async getPluginVersion() {
+      return { version: 'test', binaryProtocolVersion };
+    },
     async connect(options: { database: string }) {
       opens++;
       await new Promise((resolve) => setTimeout(resolve, 5));
@@ -41,4 +46,27 @@ test('disconnect waits for a pending open', async () => {
   await pending;
   expect(FastSQL.getConnection('pending')).toBeNull();
   expect(closes).toBe(3);
+});
+
+test('binary capability rejection never opens or closes a native database and can be retried', async () => {
+  const getPlatform = Capacitor.getPlatform;
+  const beforeOpens = opens;
+  const beforeCloses = closes;
+  Capacitor.getPlatform = () => 'ios';
+  try {
+    binaryProtocolVersion = undefined;
+    for (const database of ['externally-open-with-transaction', 'not-yet-open']) {
+      await expect(FastSQL.connect({ database, transport: 'http-binary' })).rejects.toThrow('does not support');
+    }
+    expect(opens).toBe(beforeOpens);
+    expect(closes).toBe(beforeCloses);
+    binaryProtocolVersion = 1;
+    await FastSQL.connect({ database: 'not-yet-open', transport: 'http-binary' });
+    expect(opens).toBe(beforeOpens + 1);
+    await FastSQL.disconnect('not-yet-open');
+    expect(closes).toBe(beforeCloses + 1);
+  } finally {
+    Capacitor.getPlatform = getPlatform;
+    binaryProtocolVersion = undefined;
+  }
 });

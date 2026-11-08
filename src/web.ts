@@ -70,6 +70,7 @@ export class CapgoCapacitorFastSqlWeb extends WebPlugin implements CapgoCapacito
   async connect(
     options: SQLConnectionOptions,
   ): Promise<{ port: number; token: string; database: string; persistent: boolean }> {
+    if (options.transport === 'http-binary') throw new Error('Binary HTTP transport requires iOS or Android');
     if (options.readOnly) {
       throw new Error('Read-only opens are not supported by the SQLite Wasm Worker transport');
     }
